@@ -1,16 +1,18 @@
-- name: files microservice pipeline
-  hosts: bento
+- name: build files microservice
+  hosts: all
   connection: local
   gather_facts: no
 
   tasks:
+    #install collections
     - name: install aws collection
       command: ansible-galaxy collection install --force {{ item }}
       loop:
         - community.docker
-        - amazon.aws
-        - community.aws:<=3.2.0
-        - git+https://github.com/CBIIT/datacommons-devops.git#/ansible/collections/bento/common/,main
+        #- amazon.aws
+        #- community.aws:<=3.2.0
+        #- git+https://github.com/CBIIT/datacommons-devops.git#/ansible/collections/bento/common/,main
+        - git+https://github.com/CBIIT/datacommons-devops.git#/ansible/collections/bento/common/,ctdc
 
     #docker login
     - name: docker login
