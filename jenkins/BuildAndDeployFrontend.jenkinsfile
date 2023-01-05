@@ -1,4 +1,4 @@
-@Library('datacommons-jenkins-shared-library@ctdc_test') _
+@Library('datacommons-jenkins-shared-library') _
 buildAndDeploy(
     label: "slave-ncias-d2947-c",
     parameterName: "FrontendTag",
