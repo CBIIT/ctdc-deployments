@@ -1,7 +1,7 @@
 - name: deploy files microservice
   hosts: all
   connection: local
-  gather_facts: no
+  gather_facts: true
 
   tasks:
     #install collections
