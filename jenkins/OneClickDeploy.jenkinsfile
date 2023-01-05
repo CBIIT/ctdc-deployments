@@ -5,7 +5,7 @@ oneClickDeploy(
     codeRepoUrl: "https://github.com/CBIIT/ctdc-deployments.git",
     checkoutDirectory: "ctdc-deployments",
     deploymentFile: "ctdc-deployments/deployments.yaml",
-    jobPath: "_default/_lower/CTDC/_one_click/_jobs/",
+    jobPath: "_default/_lower/CTDC/_jobs/",
     slackSecretPath: "notification/slack",
     slackSecretName: "ctdc_slack_url",
 )
