@@ -1,6 +1,7 @@
 @Library('datacommons-jenkins-shared-library') _
 buildAndDeploy(
-    label: "slave-ncias-d2947-c",
+    //label: "slave-ncias-d2947-c",
+	label: "ctdc-docker",
     parameterName: "FrontendTag",
     codeRepoUrl: "https://github.com/CBIIT/bento-ctdc-frontend",
     checkoutDirectory: "ctdc-frontend",
