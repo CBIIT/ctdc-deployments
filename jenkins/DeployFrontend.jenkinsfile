@@ -1,7 +1,7 @@
 @Library('datacommons-jenkins-shared-library') _
 deployApp(
-    //label: "slave-ncias-d2947-c",
-	label: "ctdc-docker",
+    label: "slave-ncias-d2947-c",
+	//label: "ctdc-docker",
     parameterName: "FrontendTag",
     repoName: "ctdc-frontend",
     playbookRepoUrl: "https://github.com/CBIIT/ctdc-deployments",
@@ -21,7 +21,7 @@ deployApp(
         subdomain: "trialcommons",
         domain_name: "cancer.gov"
      ],
-    useDockerAgent: false,
+    useDockerAgent: true,
     agentImage: "ncidockerhub.nci.nih.gov/icdc/jenkins-agent-ansible",
     dockerRegistryUrl: "https://ncidockerhub.nci.nih.gov",
     registryCredentialsId: "ncidockerhub"
