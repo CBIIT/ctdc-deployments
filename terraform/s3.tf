@@ -4,7 +4,8 @@ data "aws_iam_policy_document" "s3_alb_policy" {
     sid    = "allowalbaccount"
     effect = "Allow"
     principals {
-      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+      #identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+	  identifiers = ["arn:aws:iam::${lookup(var.aws_account_id,var.region,"us-east-1" )}:root"]
       type        = "AWS"
     }
     actions   = ["s3:PutObject"]
@@ -34,6 +35,15 @@ data "aws_iam_policy_document" "s3_alb_policy" {
       identifiers = ["delivery.logs.amazonaws.com"]
       type        = "Service"
     }
+  }
+}
+
+#vars
+variable "aws_account_id" {
+  type = map(string)
+  description = "aws account to allow for alb s3 logging"
+  default = {
+    us-east-1 = "127311923021"
   }
 }
 
