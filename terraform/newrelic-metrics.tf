@@ -4,6 +4,12 @@ variable "account_level" {
   description = "whether the account is prod or non-prod"
 }
 
+variable "create_newrelic_pipeline" {
+  type        = bool
+  description = "whether to create the newrelic pipeline"
+  default = false
+}
+
 variable "newrelic_account_id" {
   type        = string
   description = "Newrelic Account ID"
