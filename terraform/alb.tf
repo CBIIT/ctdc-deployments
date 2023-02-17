@@ -8,7 +8,7 @@ data "aws_acm_certificate" "amazon_issued" {
 # locals
 locals {
   alb_subnet_ids      = terraform.workspace == "prod" || terraform.workspace == "stage" ? var.public_subnet_ids : var.private_subnet_ids
-  alb_log_bucket_name = terraform.workspace == "prod" || terraform.workspace == "stage" ? "${var.stack_name}-alb-access-logs" : "${var.stack_name}-nonprod-alb-access-logs"
+  alb_log_bucket_name = terraform.workspace == "prod" || terraform.workspace == "stage" ? "prod-alb-access-logs" : "nonprod-alb-access-logs"
   cert_types          = "IMPORTED"
 }
 
