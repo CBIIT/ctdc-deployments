@@ -3,7 +3,7 @@ buildAndDeploy(
 	label: "slave-ncias-d2947-c",
     parameterName: "FilesTag",
     codeRepoUrl: "https://github.com/CBIIT/bento-files",
-	codeRepoCreds: "",
+	//codeRepoCreds: "",
     checkoutDirectory: "ctdc-files",
     playbookRepoUrl: "https://github.com/CBIIT/ctdc-deployments",
     playbookRepoBranch: "main",
