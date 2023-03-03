@@ -42,7 +42,7 @@ module "new_relic_metric_pipeline" {
   http_endpoint_access_key = var.newrelic_api_key
   level                    = var.account_level
   new_relic_account_id     = var.newrelic_account_id
-  permission_boundary_arn  = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/PermissionBoundary_PowerUser"
+  permission_boundary_arn  = local.permissions_boundary
   program                  = var.program
   s3_bucket_arn            = var.newrelic_s3_bucket
 }

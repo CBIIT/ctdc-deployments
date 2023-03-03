@@ -255,7 +255,7 @@ resource "aws_iam_role" "integration_server" {
   count                = var.create_instance_profile ? 1 : 0
   name                 = local.integration_server_profile_name
   assume_role_policy   = data.aws_iam_policy_document.integration_server_assume_role.json
-  permissions_boundary = terraform.workspace == "prod" ? null : local.permissions_boundary
+  permissions_boundary = local.permissions_boundary
 }
 
 resource "aws_iam_policy" "integration_server" {
