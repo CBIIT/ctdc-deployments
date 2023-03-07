@@ -23,7 +23,7 @@ variable "application_subdomain" {
 
 # modules
 module "ecs" {
-  source                    = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/ecs?ref=v1.0"
+  source                    = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/ecs?ref=ctdc_prod_terraform"
   stack_name                = var.stack_name
   tags                      = var.tags
   vpc_id                    = var.vpc_id
