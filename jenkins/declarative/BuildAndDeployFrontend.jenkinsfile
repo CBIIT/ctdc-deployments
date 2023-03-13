@@ -99,7 +99,7 @@ pipeline {
 	
         tagRepo ( 
             gitTag: "${params.FrontendBranch}",
-            gitUrl: "https://github.com/CBIIT/bento-ctdc-frontend",
+            gitUrl: "github.com/CBIIT/bento-ctdc-frontend",
             checkoutDirectory: "${env.PROJECT}-frontend"
         )
 
