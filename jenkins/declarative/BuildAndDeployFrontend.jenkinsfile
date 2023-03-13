@@ -1,0 +1,108 @@
+@Library('datacommons-jenkins-shared-library@v1.0') _
+
+pipeline {
+	agent {
+		node {
+			label 'ctdc-docker'
+		}
+	}
+
+    environment {
+
+        PROJECT        = 'ctdc'
+		DEFAULT_TIER   = 'dev'
+		DEFAULT_BRANCH = 'main'
+		
+    }
+
+	parameters {
+
+        extendedChoice(
+            name: 'Environment',
+            defaultValue: "${DEFAULT_TIER}",
+            description: 'Choose the environment to build',
+            type: 'PT_SINGLE_SELECT',
+            value: 'dev,qa,stage,prod')
+
+        gitParameter(branchFilter: 'origin/(.*)', 
+            defaultValue: "${DEFAULT_BRANCH}", 
+            name: 'FrontendBranch', 
+            type: 'GitParameterDefinition',
+            quickFilterEnabled: true, 
+            selectedValue: 'DEFAULT', 
+            sortMode: 'ASCENDING_SMART', 
+            tagFilter: '*', 
+            useRepository: 'https://github.com/CBIIT/bento-ctdc-frontend')
+
+        booleanParam(
+            defaultValue: true,
+            name: 'UpdateDeploymentVersion')
+
+  }
+
+  options {
+  	ansiColor('xterm')
+	timestamps()
+  }
+
+  stages{
+  	stage('checkout'){
+  		steps {
+
+		checkout([$class: 'GitSCM',
+			branches: [[name: "${params.FrontendBranch"]],
+			doGenerateSubmoduleConfigurations: false,
+			extensions: [[$class: 'RelativeTargetDirectory',
+			relativeTargetDir: "${PROJECT}-frontend"]],
+			submoduleCfg: [],
+			userRemoteConfigs:
+			[[url: 'https://github.com/CBIIT/bento-ctdc-frontend']]])
+
+  		checkout([$class: 'GitSCM',
+			branches: [[name: '*/main']],
+			doGenerateSubmoduleConfigurations: false,
+			extensions: [[$class: 'RelativeTargetDirectory',
+			relativeTargetDir: "${PROJECT}-deployments"]],
+			submoduleCfg: [],
+			userRemoteConfigs:
+			[[url: 'https://github.com/CBIIT/ctdc-deployments']]])
+
+        }
+
+  	}
+
+  	stage('build'){
+      environment{
+        FE_VERSION = "${params.Frontend_Tag}-${BUILD_NUMBER}"
+        BE_VERSION = "${params.Backend_Tag}-${BUILD_NUMBER}"
+      }
+	  
+ 		steps {
+ 			wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
+                ansiblePlaybook(
+                    playbook: '${WORKSPACE}/${PROJECT}-deployments/ansible/playbooks/build-frontend-microservice.yml', 
+            		inventory: '${WORKSPACE}/${PROJECT}-deployments/ansible/playbooks/hosts',
+                    extraVars: [
+                        tier: "${params.Environment}",
+						project_name: "${PROJECT}",
+						auth_enabled: false
+						],
+                    colorized: true)
+ 			}
+ 		}
+		
+  	}
+
+  }
+
+  post {
+
+    cleanup {
+
+        cleanWs()
+
+    }
+
+  }
+
+}
