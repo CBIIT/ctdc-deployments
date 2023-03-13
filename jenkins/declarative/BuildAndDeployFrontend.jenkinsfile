@@ -19,13 +19,13 @@ pipeline {
 
         extendedChoice(
             name: 'Environment',
-            defaultValue: "env.DEFAULT_TIER",
+            defaultValue: "${DEFAULT_TIER}",
             description: 'Choose the environment to build',
             type: 'PT_SINGLE_SELECT',
             value: 'dev,qa,stage,prod')
 
         gitParameter(branchFilter: 'origin/(.*)', 
-            defaultValue: "env.DEFAULT_BRANCH", 
+            defaultValue: "${DEFAULT_BRANCH}", 
             name: 'FrontendBranch', 
             type: 'GitParameterDefinition',
             quickFilterEnabled: true, 
