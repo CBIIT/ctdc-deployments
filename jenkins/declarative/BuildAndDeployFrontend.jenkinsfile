@@ -95,15 +95,6 @@ pipeline {
 
   post {
 
-    always {
-
-        notify(
-            secretPath: "notification/slack",
-            secretName: "ctdc_slack_url"
-        ) 
-
-    }
-
     success {
 	
         tagRepo ( 
@@ -131,6 +122,15 @@ pipeline {
 //				build job: 'Bento/_Data_Processing/BentoDataLoader_ES', parameters: [gitParameter(name: 'Dataloader_Branch', value: 'master'), gitParameter(name: 'Frontend_Branch', value: "${params.Frontend_Tag}"), gitParameter(name: 'Backend_Branch', value: "${params.Backend_Tag}"), extendedChoice(name: 'Environment', value: "${params.Environment}")]
 //			}
 //		}
+    }
+
+    always {
+
+        notify(
+            secretPath: "notification/slack",
+            secretName: "ctdc_slack_url"
+        ) 
+
     }
 
     cleanup {
