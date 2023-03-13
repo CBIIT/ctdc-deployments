@@ -19,13 +19,13 @@ pipeline {
 
         extendedChoice(
             name: 'Environment',
-            defaultValue: "${DEFAULT_TIER}",
+            defaultValue: "${env.DEFAULT_TIER}",
             description: 'Choose the environment to build',
             type: 'PT_SINGLE_SELECT',
             value: 'dev,qa,stage,prod')
 
         gitParameter(branchFilter: 'origin/(.*)', 
-            defaultValue: "${DEFAULT_BRANCH}", 
+            defaultValue: "${env.DEFAULT_BRANCH}", 
             name: 'FrontendBranch', 
             type: 'GitParameterDefinition',
             quickFilterEnabled: true, 
@@ -53,7 +53,7 @@ pipeline {
 			branches: [[name: "${params.FrontendBranch}"]],
 			doGenerateSubmoduleConfigurations: false,
 			extensions: [[$class: 'RelativeTargetDirectory',
-			relativeTargetDir: "${PROJECT}-frontend"]],
+			relativeTargetDir: "${env.PROJECT}-frontend"]],
 			submoduleCfg: [],
 			userRemoteConfigs:
 			[[url: 'https://github.com/CBIIT/bento-ctdc-frontend']]])
@@ -62,7 +62,7 @@ pipeline {
 			branches: [[name: '*/main']],
 			doGenerateSubmoduleConfigurations: false,
 			extensions: [[$class: 'RelativeTargetDirectory',
-			relativeTargetDir: "${PROJECT}-deployments"]],
+			relativeTargetDir: "${env.PROJECT}-deployments"]],
 			submoduleCfg: [],
 			userRemoteConfigs:
 			[[url: 'https://github.com/CBIIT/ctdc-deployments']]])
@@ -80,11 +80,11 @@ pipeline {
  		steps {
  			wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
                 ansiblePlaybook(
-                    playbook: '${WORKSPACE}/${PROJECT}-deployments/ansible/playbooks/build-frontend-microservice.yml', 
-            		inventory: '${WORKSPACE}/${PROJECT}-deployments/ansible/playbooks/hosts',
+                    playbook: '${WORKSPACE}/${env.PROJECT}-deployments/ansible/playbooks/build-frontend-microservice.yml', 
+            		inventory: '${WORKSPACE}/${env.PROJECT}-deployments/ansible/playbooks/hosts',
                     extraVars: [
                         tier: "${params.Environment}",
-						project_name: "${PROJECT}",
+						project_name: "${env.PROJECT}",
 						auth_enabled: false
 						],
                     colorized: true)
