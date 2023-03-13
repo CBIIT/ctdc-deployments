@@ -80,11 +80,11 @@ pipeline {
  		steps {
  			wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
                 ansiblePlaybook(
-                    playbook: '${WORKSPACE}/${env.PROJECT}-deployments/ansible/playbooks/build-frontend-microservice.yml', 
-            		inventory: '${WORKSPACE}/${env.PROJECT}-deployments/ansible/playbooks/hosts',
+                    playbook: "${WORKSPACE}/${PROJECT}-deployments/ansible/playbooks/build-frontend-microservice.yml", 
+            		inventory: "${WORKSPACE}/${PROJECT}-deployments/ansible/playbooks/hosts",
                     extraVars: [
                         tier: "${params.Environment}",
-						project_name: "${env.PROJECT}",
+						project_name: "${PROJECT}",
 						auth_enabled: false
 						],
                     colorized: true)
