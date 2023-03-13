@@ -19,7 +19,7 @@ pipeline {
 
         extendedChoice(
             name: 'Environment',
-            defaultValue: "${env.DEFAULT_TIER}",
+            defaultValue: "env.DEFAULT_TIER",
             description: 'Choose the environment to build',
             type: 'PT_SINGLE_SELECT',
             value: 'dev,qa,stage,prod')
