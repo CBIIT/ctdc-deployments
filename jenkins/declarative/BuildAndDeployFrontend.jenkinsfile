@@ -71,7 +71,7 @@ pipeline {
 
   	}
 
-  	stage('build'){
+  	stage('Build'){
 
  		steps {
  			wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
@@ -90,6 +90,27 @@ pipeline {
  		}
 		
   	}
+	
+  	stage('Update Deployment Manifest'){
+
+ 		steps {
+ 			
+			script {
+                if (params.UpdateDeploymentVersion) {
+                    writeDeployment(
+                        version: "${env.FE_VERSION}",
+                        image:  "${env.FE_VERSION}",
+                        service: "frontend",
+                        deploymentFile: "${PROJECT}-deployments/deployment.yaml",
+                        deploymentRepoUrl: "github.com/CBIIT/${PROJECT}-deployments",
+                        deploymentCheckoutDirectory: "${PROJECT}-deployments"
+                    )
+                }
+            }
+
+ 		}
+
+  	}
 
   }
 
@@ -102,19 +123,6 @@ pipeline {
             gitUrl: "github.com/CBIIT/bento-ctdc-frontend",
             checkoutDirectory: "${env.PROJECT}-frontend"
         )
-
-        script {
-            if (params.UpdateDeploymentVersion) {
-                writeDeployment(
-                    version: "${env.FE_VERSION}",
-                    image:  "${env.FE_VERSION}",
-                    service: "frontend",
-                    deploymentFile: "${PROJECT}-deployments/deployment.yaml",
-                    deploymentRepoUrl: "https://github.com/CBIIT/${PROJECT}-deployments",
-                    deploymentCheckoutDirectory: "${PROJECT}-deployments"
-                )
-            }
-        }
 
 //		script {
 //			if (params.RunDeployStage) {
