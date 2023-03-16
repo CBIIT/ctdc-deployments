@@ -40,7 +40,7 @@ pipeline {
   environment {
 
       PROJECT    = 'ctdc'
-      FE_VERSION = "${params.FrontendBranch}-${BUILD_NUMBER}"
+      FE_VERSION = "${params.FrontendBranch}.${BUILD_NUMBER}"
 
   }
 
