@@ -73,6 +73,14 @@ pipeline {
 			//env.FE_VERSION  = getVersion(service: "frontend",deploymentFile: "${PROJECT}-deployments/deployments.yaml")
 			//env.BE_VERSION  = getVersion(service: "backend",deploymentFile: "${PROJECT}-deployments/deployments.yaml")
 			
+			script {
+			
+			     echo "Project and Version:"
+				 echo "${PROJECT}"
+				 echo "${BE_VERSION}"
+			
+			}
+			
 			wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
                 ansiblePlaybook(
 					playbook: "${WORKSPACE}/playbooks/ansible/playbooks/deploy-frontend-microservice.yml", 

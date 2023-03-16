@@ -40,7 +40,7 @@ pipeline {
   environment {
 
       PROJECT    = 'ctdc'
-      FE_VERSION = "${params.FrontendBranch}.${BUILD_NUMBER}"
+      FE_VERSION = "${params.FrontendBranch}"
 
   }
 
@@ -103,8 +103,8 @@ pipeline {
 			script {
                 if (params.UpdateDeploymentVersion) {
                     writeDeployment(
-                        version: "${env.FE_VERSION}",
-                        image:  "${env.FE_VERSION}",
+                        version: "${env.FE_VERSION}.${BUILD_NUMBER}",
+                        image:  "${env.FE_VERSION}.${BUILD_NUMBER}",
                         service: "frontend",
                         deploymentFile: "${PROJECT}-deployments/deployments.yaml",
                         deploymentRepoUrl: "https://github.com/CBIIT/${PROJECT}-deployments",
