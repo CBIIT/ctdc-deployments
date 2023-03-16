@@ -112,25 +112,37 @@ pipeline {
 
   	}
 
+  	stage('Update Code Tag'){
+
+ 		steps {
+ 			
+			script {
+
+                tagRepo ( 
+                    gitTag: "${params.FrontendBranch}",
+                    gitUrl: "github.com/CBIIT/bento-ctdc-frontend",
+                    checkoutDirectory: "${WORKSPACE}/${env.PROJECT}-frontend"
+                )
+
+            }
+
+ 		}
+
+  	}
+
   }
 
   post {
 
-    success {
-	
-        tagRepo ( 
-            gitTag: "${params.FrontendBranch}",
-            gitUrl: "github.com/CBIIT/bento-ctdc-frontend",
-            checkoutDirectory: "${WORKSPACE}/${env.PROJECT}-frontend"
-        )
-
+//    success {
+//
 //		script {
 //			if (params.RunDeployStage) {
 //				echo 'Run the deployment for this sevice'
 //				build job: 'Bento/_Data_Processing/BentoDataLoader_ES', parameters: [gitParameter(name: 'Dataloader_Branch', value: 'master'), gitParameter(name: 'Frontend_Branch', value: "${params.Frontend_Tag}"), gitParameter(name: 'Backend_Branch', value: "${params.Backend_Tag}"), extendedChoice(name: 'Environment', value: "${params.Environment}")]
 //			}
 //		}
-    }
+//    }
 
     always {
 
