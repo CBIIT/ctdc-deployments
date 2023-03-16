@@ -107,7 +107,7 @@ pipeline {
                         image:  "${env.FE_VERSION}",
                         service: "frontend",
                         deploymentFile: "${PROJECT}-deployments/deployment.yaml",
-                        deploymentRepoUrl: "github.com/CBIIT/${PROJECT}-deployments",
+                        deploymentRepoUrl: "https://github.com/CBIIT/${PROJECT}-deployments",
                         deploymentCheckoutDirectory: "${PROJECT}-deployments"
                     )
                 }
