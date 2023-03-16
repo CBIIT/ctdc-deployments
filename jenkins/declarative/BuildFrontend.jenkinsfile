@@ -71,25 +71,25 @@ pipeline {
 
   	}
 
-  	stage('Build'){
-
- 		steps {
- 			wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
-                ansiblePlaybook(
-                    //playbook: "${WORKSPACE}/${PROJECT}-deployments/ansible/playbooks/build-frontend-microservice.yml", 
-            		//inventory: "${WORKSPACE}/${PROJECT}-deployments/ansible/playbooks/hosts",
-					playbook: "${WORKSPACE}/playbooks/ansible/playbooks/build-frontend-microservice.yml", 
-            		inventory: "${WORKSPACE}/playbooks/ansible/playbooks/hosts",
-                    extraVars: [
-                        tier: "${params.Environment}",
-						project_name: "${PROJECT}",
-						auth_enabled: false
-						],
-                    colorized: true)
- 			}
- 		}
-		
-  	}
+//  	stage('Build'){
+//
+// 		steps {
+// 			wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
+//                ansiblePlaybook(
+//                    //playbook: "${WORKSPACE}/${PROJECT}-deployments/ansible/playbooks/build-frontend-microservice.yml", 
+//            		//inventory: "${WORKSPACE}/${PROJECT}-deployments/ansible/playbooks/hosts",
+//					playbook: "${WORKSPACE}/playbooks/ansible/playbooks/build-frontend-microservice.yml", 
+//            		inventory: "${WORKSPACE}/playbooks/ansible/playbooks/hosts",
+//                    extraVars: [
+//                        tier: "${params.Environment}",
+//						project_name: "${PROJECT}",
+//						auth_enabled: false
+//						],
+//                   colorized: true)
+// 			}
+// 		}
+//		
+//  	}
 	
   	stage('Update Deployment Manifest'){
 
