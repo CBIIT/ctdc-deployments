@@ -1,0 +1,112 @@
+@Library('datacommons-jenkins-shared-library@v1.1') _
+
+pipeline {
+	agent {
+		node {
+			label 'ctdc-docker'
+		}
+	}
+
+	parameters {
+
+        string(
+	        defaultValue: '',
+		    description: 'The image tag to deploy',
+		    name: 'Frontend_Tag')
+
+		extendedChoice(
+            name: 'Environment',
+            defaultValue: 'dev',
+            description: 'Choose the environment to build',
+            type: 'PT_SINGLE_SELECT',
+            value: 'dev,qa,stage,prod')
+
+  }
+
+  options {
+  	ansiColor('xterm')
+	timestamps()
+  }
+
+  environment {
+
+      PROJECT    = 'ctdc'
+
+  }
+
+  stages{
+  	stage('checkout'){
+  		steps {
+
+  		checkout([$class: 'GitSCM',
+			branches: [[name: '*/main']],
+			doGenerateSubmoduleConfigurations: false,
+			extensions: [[$class: 'RelativeTargetDirectory',
+			relativeTargetDir: "playbooks"]],
+			submoduleCfg: [],
+			userRemoteConfigs:
+			[[url: 'https://github.com/CBIIT/ctdc-deployments']]])
+
+        checkout([$class: 'GitSCM',
+			branches: [[name: "${params.Environment}"]],
+			doGenerateSubmoduleConfigurations: false,
+			extensions: [[$class: 'RelativeTargetDirectory',
+			relativeTargetDir: "${env.PROJECT}-deployments"]],
+			submoduleCfg: [],
+			userRemoteConfigs:
+			[[url: 'https://github.com/CBIIT/ctdc-deployments']]])
+
+        }
+
+  	}
+
+  	stage('Deploy'){
+	    environment {
+            FE_VERSION = "${params.Frontend_Tag}"
+            BE_VERSION = getVersion(service: "backend",deploymentFile: "${PROJECT}-deployments/deployments.yaml")
+        }
+
+ 		steps {
+ 			
+			//API_VERSION=$(curl https://trialcommons-dev.cancer.gov/version | python2 -c 'import json,sys;obj=json.load(sys.stdin);print obj["version"]')
+			
+			//env.FE_VERSION  = getVersion(service: "frontend",deploymentFile: "${PROJECT}-deployments/deployments.yaml")
+			//env.BE_VERSION  = getVersion(service: "backend",deploymentFile: "${PROJECT}-deployments/deployments.yaml")
+			
+			wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
+                ansiblePlaybook(
+					playbook: "${WORKSPACE}/playbooks/ansible/playbooks/deploy-frontend-microservice.yml", 
+            		inventory: "${WORKSPACE}/playbooks/ansible/playbooks/hosts",
+                    extraVars: [
+                        tier: "${params.Environment}",
+						project_name: "${PROJECT}",
+						auth_enabled: false
+						],
+                    colorized: true)
+ 			}
+ 		}
+
+  	}
+
+  }
+
+  post {
+
+    always {
+
+        notify(
+            secretPath: "notification/slack",
+            secretName: "ctdc_slack_url"
+        ) 
+
+    }
+
+    cleanup {
+
+        cleanWs()
+
+    }
+
+  }
+
+}
