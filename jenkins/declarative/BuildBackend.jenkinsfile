@@ -87,8 +87,12 @@ pipeline {
 
  		steps {
 
+		script {
+		    echo "${env.FE_VERSION}"
+		}
+		
 		checkout([$class: 'GitSCM',
-			branches: [[name: "${FE_VERSION}"]],
+			branches: [[name: "${env.FE_VERSION}"]],
 			doGenerateSubmoduleConfigurations: false,
 			extensions: [[$class: 'RelativeTargetDirectory',
 			relativeTargetDir: "${env.PROJECT}-frontend"]],
