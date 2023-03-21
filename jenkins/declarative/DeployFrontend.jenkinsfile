@@ -67,21 +67,7 @@ pipeline {
         }
 
  		steps {
- 			
-			//API_VERSION=$(curl https://trialcommons-dev.cancer.gov/version | python2 -c 'import json,sys;obj=json.load(sys.stdin);print obj["version"]')
-			
-			//env.FE_VERSION  = getVersion(service: "frontend",deploymentFile: "${PROJECT}-deployments/deployments.yaml")
-			//env.BE_VERSION  = getVersion(service: "backend",deploymentFile: "${PROJECT}-deployments/deployments.yaml")
-			
-			script {
-			
-			     echo "Project and Version:"
-				 echo "${PROJECT}"
-				 echo "${BE_VERSION}"
-				 echo "${params.Environment}"
-			
-			}
-			
+
 			wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
                 ansiblePlaybook(
 					playbook: "${WORKSPACE}/playbooks/ansible/playbooks/deploy-frontend-microservice.yml", 
@@ -96,6 +82,7 @@ pipeline {
 						],
                     colorized: true)
  			}
+
  		}
 
   	}

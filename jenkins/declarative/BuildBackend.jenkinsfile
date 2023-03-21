@@ -74,8 +74,18 @@ pipeline {
 			submoduleCfg: [],
 			userRemoteConfigs:
 			[[url: 'https://github.com/CBIIT/ctdc-deployments']]])
-			
-		FE_VERSION = getVersion(service: "frontend",deploymentFile: "${env.PROJECT}-deployments/deployments.yaml")
+
+        }
+
+  	}
+
+  	stage('get frontend code'){
+
+        environment {
+            FE_VERSION = getVersion(service: "frontend",deploymentFile: "${env.PROJECT}-deployments/deployments.yaml")
+        }
+
+ 		steps {
 
 		checkout([$class: 'GitSCM',
 			branches: [[name: "${FE_VERSION}"]],
@@ -85,8 +95,7 @@ pipeline {
 			submoduleCfg: [],
 			userRemoteConfigs:
 			[[url: 'https://github.com/CBIIT/bento-ctdc-frontend']]])
-
-        }
+ 		}
 
   	}
 
