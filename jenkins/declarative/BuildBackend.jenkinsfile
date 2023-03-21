@@ -51,8 +51,8 @@ pipeline {
 		checkout([$class: 'GitSCM',
 			branches: [[name: "${params.BackendBranch}"]],
 			doGenerateSubmoduleConfigurations: false,
-			extensions: [[$class: 'RelativeTargetDirectory',
-			relativeTargetDir: "${env.PROJECT}-backend"]],
+			//extensions: [[$class: 'RelativeTargetDirectory',
+			//relativeTargetDir: "${env.PROJECT}-backend"]],
 			submoduleCfg: [],
 			userRemoteConfigs:
 			[[url: 'https://github.com/CBIIT/bento-backend']]])
