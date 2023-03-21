@@ -17,7 +17,7 @@ pipeline {
             value: 'dev,qa,stage,prod')
 
         gitParameter(branchFilter: 'origin/(.*)',
-            defaultValue: 'main',
+            defaultValue: 'master',
             name: 'BackendBranch',
             type: 'GitParameterDefinition',
             quickFilterEnabled: true,
@@ -87,10 +87,6 @@ pipeline {
 
  		steps {
 
-		script {
-		    echo "${env.FE_VERSION}"
-		}
-		
 		checkout([$class: 'GitSCM',
 			branches: [[name: "${env.FE_VERSION}"]],
 			doGenerateSubmoduleConfigurations: false,
