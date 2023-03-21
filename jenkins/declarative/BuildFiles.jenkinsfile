@@ -40,7 +40,7 @@ pipeline {
   environment {
 
       PROJECT    = 'ctdc'
-      FILES_VERSION = "${params.FrontendBranch}"
+      FILES_VERSION = "${params.FilesBranch}"
 
   }
 
