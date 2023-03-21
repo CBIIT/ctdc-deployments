@@ -147,7 +147,8 @@ pipeline {
                 tagRepo ( 
                     gitTag: "ctdc-${params.BackendBranch}",
                     gitUrl: "github.com/CBIIT/bento-backend",
-                    checkoutDirectory: "."
+                    //checkoutDirectory: "${env.PROJECT}-backend"
+					checkoutDirectory: "."
                 )
 
             }
