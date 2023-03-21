@@ -78,6 +78,7 @@ pipeline {
 			     echo "Project and Version:"
 				 echo "${PROJECT}"
 				 echo "${BE_VERSION}"
+				 echo "${params.Environment}"
 			
 			}
 			
@@ -88,6 +89,9 @@ pipeline {
                     extraVars: [
                         tier: "${params.Environment}",
 						project_name: "${PROJECT}",
+						iam_prefix: "power-user",
+						subdomain: "trialcommons",
+						domain_name: "cancer.gov",
 						auth_enabled: false
 						],
                     colorized: true)
