@@ -51,8 +51,8 @@ pipeline {
 		checkout([$class: 'GitSCM',
 			branches: [[name: "${params.BackendBranch}"]],
 			doGenerateSubmoduleConfigurations: false,
-			//extensions: [[$class: 'RelativeTargetDirectory',
-			//relativeTargetDir: "${env.PROJECT}-backend"]],
+			extensions: [[$class: 'RelativeTargetDirectory',
+			relativeTargetDir: "${env.PROJECT}-backend"]],
 			submoduleCfg: [],
 			userRemoteConfigs:
 			[[url: 'https://github.com/CBIIT/bento-backend']]])
@@ -147,8 +147,7 @@ pipeline {
                 tagRepo ( 
                     gitTag: "ctdc-${params.BackendBranch}",
                     gitUrl: "github.com/CBIIT/bento-backend",
-                    //checkoutDirectory: "${env.PROJECT}-backend"
-					checkoutDirectory: "."
+                    checkoutDirectory: "${env.PROJECT}-backend"
                 )
 
             }
