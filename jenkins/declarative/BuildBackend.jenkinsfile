@@ -107,6 +107,7 @@ pipeline {
 					playbook: "${WORKSPACE}/playbooks/ansible/playbooks/build-backend-microservice.yml", 
             		inventory: "${WORKSPACE}/playbooks/ansible/playbooks/hosts",
                     extraVars: [
+						tier: "${params.Environment}",
 						project_name: "${PROJECT}",
 						auth_enabled: false
 						],
