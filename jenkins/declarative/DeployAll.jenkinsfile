@@ -27,7 +27,7 @@ pipeline {
   environment {
 
       PROJECT    = 'ctdc'
-	  JOB_PATH   = '_jobs'
+	  JOB_PATH   = '_default/_lower/CTDC/_jobs'
 
   }
 
@@ -57,7 +57,7 @@ pipeline {
                 def deployment = readYaml file: "${WORKSPACE}/${PROJECT}-deployments/deployments.yaml"
                 deployment.services.each {
                     buildJob(
-                        jobName: "${WORKSPACE}/${JOB_PATH}/Deploy" + "${it.key}".capitalize(),
+                        jobName: "${JOB_PATH}/Deploy" + "${it.key}".capitalize(),
                         parameters:[
                                 string(name: 'Environment', value: params["Environment"]),
                                 string(name: "${it.key}".capitalize() + "_Tag" , value: it.value.image)

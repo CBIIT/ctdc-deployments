@@ -45,6 +45,7 @@ pipeline {
 
       PROJECT    = 'ctdc'
       BE_VERSION = "${params.BackendBranch}"
+	  JOB_PATH   = '_default/_lower/CTDC/_jobs'
 
   }
 
@@ -169,7 +170,7 @@ pipeline {
 		script {
 			if (params.RunDeployStage) {
 				echo 'Run the deployment for this sevice'
-				build job: '_default/_lower/CTDC/_test/DeployBackend', parameters: [string(name: 'Backend_Tag', value: "${params.BackendBranch}.$BUILD_NUMBER"), extendedChoice(name: 'Environment', value: "${params.Environment}")]
+				build job: "$JOB_PATH/DeployBackend", parameters: [string(name: 'Backend_Tag', value: "${params.BackendBranch}.$BUILD_NUMBER"), extendedChoice(name: 'Environment', value: "${params.Environment}")]
 			}
 		}
     }
