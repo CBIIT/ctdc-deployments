@@ -169,7 +169,7 @@ pipeline {
 		script {
 			if (params.RunDeployStage) {
 				echo 'Run the deployment for this sevice'
-				build job: '_default/_lower/CTDC/_test/DeployBackend', parameters: [string(name: 'Backend_Tag', value: "${params.BackendBranch}.$BUILD_NUMBER"), extendedChoice(name: 'Environment', value: "${params.Deploy_Image}")]
+				build job: '_default/_lower/CTDC/_test/DeployBackend', parameters: [string(name: 'Backend_Tag', value: "${params.BackendBranch}.$BUILD_NUMBER"), extendedChoice(name: 'Environment', value: "${params.Environment}")]
 			}
 		}
     }
