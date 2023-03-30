@@ -6,5 +6,4 @@ module "ecr" {
   resource_prefix          = local.resource_prefix
   ecr_repo_names           = var.ecr_repo_names
   tags                     = var.tags
-  create_env_specific_repo = var.create_env_specific_repo
 }
