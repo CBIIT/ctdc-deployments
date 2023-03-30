@@ -27,6 +27,9 @@ locals {
   alb_log_bucket_name = terraform.workspace == "prod" || terraform.workspace == "stage" ? "prod-alb-access-logs" : "nonprod-alb-access-logs"
   cert_types          = "IMPORTED"
   
+  # ECR
+  resource_prefix = var.project
+  
   # ECS
   application_url = terraform.workspace == "prod" ? var.domain_name : "${var.application_subdomain}-${terraform.workspace}.${var.domain_name}"
   
