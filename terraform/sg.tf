@@ -1,23 +1,3 @@
-# vars
-variable "allowed_ip_blocks" {
-  description = "allowed ip block for the opensearch"
-  type        = list(string)
-  default     = []
-}
-
-variable "bastion_host_security_group_id" {
-  description = "security group id of the bastion host"
-  type        = string
-  default     = "sg-0c94322085acbfd97"
-}
-
-variable "katalon_security_group_id" {
-  description = "security group id of the bastion host"
-  type        = string
-  default     = "sg-0f07eae0a9b3a0bb8"
-}
-
-# resources
 #create alb http ingress
 resource "aws_security_group_rule" "alb_http_inbound" {
   from_port         = local.http_port
