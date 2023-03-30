@@ -72,99 +72,99 @@ resource "aws_security_group_rule" "opensearch_outbound" {
 
 
 #create neo4j http ingress rule
-resource "aws_security_group_rule" "neo4j_http" {
-  count             = var.create_db_instance ? 1 : 0
-  from_port         = local.neo4j_http
-  protocol          = local.tcp_protocol
-  to_port           = local.neo4j_http
-  cidr_blocks       = var.allowed_ip_blocks
-  security_group_id = module.neo4j[count.index].db_security_group_id
-  type              = "ingress"
-}
+#resource "aws_security_group_rule" "neo4j_http" {
+#  count             = var.create_db_instance ? 1 : 0
+#  from_port         = local.neo4j_http
+#  protocol          = local.tcp_protocol
+#  to_port           = local.neo4j_http
+#  cidr_blocks       = var.allowed_ip_blocks
+#  security_group_id = module.neo4j[count.index].db_security_group_id
+#  type              = "ingress"
+#}
 
 #create bastion host ingress rule
-resource "aws_security_group_rule" "bastion_host_ssh" {
-  count                    = var.create_db_instance ? 1 : 0
-  from_port                = local.bastion_port
-  protocol                 = local.tcp_protocol
-  to_port                  = local.bastion_port
-  source_security_group_id = var.bastion_host_security_group_id
-  security_group_id        = module.neo4j[count.index].db_security_group_id
-  type                     = "ingress"
-}
+#resource "aws_security_group_rule" "bastion_host_ssh" {
+#  count                    = var.create_db_instance ? 1 : 0
+#  from_port                = local.bastion_port
+#  protocol                 = local.tcp_protocol
+#  to_port                  = local.bastion_port
+#  source_security_group_id = var.bastion_host_security_group_id
+#  security_group_id        = module.neo4j[count.index].db_security_group_id
+#  type                     = "ingress"
+#}
 
 #create neo4j https ingress rule
-resource "aws_security_group_rule" "neo4j_https" {
-  count             = var.create_db_instance ? 1 : 0
-  from_port         = local.neo4j_https
-  protocol          = local.tcp_protocol
-  to_port           = local.neo4j_https
-  cidr_blocks       = var.allowed_ip_blocks
-  security_group_id = module.neo4j[count.index].db_security_group_id
-  type              = "ingress"
-}
+#resource "aws_security_group_rule" "neo4j_https" {
+#  count             = var.create_db_instance ? 1 : 0
+#  from_port         = local.neo4j_https
+#  protocol          = local.tcp_protocol
+#  to_port           = local.neo4j_https
+#  cidr_blocks       = var.allowed_ip_blocks
+#  security_group_id = module.neo4j[count.index].db_security_group_id
+#  type              = "ingress"
+#}
 
 #create neo4j bolt https ingress rule
-resource "aws_security_group_rule" "neo4j_bolt" {
-  count             = var.create_db_instance ? 1 : 0
-  from_port         = local.neo4j_bolt
-  protocol          = local.tcp_protocol
-  to_port           = local.neo4j_bolt
-  cidr_blocks       = var.allowed_ip_blocks
-  security_group_id = module.neo4j[count.index].db_security_group_id
-  type              = "ingress"
-}
+#resource "aws_security_group_rule" "neo4j_bolt" {
+#  count             = var.create_db_instance ? 1 : 0
+#  from_port         = local.neo4j_bolt
+#  protocol          = local.tcp_protocol
+#  to_port           = local.neo4j_bolt
+#  cidr_blocks       = var.allowed_ip_blocks
+#  security_group_id = module.neo4j[count.index].db_security_group_id
+#  type              = "ingress"
+#}
 
 #create neo4j egress rule
-resource "aws_security_group_rule" "neo4j_outbound" {
-  count             = var.create_db_instance ? 1 : 0
-  from_port         = local.any_port
-  protocol          = local.any_protocol
-  to_port           = local.any_port
-  cidr_blocks       = local.all_ips
-  security_group_id = module.neo4j[count.index].db_security_group_id
-  type              = "egress"
-}
+#resource "aws_security_group_rule" "neo4j_outbound" {
+#  count             = var.create_db_instance ? 1 : 0
+#  from_port         = local.any_port
+#  protocol          = local.any_protocol
+#  to_port           = local.any_port
+#  cidr_blocks       = local.all_ips
+#  security_group_id = module.neo4j[count.index].db_security_group_id
+#  type              = "egress"
+#}
 
 #create dataloader http ingress rule
-resource "aws_security_group_rule" "dataloader_http_inbound" {
-  count                    = var.create_db_instance ? 1 : 0
-  from_port                = local.neo4j_http
-  protocol                 = local.tcp_protocol
-  to_port                  = local.neo4j_http
-  source_security_group_id = var.bastion_host_security_group_id
-  security_group_id        = module.neo4j[count.index].db_security_group_id
-  type                     = "ingress"
-}
+#resource "aws_security_group_rule" "dataloader_http_inbound" {
+#  count                    = var.create_db_instance ? 1 : 0
+#  from_port                = local.neo4j_http
+#  protocol                 = local.tcp_protocol
+#  to_port                  = local.neo4j_http
+#  source_security_group_id = var.bastion_host_security_group_id
+#  security_group_id        = module.neo4j[count.index].db_security_group_id
+#  type                     = "ingress"
+#}
 
 #create dataloader bolt ingress rule
-resource "aws_security_group_rule" "dataloader_bolt_inbound" {
-  count                    = var.create_db_instance ? 1 : 0
-  from_port                = local.neo4j_bolt
-  protocol                 = local.tcp_protocol
-  to_port                  = local.neo4j_bolt
-  source_security_group_id = var.bastion_host_security_group_id
-  security_group_id        = module.neo4j[count.index].db_security_group_id
-  type                     = "ingress"
-}
+#resource "aws_security_group_rule" "dataloader_bolt_inbound" {
+#  count                    = var.create_db_instance ? 1 : 0
+#  from_port                = local.neo4j_bolt
+#  protocol                 = local.tcp_protocol
+#  to_port                  = local.neo4j_bolt
+#  source_security_group_id = var.bastion_host_security_group_id
+#  security_group_id        = module.neo4j[count.index].db_security_group_id
+#  type                     = "ingress"
+#}
 
 #create katalon bolt ingress rule
-resource "aws_security_group_rule" "katalon_bolt_inbound" {
-  count                    = var.create_db_instance ? 1 : 0
-  from_port                = local.neo4j_bolt
-  protocol                 = local.tcp_protocol
-  to_port                  = local.neo4j_bolt
-  source_security_group_id = var.katalon_security_group_id
-  security_group_id        = module.neo4j[count.index].db_security_group_id
-  type                     = "ingress"
-}
+#resource "aws_security_group_rule" "katalon_bolt_inbound" {
+#  count                    = var.create_db_instance ? 1 : 0
+#  from_port                = local.neo4j_bolt
+#  protocol                 = local.tcp_protocol
+#  to_port                  = local.neo4j_bolt
+#  source_security_group_id = var.katalon_security_group_id
+#  security_group_id        = module.neo4j[count.index].db_security_group_id
+#  type                     = "ingress"
+#}
 #create katalon http ingress rule
-resource "aws_security_group_rule" "katalon_http_inbound" {
-  count                    = var.create_db_instance ? 1 : 0
-  from_port                = local.neo4j_http
-  protocol                 = local.tcp_protocol
-  to_port                  = local.neo4j_http
-  source_security_group_id = var.katalon_security_group_id
-  security_group_id        = module.neo4j[count.index].db_security_group_id
-  type                     = "ingress"
-}
+#resource "aws_security_group_rule" "katalon_http_inbound" {
+#  count                    = var.create_db_instance ? 1 : 0
+#  from_port                = local.neo4j_http
+#  protocol                 = local.tcp_protocol
+#  to_port                  = local.neo4j_http
+#  source_security_group_id = var.katalon_security_group_id
+#  security_group_id        = module.neo4j[count.index].db_security_group_id
+#  type                     = "ingress"
+#}
