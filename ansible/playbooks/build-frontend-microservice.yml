@@ -7,9 +7,9 @@
   tasks:
     #install collections
     - name: install collections
-      command: ansible-galaxy collection install {{ item }}
+      shell: "ansible-galaxy collection install {{ item | quote }}"
       loop:
-        - community.docker
+        - community.docker:<=3.4.3
         #- git+https://github.com/CBIIT/datacommons-devops.git#/ansible/collections/bento/common/,main
         - git+https://github.com/CBIIT/datacommons-devops.git#/ansible/collections/bento/common/,ctdc
 
