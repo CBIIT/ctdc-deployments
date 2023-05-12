@@ -10,6 +10,6 @@ services:
     image: v1.0.0.26
     buildNumber: '26'
   files:
-    version: 1.4.0.12
-    image: 1.4.0.12
-    buildNumber: '12'
+    version: 1.4.0.13
+    image: 1.4.0.13
+    buildNumber: '13'
