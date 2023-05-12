@@ -6,9 +6,9 @@ services:
     image: CTDC-Develop.13
     buildNumber: '13'
   frontend:
-    version: v1.0.0.26
-    image: v1.0.0.26
-    buildNumber: '26'
+    version: v1.0.0.28
+    image: v1.0.0.28
+    buildNumber: '28'
   files:
     version: 1.4.0.13
     image: 1.4.0.13
