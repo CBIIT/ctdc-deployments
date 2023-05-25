@@ -81,13 +81,13 @@ pipeline {
 
   	stage('Build'){
 
-        agent {
-            docker {
-                image 'cbiitssrepo/cicd-ansible_4.0'
-                args '--net=host -u root -v /var/run/docker.sock:/var/run/docker.sock'
-                reuseNode true
-            }
-        }
+        //agent {
+        //    docker {
+        //        image 'cbiitssrepo/cicd-ansible_4.0'
+        //        args '--net=host -u root -v /var/run/docker.sock:/var/run/docker.sock'
+        //        reuseNode true
+        //    }
+       // }
 
  		steps {
 
@@ -131,8 +131,8 @@ pipeline {
                 aws_account=$(aws sts get-caller-identity --query "Account" --output text)
 				repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
 
-                #trivy image --exit-code 1 --severity HIGH,CRITICAL $repo_url:$CODE_BRANCH.$BUILD_NUMBER
-                trivy image --timeout 15m --severity HIGH,CRITICAL $repo_url:$CODE_BRANCH.$BUILD_NUMBER
+                trivy image --exit-code 1 --severity HIGH,CRITICAL $repo_url:$CODE_BRANCH.$BUILD_NUMBER
+                #trivy image --timeout 15m --severity HIGH,CRITICAL $repo_url:$CODE_BRANCH.$BUILD_NUMBER
 
 				'''
 
