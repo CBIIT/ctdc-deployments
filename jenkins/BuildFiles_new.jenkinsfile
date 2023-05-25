@@ -100,7 +100,7 @@ pipeline {
 				aws_account=$(aws sts get-caller-identity --query "Account" --output text)
 				repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
 
-				cd $WORKSPACE/$CODE_FOLDER && DOCKER_BUILDKIT=1 docker build --no-cache -t $repo_url:$CODE_BRANCH.$BUILD_NUMBER -t $repo_url:latest .
+				cd $WORKSPACE/$CODE_FOLDER && DOCKER_BUILDKIT=1 docker build --no-cache -t $repo_url:$CODE_BRANCH.$BUILD_NUMBER .
 
 				'''
 
@@ -157,12 +157,11 @@ pipeline {
 
 				# login and push to ECR
 				docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $repo_url
-				#docker push $repo_url:$CODE_BRANCH.$BUILD_NUMBER
-                docker push $repo_url --all-tags
+				docker push $repo_url:$CODE_BRANCH.$BUILD_NUMBER
 
                 # tag as latest and push to ECR
-				#docker tag $repo_url:$CODE_BRANCH.$BUILD_NUMBER $repo_url:latest
-                #docker push $repo_url:latest
+				docker tag $repo_url:$CODE_BRANCH.$BUILD_NUMBER $repo_url:latest
+                docker push $repo_url:latest
 
 				'''
 
