@@ -100,7 +100,36 @@ pipeline {
 				aws_account=$(aws sts get-caller-identity --query "Account" --output text)
 				repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
 
-				cd $WORKSPACE/$CODE_FOLDER && DOCKER_BUILDKIT=1 docker build -t $repo_url:$CODE_BRANCH.$BUILD_NUMBER .
+				cd $WORKSPACE/$CODE_FOLDER && DOCKER_BUILDKIT=1 docker build -t $repo_url:$CODE_BRANCH.$BUILD_NUMBER -t $repo_url:latest .
+
+				'''
+
+			}
+
+ 		}
+
+  	}
+
+  	stage('Test'){
+
+        agent {
+            docker {
+                image 'cbiitssrepo/cicd-ansible_4.0'
+                //args '--net=host -u root -v /var/run/docker.sock:/var/run/docker.sock'
+                reuseNode true
+            }
+        }
+
+ 		steps {
+
+ 			script {
+
+			    sh label: 'Trivy-Test', script: '''#!/bin/bash
+
+				# Test image for vulnerabilities
+                echo "Testing Image with Trivy: $ECR_REPO:$CODE_BRANCH.$BUILD_NUMBER"
+                #command: "trivy image --exit-code 1 --severity HIGH,CRITICAL {{ project_name }}-{{ container_name }}:{{ image_version }}-{{ build_number }}"
+                command: "trivy image --timeout 15m --severity HIGH,CRITICAL {{ project_name }}-{{ container_name }}:{{ image_version }}.{{ build_number }}"
 
 				'''
 
@@ -125,7 +154,12 @@ pipeline {
 
 				# login and push to ECR
 				docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $repo_url
-				docker push $repo_url:$CODE_BRANCH.$BUILD_NUMBER
+				#docker push $repo_url:$CODE_BRANCH.$BUILD_NUMBER
+                docker push $repo_url --all-tags
+
+                # tag as latest and push to ECR
+				#docker tag $repo_url:$CODE_BRANCH.$BUILD_NUMBER $repo_url:latest
+                #docker push $repo_url:latest
 
 				'''
 
