@@ -3,7 +3,6 @@
 pipeline {
 	agent {
 		node {
-			//label 'ctdc-docker'
 			label 'slave-ncias-d2947-c'
 		}
 	}
@@ -13,7 +12,7 @@ pipeline {
         string(
 	        defaultValue: '',
 		    description: 'The image tag to deploy',
-		    name: 'Files_Tag')
+		    name: 'ImageTag')
 
 		extendedChoice(
             name: 'Environment',
@@ -31,7 +30,8 @@ pipeline {
 
   environment {
 
-      PROJECT    = 'ctdc'
+      PROJECT      = 'ctdc'
+	  SLACK_SECRET = "ctdc_slack_url"
 
   }
 
@@ -72,7 +72,7 @@ pipeline {
         }
 
 	    environment {
-            FILES_VERSION = "${params.Files_Tag}"
+            FILES_VERSION = "${params.ImageTag}"
         }
 
  		steps {
@@ -103,7 +103,7 @@ pipeline {
 
         notify(
             secretPath: "notification/slack",
-            secretName: "ctdc_slack_url"
+            secretName: "${env.SLACK_SECRET}"
         ) 
 
     }

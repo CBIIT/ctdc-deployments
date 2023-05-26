@@ -13,7 +13,7 @@ pipeline {
         string(
 	        defaultValue: '',
 		    description: 'The image tag to deploy',
-		    name: 'Backend_Tag')
+		    name: 'ImageTag')
 
 		extendedChoice(
             name: 'Environment',
@@ -31,7 +31,8 @@ pipeline {
 
   environment {
 
-      PROJECT    = 'ctdc'
+      PROJECT      = 'ctdc'
+	  SLACK_SECRET = "ctdc_slack_url"
 
   }
 
@@ -72,7 +73,7 @@ pipeline {
         }
 
 	    environment {
-            BE_VERSION = "${params.Backend_Tag}"
+            BE_VERSION = "${params.ImageTag}"
         }
 
  		steps {
@@ -103,7 +104,7 @@ pipeline {
 
         notify(
             secretPath: "notification/slack",
-            secretName: "ctdc_slack_url"
+            secretName: "${env.SLACK_SECRET}"
         ) 
 
     }

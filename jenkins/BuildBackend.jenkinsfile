@@ -3,7 +3,6 @@
 pipeline {
 	agent {
 		node {
-			//label 'ctdc-docker'
 			label 'slave-ncias-d2947-c'
 		}
 	}
@@ -18,8 +17,8 @@ pipeline {
             value: 'dev,qa,stage,prod')
 
         gitParameter(branchFilter: 'origin/(.*)',
-            defaultValue: 'master',
-            name: 'BackendBranch',
+            defaultValue: 'main',
+            name: 'CodeBranch',
             type: 'GitParameterDefinition',
             quickFilterEnabled: true,
             selectedValue: 'DEFAULT',
@@ -44,9 +43,17 @@ pipeline {
 
   environment {
 
-      PROJECT    = 'ctdc'
-      BE_VERSION = "${params.BackendBranch}"
-	  JOB_PATH   = '_default/_lower/CTDC/_jobs'
+      PROJECT      = "ctdc"
+	  SERVICE      = "backend"
+	  ECR_REPO     = "ctdc-backend"
+	  DEPLOY_JOB   = "DeployBackend"
+	  SLACK_SECRET = "ctdc_slack_url"
+	  CODE_REPO    = "bento-backend"
+	  JOB_PATH     = "_default/_lower/CTDC/_jobs"
+	  REGION       = "us-east-1"
+	  DEPLOY_REPO  = "${env.PROJECT}-deployments"
+      CODE_BRANCH  = "${params.CodeBranch}"
+      CODE_FOLDER  = "${env.PROJECT}-${env.SERVICE}"
 
   }
 
@@ -55,22 +62,13 @@ pipeline {
   		steps {
 
 		checkout([$class: 'GitSCM',
-			branches: [[name: "${params.BackendBranch}"]],
+			branches: [[name: "${env.CODE_BRANCH}"]],
 			doGenerateSubmoduleConfigurations: false,
 			extensions: [[$class: 'RelativeTargetDirectory',
-			relativeTargetDir: "${env.PROJECT}-backend"]],
+			relativeTargetDir: "${env.CODE_FOLDER}"]],
 			submoduleCfg: [],
 			userRemoteConfigs:
-			[[url: 'https://github.com/CBIIT/bento-backend']]])
-
-  		checkout([$class: 'GitSCM',
-			branches: [[name: '*/main']],
-			doGenerateSubmoduleConfigurations: false,
-			extensions: [[$class: 'RelativeTargetDirectory',
-			relativeTargetDir: "playbooks"]],
-			submoduleCfg: [],
-			userRemoteConfigs:
-			[[url: 'https://github.com/CBIIT/ctdc-deployments']]])
+			[[url: "https://github.com/CBIIT/${env.CODE_REPO}"]]])
 
   		checkout([$class: 'GitSCM',
 			branches: [[name: "${params.Environment}"]],
@@ -79,33 +77,36 @@ pipeline {
 			relativeTargetDir: "${env.PROJECT}-deployments"]],
 			submoduleCfg: [],
 			userRemoteConfigs:
-			[[url: 'https://github.com/CBIIT/ctdc-deployments']]])
+			[[url: "https://github.com/CBIIT/${env.DEPLOY_REPO}"]]])
 
         }
-
-  	}
-
-  	stage('get frontend code'){
-
-        environment {
-            FE_VERSION = getVersion(service: "frontend",deploymentFile: "${env.PROJECT}-deployments/deployments.yaml")
-        }
-
- 		steps {
-
-		checkout([$class: 'GitSCM',
-			branches: [[name: "${env.FE_VERSION}"]],
-			doGenerateSubmoduleConfigurations: false,
-			extensions: [[$class: 'RelativeTargetDirectory',
-			relativeTargetDir: "${env.PROJECT}-frontend"]],
-			submoduleCfg: [],
-			userRemoteConfigs:
-			[[url: 'https://github.com/CBIIT/bento-ctdc-frontend']]])
- 		}
 
   	}
 
   	stage('Build'){
+
+ 		steps {
+
+ 			script {
+
+			    sh label: 'Docker-Build', script: '''#!/bin/bash
+
+				# build CTDC Docker container
+				echo "Building: $ECR_REPO:$CODE_BRANCH.$BUILD_NUMBER"
+				aws_account=$(aws sts get-caller-identity --query "Account" --output text)
+				repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
+
+				cd $WORKSPACE/$CODE_FOLDER && DOCKER_BUILDKIT=1 docker build --no-cache -t $repo_url:$CODE_BRANCH.$BUILD_NUMBER .
+
+				'''
+
+			}
+
+ 		}
+
+  	}
+
+  	stage('Test'){
 
         agent {
             docker {
@@ -116,17 +117,52 @@ pipeline {
         }
 
  		steps {
- 			wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
-                ansiblePlaybook(
-					playbook: "${WORKSPACE}/playbooks/ansible/playbooks/build-backend-microservice.yml", 
-            		inventory: "${WORKSPACE}/playbooks/ansible/playbooks/hosts",
-                    extraVars: [
-						tier: "${params.Environment}",
-						project_name: "${PROJECT}",
-						auth_enabled: false
-						],
-                   colorized: true)
- 			}
+
+ 			script {
+
+			    sh label: 'Trivy-Test', script: '''#!/bin/bash
+
+				# Test image for vulnerabilities
+                echo "Testing Image with Trivy: $ECR_REPO:$CODE_BRANCH.$BUILD_NUMBER"
+                aws_account=$(aws sts get-caller-identity --query "Account" --output text)
+				repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
+
+                #trivy image --exit-code 1 --severity HIGH,CRITICAL $repo_url:$CODE_BRANCH.$BUILD_NUMBER
+                trivy image --timeout 15m --severity HIGH,CRITICAL $repo_url:$CODE_BRANCH.$BUILD_NUMBER
+
+				'''
+
+			}
+
+ 		}
+
+  	}
+
+  	stage('push to ECR'){
+
+ 		steps {
+
+ 			script {
+
+			    sh label: 'Docker-Push', script: '''#!/bin/bash
+
+				# push CTDC Docker container to ECR
+				echo "Pushing: $ECR_REPO:$CODE_BRANCH.$BUILD_NUMBER"
+				aws_account=$(aws sts get-caller-identity --query "Account" --output text)
+				repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
+
+				# login and push to ECR
+				docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $repo_url
+				docker push $repo_url:$CODE_BRANCH.$BUILD_NUMBER
+
+                # tag as latest and push to ECR
+				docker tag $repo_url:$CODE_BRANCH.$BUILD_NUMBER $repo_url:latest
+                docker push $repo_url:latest
+
+				'''
+
+			}
+
  		}
 
   	}
@@ -138,12 +174,12 @@ pipeline {
 			script {
                 if (params.UpdateDeploymentVersion) {
                     writeDeployment(
-                        version: "${env.BE_VERSION}.${BUILD_NUMBER}",
-                        image:  "${env.BE_VERSION}.${BUILD_NUMBER}",
-                        service: "backend",
-                        deploymentFile: "${PROJECT}-deployments/deployments.yaml",
-                        deploymentRepoUrl: "https://github.com/CBIIT/${PROJECT}-deployments",
-                        deploymentCheckoutDirectory: "${PROJECT}-deployments"
+                        version: "${env.CODE_BRANCH}.${BUILD_NUMBER}",
+                        image:  "${env.CODE_BRANCH}.${BUILD_NUMBER}",
+                        service: "${env.SERVICE}",
+                        deploymentFile: "${env.PROJECT}-deployments/deployments.yaml",
+                        deploymentRepoUrl: "https://github.com/CBIIT/${env.DEPLOY_REPO}",
+                        deploymentCheckoutDirectory: "${env.PROJECT}-deployments"
                     )
                 }
             }
@@ -159,9 +195,9 @@ pipeline {
 			script {
 
                 tagRepo ( 
-                    gitTag: "ctdc-${params.BackendBranch}",
-                    gitUrl: "github.com/CBIIT/bento-backend",
-                    checkoutDirectory: "${env.PROJECT}-backend"
+                    gitTag: "${env.CODE_BRANCH}",
+                    gitUrl: "github.com/CBIIT/${env.CODE_REPO}",
+                    checkoutDirectory: "${env.PROJECT}-${env.SERVICE}"
                 )
 
             }
@@ -179,7 +215,7 @@ pipeline {
 		script {
 			if (params.RunDeployStage) {
 				echo 'Run the deployment for this sevice'
-				build job: "$JOB_PATH/DeployBackend", parameters: [string(name: 'Backend_Tag', value: "${params.BackendBranch}.$BUILD_NUMBER"), extendedChoice(name: 'Environment', value: "${params.Environment}")]
+				build job: "$JOB_PATH/$DEPLOY_JOB", parameters: [string(name: 'ImageTag', value: "$CODE_BRANCH.$BUILD_NUMBER"), extendedChoice(name: 'Environment', value: "${params.Environment}")]
 			}
 		}
     }
@@ -188,7 +224,7 @@ pipeline {
 
         notify(
             secretPath: "notification/slack",
-            secretName: "ctdc_slack_url"
+            secretName: "${env.SLACK_SECRET}"
         ) 
 
     }

@@ -27,8 +27,9 @@ pipeline {
 
   environment {
 
-      PROJECT    = 'ctdc'
-	  JOB_PATH   = '_default/_lower/CTDC/_jobs'
+      PROJECT      = 'ctdc'
+	  JOB_PATH     = '_default/_lower/CTDC/_jobs'
+      SLACK_SECRET = "ctdc_slack_url"
 
   }
 
@@ -69,7 +70,7 @@ pipeline {
                         jobName: "${JOB_PATH}/Deploy" + "${it.key}".capitalize(),
                         parameters:[
                                 string(name: 'Environment', value: params["Environment"]),
-                                string(name: "${it.key}".capitalize() + "_Tag" , value: it.value.image)
+                                string(name: 'ImageTag' , value: it.value.image)
                         ]
                     )
                 }
@@ -87,7 +88,7 @@ pipeline {
 
         notify(
             secretPath: "notification/slack",
-            secretName: "ctdc_slack_url"
+            secretName: "${env.SLACK_SECRET}"
         ) 
 
     }
