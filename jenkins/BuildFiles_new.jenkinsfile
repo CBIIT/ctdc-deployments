@@ -104,14 +104,14 @@ pipeline {
 
   	stage('Test'){
 
-        agent {
-            docker {
-                //image 'cbiitssrepo/cicd-ansible_4.0'
-                image 'bitnami/trivy:0.41.0'
-                args '--net=host -u root -v /var/run/docker.sock:/var/run/docker.sock'
-                reuseNode true
-            }
-        }
+        //agent {
+        //    docker {
+        //        //image 'cbiitssrepo/cicd-ansible_4.0'
+        //        image 'bitnami/trivy:0.41.0'
+        //        args '--net=host -u root -v /var/run/docker.sock:/var/run/docker.sock'
+        //        reuseNode true
+        //    }
+        //}
 
  		steps {
 
@@ -125,7 +125,9 @@ pipeline {
 				repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
 
                 #trivy image --exit-code 1 --severity HIGH,CRITICAL $repo_url:$CODE_BRANCH.$BUILD_NUMBER
-                trivy image --timeout 15m --severity HIGH,CRITICAL $repo_url:$CODE_BRANCH.$BUILD_NUMBER
+                #trivy image --timeout 15m --severity HIGH,CRITICAL $repo_url:$CODE_BRANCH.$BUILD_NUMBER
+
+                docker run --rm --name trivy bitnami/trivy:0.41.0 image --timeout 15m --severity HIGH,CRITICAL $repo_url:$CODE_BRANCH.$BUILD_NUMBER
 
 				'''
 
