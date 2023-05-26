@@ -3,7 +3,6 @@
 pipeline {
 	agent {
 		node {
-			//label 'ctdc-docker'
 			label 'slave-ncias-d2947-c'
 		}
 	}
@@ -19,7 +18,7 @@ pipeline {
 
         gitParameter(branchFilter: 'origin/(.*)',
             defaultValue: 'main',
-            name: 'FilesBranch',
+            name: 'CodeBranch',
             type: 'GitParameterDefinition',
             quickFilterEnabled: true,
             selectedValue: 'DEFAULT',
@@ -44,12 +43,17 @@ pipeline {
 
   environment {
 
-      PROJECT    = 'ctdc'
-      CODE_BRANCH = "${params.FilesBranch}"
-      CODE_FOLDER = "${env.PROJECT}-files"
-	  JOB_PATH   = '_default/_lower/CTDC/_jobs'
-	  REGION      = "us-east-1"
-	  ECR_REPO    = "ctdc-files"
+      PROJECT      = "ctdc"
+	  SERVICE      = "files"
+	  ECR_REPO     = "ctdc-files"
+	  DEPLOY_JOB   = "DeployFiles"
+	  SLACK_SECRET = "ctdc_slack_url"
+	  CODE_REPO    = "bento-files"
+	  JOB_PATH     = "_default/_lower/CTDC/_jobs"
+	  REGION       = "us-east-1"
+	  DEPLOY_REPO  = "${env.PROJECT}-deployments"
+      CODE_BRANCH  = "${params.CodeBranch}"
+      CODE_FOLDER  = "${env.PROJECT}-${env.SERVICE}"
 
   }
 
@@ -58,13 +62,13 @@ pipeline {
   		steps {
 
 		checkout([$class: 'GitSCM',
-			branches: [[name: "${params.FilesBranch}"]],
+			branches: [[name: "${env.CODE_BRANCH}"]],
 			doGenerateSubmoduleConfigurations: false,
 			extensions: [[$class: 'RelativeTargetDirectory',
 			relativeTargetDir: "${env.CODE_FOLDER}"]],
 			submoduleCfg: [],
 			userRemoteConfigs:
-			[[url: 'https://github.com/CBIIT/bento-files']]])
+			[[url: "https://github.com/CBIIT/${env.CODE_REPO}"]]])
 
   		checkout([$class: 'GitSCM',
 			branches: [[name: "${params.Environment}"]],
@@ -73,7 +77,7 @@ pipeline {
 			relativeTargetDir: "${env.PROJECT}-deployments"]],
 			submoduleCfg: [],
 			userRemoteConfigs:
-			[[url: 'https://github.com/CBIIT/ctdc-deployments']]])
+			[[url: "https://github.com/CBIIT/${env.DEPLOY_REPO}"]]])
 
         }
 
@@ -87,7 +91,7 @@ pipeline {
 
 			    sh label: 'Docker-Build', script: '''#!/bin/bash
 
-				# build CTDC Files Docker container
+				# build CTDC Docker container
 				echo "Building: $ECR_REPO:$CODE_BRANCH.$BUILD_NUMBER"
 				aws_account=$(aws sts get-caller-identity --query "Account" --output text)
 				repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
@@ -142,7 +146,7 @@ pipeline {
 
 			    sh label: 'Docker-Push', script: '''#!/bin/bash
 
-				# pushing CTDC Files container to ECR
+				# push CTDC Docker container to ECR
 				echo "Pushing: $ECR_REPO:$CODE_BRANCH.$BUILD_NUMBER"
 				aws_account=$(aws sts get-caller-identity --query "Account" --output text)
 				repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
@@ -172,10 +176,10 @@ pipeline {
                     writeDeployment(
                         version: "${env.CODE_BRANCH}.${BUILD_NUMBER}",
                         image:  "${env.CODE_BRANCH}.${BUILD_NUMBER}",
-                        service: "files",
-                        deploymentFile: "${PROJECT}-deployments/deployments.yaml",
-                        deploymentRepoUrl: "https://github.com/CBIIT/${PROJECT}-deployments",
-                        deploymentCheckoutDirectory: "${PROJECT}-deployments"
+                        service: "${env.SERVICE}",
+                        deploymentFile: "${env.PROJECT}-deployments/deployments.yaml",
+                        deploymentRepoUrl: "https://github.com/CBIIT/${env.DEPLOY_REPO}",
+                        deploymentCheckoutDirectory: "${env.PROJECT}-deployments"
                     )
                 }
             }
@@ -191,9 +195,9 @@ pipeline {
 			script {
 
                 tagRepo ( 
-                    gitTag: "${params.FilesBranch}",
-                    gitUrl: "github.com/CBIIT/bento-files",
-                    checkoutDirectory: "${env.PROJECT}-files"
+                    gitTag: "${env.CODE_BRANCH}",
+                    gitUrl: "github.com/CBIIT/${env.CODE_REPO}",
+                    checkoutDirectory: "${env.PROJECT}-${env.SERVICE}"
                 )
 
             }
@@ -211,7 +215,7 @@ pipeline {
 		script {
 			if (params.RunDeployStage) {
 				echo 'Run the deployment for this sevice'
-				build job: "$JOB_PATH/DeployFiles", parameters: [string(name: 'Files_Tag', value: "${params.FilesBranch}.$BUILD_NUMBER"), extendedChoice(name: 'Environment', value: "${params.Environment}")]
+				build job: "$JOB_PATH/$DEPLOY_JOB", parameters: [string(name: 'ImageTag', value: "$CODE_BRANCH.$BUILD_NUMBER"), extendedChoice(name: 'Environment', value: "${params.Environment}")]
 			}
 		}
     }
@@ -220,7 +224,7 @@ pipeline {
 
         notify(
             secretPath: "notification/slack",
-            secretName: "ctdc_slack_url"
+            secretName: "${env.SLACK_SECRET}"
         ) 
 
     }
