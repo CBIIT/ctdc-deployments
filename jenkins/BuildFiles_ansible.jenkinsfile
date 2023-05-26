@@ -45,11 +45,8 @@ pipeline {
   environment {
 
       PROJECT    = 'ctdc'
-      CODE_BRANCH = "${params.FilesBranch}"
-      CODE_FOLDER = "${env.PROJECT}-files"
+      FILES_VERSION = "${params.FilesBranch}"
 	  JOB_PATH   = '_default/_lower/CTDC/_jobs'
-	  REGION      = "us-east-1"
-	  ECR_REPO    = "ctdc-files"
 
   }
 
@@ -61,10 +58,19 @@ pipeline {
 			branches: [[name: "${params.FilesBranch}"]],
 			doGenerateSubmoduleConfigurations: false,
 			extensions: [[$class: 'RelativeTargetDirectory',
-			relativeTargetDir: "${env.CODE_FOLDER}"]],
+			relativeTargetDir: "${env.PROJECT}-files"]],
 			submoduleCfg: [],
 			userRemoteConfigs:
 			[[url: 'https://github.com/CBIIT/bento-files']]])
+
+  		checkout([$class: 'GitSCM',
+			branches: [[name: '*/main']],
+			doGenerateSubmoduleConfigurations: false,
+			extensions: [[$class: 'RelativeTargetDirectory',
+			relativeTargetDir: "playbooks"]],
+			submoduleCfg: [],
+			userRemoteConfigs:
+			[[url: 'https://github.com/CBIIT/ctdc-deployments']]])
 
   		checkout([$class: 'GitSCM',
 			branches: [[name: "${params.Environment}"]],
@@ -81,29 +87,6 @@ pipeline {
 
   	stage('Build'){
 
- 		steps {
-
- 			script {
-
-			    sh label: 'Docker-Build', script: '''#!/bin/bash
-
-				# build CTDC Files Docker container
-				echo "Building: $ECR_REPO:$CODE_BRANCH.$BUILD_NUMBER"
-				aws_account=$(aws sts get-caller-identity --query "Account" --output text)
-				repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
-
-				cd $WORKSPACE/$CODE_FOLDER && DOCKER_BUILDKIT=1 docker build --no-cache -t $repo_url:$CODE_BRANCH.$BUILD_NUMBER .
-
-				'''
-
-			}
-
- 		}
-
-  	}
-
-  	stage('Test'){
-
         agent {
             docker {
                 image 'cbiitssrepo/cicd-ansible_4.0'
@@ -113,52 +96,16 @@ pipeline {
         }
 
  		steps {
-
- 			script {
-
-			    sh label: 'Trivy-Test', script: '''#!/bin/bash
-
-				# Test image for vulnerabilities
-                echo "Testing Image with Trivy: $ECR_REPO:$CODE_BRANCH.$BUILD_NUMBER"
-                aws_account=$(aws sts get-caller-identity --query "Account" --output text)
-				repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
-
-                #trivy image --exit-code 1 --severity HIGH,CRITICAL $repo_url:$CODE_BRANCH.$BUILD_NUMBER
-                trivy image --timeout 15m --severity HIGH,CRITICAL $repo_url:$CODE_BRANCH.$BUILD_NUMBER
-
-				'''
-
-			}
-
- 		}
-
-  	}
-
-  	stage('push to ECR'){
-
- 		steps {
-
- 			script {
-
-			    sh label: 'Docker-Push', script: '''#!/bin/bash
-
-				# pushing CTDC Files container to ECR
-				echo "Pushing: $ECR_REPO:$CODE_BRANCH.$BUILD_NUMBER"
-				aws_account=$(aws sts get-caller-identity --query "Account" --output text)
-				repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
-
-				# login and push to ECR
-				docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $repo_url
-				docker push $repo_url:$CODE_BRANCH.$BUILD_NUMBER
-
-                # tag as latest and push to ECR
-				docker tag $repo_url:$CODE_BRANCH.$BUILD_NUMBER $repo_url:latest
-                docker push $repo_url:latest
-
-				'''
-
-			}
-
+ 			wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
+                ansiblePlaybook(
+					playbook: "${WORKSPACE}/playbooks/ansible/playbooks/build-files-microservice.yml", 
+            		inventory: "${WORKSPACE}/playbooks/ansible/playbooks/hosts",
+                    extraVars: [
+						project_name: "${PROJECT}",
+						auth_enabled: false
+						],
+                   colorized: true)
+ 			}
  		}
 
   	}
@@ -170,8 +117,8 @@ pipeline {
 			script {
                 if (params.UpdateDeploymentVersion) {
                     writeDeployment(
-                        version: "${env.CODE_BRANCH}.${BUILD_NUMBER}",
-                        image:  "${env.CODE_BRANCH}.${BUILD_NUMBER}",
+                        version: "${env.FILES_VERSION}.${BUILD_NUMBER}",
+                        image:  "${env.FILES_VERSION}.${BUILD_NUMBER}",
                         service: "files",
                         deploymentFile: "${PROJECT}-deployments/deployments.yaml",
                         deploymentRepoUrl: "https://github.com/CBIIT/${PROJECT}-deployments",
