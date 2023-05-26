@@ -19,7 +19,7 @@ pipeline {
 
         gitParameter(branchFilter: 'origin/(.*)',
             defaultValue: 'master',
-            name: 'BackendBranch',
+            name: 'CodeBranch',
             type: 'GitParameterDefinition',
             quickFilterEnabled: true,
             selectedValue: 'DEFAULT',
@@ -45,8 +45,11 @@ pipeline {
   environment {
 
       PROJECT    = 'ctdc'
-      BE_VERSION = "${params.BackendBranch}"
+	  SERVICE      = "backend"
 	  JOB_PATH   = '_default/_lower/CTDC/_jobs'
+	  BE_VERSION = "${params.CodeBranch}"
+	  CODE_BRANCH  = "${params.CodeBranch}"
+      CODE_FOLDER  = "${env.PROJECT}-${env.SERVICE}"
 
   }
 
@@ -55,10 +58,10 @@ pipeline {
   		steps {
 
 		checkout([$class: 'GitSCM',
-			branches: [[name: "${params.BackendBranch}"]],
+			branches: [[name: "${env.CODE_BRANCH}"]],
 			doGenerateSubmoduleConfigurations: false,
 			extensions: [[$class: 'RelativeTargetDirectory',
-			relativeTargetDir: "${env.PROJECT}-backend"]],
+			relativeTargetDir: "${env.CODE_FOLDER}"]],
 			submoduleCfg: [],
 			userRemoteConfigs:
 			[[url: 'https://github.com/CBIIT/bento-backend']]])
@@ -159,7 +162,7 @@ pipeline {
 			script {
 
                 tagRepo ( 
-                    gitTag: "ctdc-${params.BackendBranch}",
+                    gitTag: "ctdc-${params.CodeBranch}",
                     gitUrl: "github.com/CBIIT/bento-backend",
                     checkoutDirectory: "${env.PROJECT}-backend"
                 )
@@ -179,7 +182,7 @@ pipeline {
 		script {
 			if (params.RunDeployStage) {
 				echo 'Run the deployment for this sevice'
-				build job: "$JOB_PATH/DeployBackend", parameters: [string(name: 'ImageTag', value: "${params.BackendBranch}.$BUILD_NUMBER"), extendedChoice(name: 'Environment', value: "${params.Environment}")]
+				build job: "$JOB_PATH/DeployBackend", parameters: [string(name: 'ImageTag', value: "${params.CodeBranch}.$BUILD_NUMBER"), extendedChoice(name: 'Environment', value: "${params.Environment}")]
 			}
 		}
     }

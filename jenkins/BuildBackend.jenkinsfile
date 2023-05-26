@@ -195,7 +195,7 @@ pipeline {
 			script {
 
                 tagRepo ( 
-                    gitTag: "${env.CODE_BRANCH}",
+                    gitTag: "${env.PROJECT}-${env.CODE_BRANCH}",
                     gitUrl: "github.com/CBIIT/${env.CODE_REPO}",
                     checkoutDirectory: "${env.PROJECT}-${env.SERVICE}"
                 )
