@@ -122,9 +122,7 @@ pipeline {
 			ansiblePlaybook( 
             	playbook: '${WORKSPACE}/ctdc-deployments/ansible/playbooks/dataloader/ctdc-opensearch-loader.yml',
 				inventory: '${WORKSPACE}/ctdc-deployments/ansible/playbooks/hosts',
-            	colorized: true,
-				//extras: '-vvv'
-				) 
+            	colorized: true) 
  			}
  		}
     }
