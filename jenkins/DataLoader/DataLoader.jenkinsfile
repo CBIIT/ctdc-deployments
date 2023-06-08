@@ -111,7 +111,7 @@ pipeline {
  			    
           wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
  			        ansiblePlaybook(
-                  playbook: '${WORKSPACE}/ctdc-deployments/ansible/dataloader/ctdc-data-loader.yml',
+                  playbook: '${WORKSPACE}/ctdc-deployments/ansible/playbooks/dataloader/ctdc-data-loader.yml',
             	    inventory: '${WORKSPACE}/ctdc-deployments/ansible/playbooks/hosts',
             	    credentialsId: 'commonsdocker',
 				          colorized: true
