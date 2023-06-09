@@ -138,16 +138,12 @@
             "mountPoints": [],
             "volumesFrom": [],
             "logConfiguration": {
-                "logDriver": "awsfirelens",
+                "logDriver": "awslogs",
                 "options": {
-                    "Format": "json_lines",
-                    "Host": "{{sumo_collector_endpoint}}",
-                    "Name": "http",
-                    "Port": "443",
-                    "Retry_Limit": "2",
-                    "URI": "/receiver/v1/http/{{sumo_collector_token}}",
-                    "tls": "on",
-                    "tls.verify": "off"
+                    "awslogs-group": "/ecs/{{project}}/{{environment}}/files/logs",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-create-group": "true",
+                    "awslogs-stream-prefix": "{{project}}-files"
                 }
             }
         }
