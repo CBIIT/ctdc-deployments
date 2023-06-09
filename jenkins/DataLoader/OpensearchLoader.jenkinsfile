@@ -57,9 +57,9 @@ pipeline {
 
     }
 
-    options {
-  	ansiColor('xterm')
-	timestamps()
+  options {
+  	  ansiColor('xterm')
+	  timestamps()
   }
 
   environment {
