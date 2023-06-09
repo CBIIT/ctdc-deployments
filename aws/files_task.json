@@ -19,10 +19,13 @@
             "mountPoints": [],
             "volumesFrom": [],
             "user": "0",
-            "firelensConfiguration": {
-                "type": "fluentbit",
+            "logConfiguration": {
+                "logDriver": "awslogs",
                 "options": {
-                    "enable-ecs-log-metadata": "true"
+                    "awslogs-group": "/ecs/{{project}}/{{environment}}/sumologic/logs"
+                    "awslogs-region": "us-east-1"
+                    "awslogs-create-group": true
+                    "awslogs-stream-prefix": "{{project}}-files"
                 }
             }
         },
