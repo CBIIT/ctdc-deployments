@@ -22,9 +22,9 @@
             "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
-                    "awslogs-group": "/ecs/{{project}}/{{environment}}/sumologic/logs"
-                    "awslogs-region": "us-east-1"
-                    "awslogs-create-group": true
+                    "awslogs-group": "/ecs/{{project}}/{{environment}}/sumologic/logs",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-create-group": true,
                     "awslogs-stream-prefix": "{{project}}-files"
                 }
             }
