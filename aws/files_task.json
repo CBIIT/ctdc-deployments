@@ -1,5 +1,5 @@
 {
-    "family": "{{program}}-{{environment}}-files",
+    "family": "{{project}}-{{environment}}-files",
     "taskRoleArn": "arn:aws:iam::{{account_id}}:role/power-user-ctdc-{{environment}}-ecs-task-role",
     "executionRoleArn": "arn:aws:iam::{{account_id}}:role/power-user-ctdc-{{environment}}-ecs-task-execution-role",
     "requiresCompatibilities": [
@@ -27,7 +27,7 @@
             }
         },
         {
-            "name": "ctdc-files-newrelic-infra",
+            "name": "newrelic-infra",
             "image": "newrelic/nri-ecs:1.9.2",
             "cpu": 0,
             "portMappings": [],
@@ -45,7 +45,7 @@
                 },
                 {
                     "name": "NEW_RELIC_APP_NAME",
-                    "value": "{{program}}-{{environment}}-files"
+                    "value": "{{project}}-{{environment}}-files"
                 },
                 {
                     "name": "NRIA_IS_FORWARD_ONLY",
