@@ -63,13 +63,20 @@ pipeline {
   }
 
   options {
-    ansiColor('xterm')
+  	ansiColor('xterm')
+	timestamps()
   }
 
-  tools {
-  	maven 'Default' 
-    jdk 'Default' 
+  environment {
+
+	  SLACK_SECRET = "ctdc_slack_url"
+
   }
+
+//  tools {
+//  	maven 'Default' 
+//    jdk 'Default' 
+//  }
 
   stages{
   	stage('checkout'){
@@ -79,19 +86,19 @@ pipeline {
   				branches: [[name: "${params.Tag}"]], 
   				doGenerateSubmoduleConfigurations: 
   				false, extensions: [], submoduleCfg: [], 
-				  recursiveSubmodules: true,
+  			    recursiveSubmodules: true,
   				userRemoteConfigs: 
   				[[url: 'https://github.com/CBIIT/icdc-dataloader']]])
 
-			  sh 'git submodule update --init'
+			sh 'git submodule update --init'
 				
   			dir('ctdc-deployments'){
   				git branch: 'main',
     			url: 'https://github.com/CBIIT/ctdc-deployments.git'}
 			
-        dir('ctdc-model'){
-				  git branch: "master",
-				  url: 'https://github.com/CBIIT/ctdc-model.git'}
+            dir('ctdc-model'){
+				git branch: "master",
+				url: 'https://github.com/CBIIT/ctdc-model.git'}
 
   		}
  
@@ -100,12 +107,12 @@ pipeline {
 
  		    environment {
             S3_BUCKET = "${params.S3Bucket}"
-			      S3_FOLDER = "${params.S3Folder}"
+			S3_FOLDER = "${params.S3Folder}"
             TIER  = "${params.Environment}"
             WIPE_DB = "${params.WipeDB}"
             CHEAT_MODE = "${params.CheatMode}"
             SPLIT  = "${params.SplitTransactions}"
- 			      SLACK_URL = "${SLACK_URL}"
+ 			//SLACK_URL = "${SLACK_URL}"
             PROJECT_NAME = "ctdc"
  		    }
 
