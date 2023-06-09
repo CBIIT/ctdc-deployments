@@ -58,13 +58,15 @@ pipeline {
     }
 
     options {
-      ansiColor('xterm')
-    }
+  	ansiColor('xterm')
+	timestamps()
+  }
 
-    tools {
-  	  maven 'Default' 
-      jdk 'Default' 
-    }
+  environment {
+
+	  SLACK_SECRET = "ctdc_slack_url"
+
+  }
 
     stages {
   	  stage('checkout'){
@@ -115,7 +117,6 @@ pipeline {
 	
   	stage('load-es-data'){
  		environment {
- 			SLACK_URL = "${SLACK_URL}"
 		    TIER = "${params.Environment}"
 			PROJECT_NAME = "ctdc"
  		}

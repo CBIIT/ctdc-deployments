@@ -73,11 +73,6 @@ pipeline {
 
   }
 
-//  tools {
-//  	maven 'Default' 
-//    jdk 'Default' 
-//  }
-
   stages{
   	stage('checkout'){
   		steps {
@@ -112,7 +107,6 @@ pipeline {
             WIPE_DB = "${params.WipeDB}"
             CHEAT_MODE = "${params.CheatMode}"
             SPLIT  = "${params.SplitTransactions}"
- 			//SLACK_URL = "${SLACK_URL}"
             PROJECT_NAME = "ctdc"
  		    }
 
