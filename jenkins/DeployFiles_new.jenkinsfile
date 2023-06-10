@@ -77,8 +77,8 @@ pipeline {
                     env.DOMAIN_NAME = "trialcommons-${env.ENV}.cancer.gov"
                 }
 
-                env.SUMO_ENDPOINT = sh(label: 'Get Sumo Endpoint', returnStdout: true, script: "aws secretsmanager get-secret-value --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_endpoint'")
-				env.SUMO_TOKEN = sh(label: 'Get Sumo Token', returnStdout: true, script: "aws secretsmanager get-secret-value --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_token_files'")
+                env.SUMO_COLLECTOR_ENDPOINT = sh(label: 'Get Sumo Endpoint', returnStdout: true, script: "aws secretsmanager get-secret-value --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_endpoint'")
+				env.SUMO_COLLECTOR_TOKEN = sh(label: 'Get Sumo Token', returnStdout: true, script: "aws secretsmanager get-secret-value --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_token_files'")
 
 			}
 			
