@@ -153,7 +153,7 @@ pipeline {
 			    sh label: 'Docker-Tag', script: '''#!/bin/bash
 
 				# Tag image as production if deploying to prod tier
-				echo "Tagging Image as Production: $ECR_REPO:$IMAGE_TAG
+				echo "Tagging Image as Production: $ECR_REPO:$IMAGE_TAG"
 				aws_account=$(aws sts get-caller-identity --query "Account" --output text)
 				repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
 
