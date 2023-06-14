@@ -51,10 +51,10 @@ pipeline {
 
   		checkout([$class: 'GitSCM',
 			branches: [[name: '*/main']],
-			doGenerateSubmoduleConfigurations: false,
-			extensions: [[$class: 'RelativeTargetDirectory',
+			extensions: [[$class: 'SubmoduleOption', 
+			recursiveSubmodules: true],
+			[$class: 'RelativeTargetDirectory',
 			relativeTargetDir: 'ctdc-deployments']],
-			submoduleCfg: [],
 			userRemoteConfigs:
 			[[url: 'https://github.com/CBIIT/ctdc-deployments.git']]])
 

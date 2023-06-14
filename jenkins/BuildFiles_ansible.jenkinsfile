@@ -56,28 +56,28 @@ pipeline {
 
 		checkout([$class: 'GitSCM',
 			branches: [[name: "${params.FilesBranch}"]],
-			doGenerateSubmoduleConfigurations: false,
-			extensions: [[$class: 'RelativeTargetDirectory',
+			extensions: [[$class: 'SubmoduleOption', 
+			recursiveSubmodules: true],
+            [$class: 'RelativeTargetDirectory',
 			relativeTargetDir: "${env.PROJECT}-files"]],
-			submoduleCfg: [],
 			userRemoteConfigs:
 			[[url: 'https://github.com/CBIIT/bento-files']]])
 
   		checkout([$class: 'GitSCM',
 			branches: [[name: '*/main']],
-			doGenerateSubmoduleConfigurations: false,
-			extensions: [[$class: 'RelativeTargetDirectory',
+			extensions: [[$class: 'SubmoduleOption', 
+			recursiveSubmodules: true],
+            [$class: 'RelativeTargetDirectory',
 			relativeTargetDir: "playbooks"]],
-			submoduleCfg: [],
 			userRemoteConfigs:
 			[[url: 'https://github.com/CBIIT/ctdc-deployments']]])
 
   		checkout([$class: 'GitSCM',
 			branches: [[name: "${params.Environment}"]],
-			doGenerateSubmoduleConfigurations: false,
-			extensions: [[$class: 'RelativeTargetDirectory',
+			extensions: [[$class: 'SubmoduleOption', 
+			recursiveSubmodules: true],
+            [$class: 'RelativeTargetDirectory',
 			relativeTargetDir: "${env.PROJECT}-deployments"]],
-			submoduleCfg: [],
 			userRemoteConfigs:
 			[[url: 'https://github.com/CBIIT/ctdc-deployments']]])
 
