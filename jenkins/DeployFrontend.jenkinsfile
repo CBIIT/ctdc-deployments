@@ -33,6 +33,7 @@ pipeline {
 
       PROJECT      = 'ctdc'
 	  SLACK_SECRET = "ctdc_slack_url"
+	  ENV          = "${params.Environment}"
 
   }
 
