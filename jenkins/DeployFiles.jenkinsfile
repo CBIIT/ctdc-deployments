@@ -96,19 +96,20 @@ pipeline {
 
 				# create new revision for $PROJECT-$APP Task Definition
 				echo "Updating Task Defintion to Use: $ECR_REPO:$IMAGE_TAG"
+				template=ctdc-deployments/aws/$APP_task.json
 				ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 				IMAGE_ID="$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG"
 				DATE=$(date '+%m/%d/%Y')
 
-				sed -i "s|{{account_id}}|$ACCOUNT_ID|" "ctdc-deployments/aws/$APP_task.json"
-				sed -i "s|{{image_id}}|$IMAGE_ID|" ctdc-deployments/aws/$APP_task.json
-				sed -i "s|{{image_tag}}|$IMAGE_TAG|" ctdc-deployments/aws/$APP_task.json
-				sed -i "s|{{environment}}|$ENV|" ctdc-deployments/aws/$APP_task.json
-				sed -i "s|{{project}}|$PROJECT|" ctdc-deployments/aws/$APP_task.json
-				sed -i "s|{{domain_name}}|$DOMAIN_NAME|" ctdc-deployments/aws/$APP_task.json
-				sed -i "s|{{sumo_collector_endpoint}}|$SUMO_COLLECTOR_ENDPOINT|" ctdc-deployments/aws/$APP_task.json
-				sed -i "s|{{sumo_collector_token}}|$SUMO_COLLECTOR_TOKEN|" ctdc-deployments/aws/$APP_task.json
-				sed -i "s|{{date}}|$DATE|" ctdc-deployments/aws/$APP_task.json
+				sed -i "s|{{account_id}}|$ACCOUNT_ID|" $template
+				sed -i "s|{{image_id}}|$IMAGE_ID|" $template
+				sed -i "s|{{image_tag}}|$IMAGE_TAG|" $template
+				sed -i "s|{{environment}}|$ENV|" $template
+				sed -i "s|{{project}}|$PROJECT|" $template
+				sed -i "s|{{domain_name}}|$DOMAIN_NAME|" $template
+				sed -i "s|{{sumo_collector_endpoint}}|$SUMO_COLLECTOR_ENDPOINT|" $template
+				sed -i "s|{{sumo_collector_token}}|$SUMO_COLLECTOR_TOKEN|" $template
+				sed -i "s|{{date}}|$DATE|" $template
 
 				aws ecs register-task-definition --cli-input-json file://ctdc-deployments/aws/$APP_task.json
 
