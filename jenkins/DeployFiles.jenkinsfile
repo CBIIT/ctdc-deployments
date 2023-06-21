@@ -167,7 +167,7 @@ pipeline {
 
  			script {
 
-			    sh label: 'Docker-Tag', script: """#!/bin/bash
+			    sh label: 'Docker-Tag', script: '''#!/bin/bash
 
 				# Tag image as production if deploying to prod tier
 				echo "Tagging Image as Production: $ECR_REPO:$IMAGE_TAG"
@@ -181,7 +181,7 @@ pipeline {
                 # tag as latest and push to ECR
 				aws ecr put-image --repository-name $ECR_REPO --image-tag production-$IMAGE_TAG --image-manifest "$MANIFEST"
 
-				"""
+				'''
 
 			}
 
