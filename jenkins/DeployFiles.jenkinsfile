@@ -97,7 +97,7 @@ pipeline {
 
 			script {
 
-			    sh label: 'Task-Definition-Update', script: '''#!/bin/bash
+			    sh label: 'Task-Definition-Update', script: """#!/bin/bash
 
 				# create new revision for $PROJECT-$APP Task Definition
 				echo "Updating Task Defintion to Use: $ECR_REPO:$IMAGE_TAG"
@@ -121,7 +121,7 @@ pipeline {
 
 				aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE
 
-				'''
+				"""
 
 			}
 
@@ -135,7 +135,7 @@ pipeline {
 
  			script {
 
-			    sh label: 'Service-Update', script: '''#!/bin/bash
+			    sh label: 'Service-Update', script: """#!/bin/bash
 
 				# Redeploy Service Using The Latest Task Definition
 				echo "Updating Service: $SERVICE_NAME"
@@ -143,7 +143,7 @@ pipeline {
 				TASK_REVISION=$(aws ecs describe-task-definition --task-definition $SERVICE_NAME | egrep "revision" | awk '{print $2}' | sed 's/,//')
 				aws ecs update-service --cluster $CLUSTER --region $REGION --service $SERVICE_NAME --task-definition $SERVICE_NAME:$TASK_REVISION --desired-count 1
 
-				'''
+				"""
 
 			}
 
@@ -167,7 +167,7 @@ pipeline {
 
  			script {
 
-			    sh label: 'Docker-Tag', script: '''#!/bin/bash
+			    sh label: 'Docker-Tag', script: """#!/bin/bash
 
 				# Tag image as production if deploying to prod tier
 				echo "Tagging Image as Production: $ECR_REPO:$IMAGE_TAG"
@@ -181,7 +181,7 @@ pipeline {
                 # tag as latest and push to ECR
 				aws ecr put-image --repository-name $ECR_REPO --image-tag production-$IMAGE_TAG --image-manifest "$MANIFEST"
 
-				'''
+				"""
 
 			}
 
