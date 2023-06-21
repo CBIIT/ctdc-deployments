@@ -101,6 +101,10 @@ pipeline {
 
 				# create new revision for $PROJECT-$APP Task Definition
 				echo "Updating Task Defintion to Use: $ECR_REPO:$IMAGE_TAG"
+
+				echo "Sumo Endpoint:     $SUMO_COLLECTOR_ENDPOINT"
+				echo "Sumo Token:     $SUMO_COLLECTOR_TOKEN"
+
 				ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 				IMAGE_ID="$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG"
 				DATE=$(date '+%m/%d/%Y')
