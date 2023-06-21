@@ -100,36 +100,36 @@
             ],
             "environment": [
                 {
-                    "name": "DATE",
-                    "value": "{{date}}"
-                },
-                {
                     "name": "PROJECT",
                     "value": "{{project}}"
-                },
-                {
-                    "name": "AUTH_ENABLED",
-                    "value": "false"
                 },
                 {
                     "name": "VERSION",
                     "value": "{{image_tag}}"
                 },
                 {
-                    "name": "NEW_RELIC_LABELS",
-                    "value": "Project:{{project}};Environment:{{environment}}"
-                },
-                {
                     "name": "BACKEND_URL",
                     "value": "https://{{domain_name}}/v1/graphql/"
                 },
                 {
-                    "name": "NEW_RELIC_APP_NAME",
-                    "value": "{{project}}-{{environment}}-files"
+                    "name": "AUTH_ENABLED",
+                    "value": "false"
+                },
+                {
+                    "name": "DATE",
+                    "value": "{{date}}"
                 },
                 {
                     "name": "URL_SRC",
                     "value": "indexd"
+                },
+                {
+                    "name": "NEW_RELIC_LABELS",
+                    "value": "Project:{{project}};Environment:{{environment}}"
+                },
+                {
+                    "name": "NEW_RELIC_APP_NAME",
+                    "value": "{{project}}-{{environment}}-files"
                 }
             ],
             "mountPoints": [],

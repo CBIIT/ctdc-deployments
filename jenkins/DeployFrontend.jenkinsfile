@@ -131,6 +131,7 @@ pipeline {
 
 				sed -i "s|{{domain_name}}|$DOMAIN_NAME|" $TEMPLATE_FILE
 				sed -i "s|{{google_id}}|$GOOGLE_ID|" $TEMPLATE_FILE
+				sed -i "s|{{be_version}}|$BE_VERSION|" $TEMPLATE_FILE
 
 				aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE
 

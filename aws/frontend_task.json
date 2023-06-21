@@ -141,7 +141,7 @@
                 },
                 {
                     "name": "NEW_RELIC_APP_NAME",
-                    "value": "{{project}}-{{environment}}-files"
+                    "value": "{{project}}-{{environment}}-frontend"
                 }
             ],
             "mountPoints": [],
