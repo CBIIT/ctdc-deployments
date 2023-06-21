@@ -58,8 +58,6 @@ pipeline {
 			userRemoteConfigs:
 			[[url: 'https://github.com/CBIIT/ctdc-deployments.git']]])
 
-        }
-
 		checkout([$class: 'GitSCM',
 			branches: [[name: "${env.ENV}"]],
 			extensions: [[$class: 'SubmoduleOption', 
