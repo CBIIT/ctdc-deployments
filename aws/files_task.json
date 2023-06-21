@@ -138,7 +138,7 @@
                 "logDriver": "awsfirelens",
                 "options": {
                     "Format": "json_lines",
-                    "Host": "collectors.fed.sumologic.com",
+                    "Host": "{{sumo_collector_endpoint}}",
                     "Name": "http",
                     "Port": "443",
                     "Retry_Limit": "2",
