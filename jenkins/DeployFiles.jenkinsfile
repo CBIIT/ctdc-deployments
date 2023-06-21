@@ -78,7 +78,7 @@ pipeline {
                 }
 
                 env.SUMO_COLLECTOR_ENDPOINT = sh(label: 'Get Sumo Endpoint', returnStdout: true, script: "aws secretsmanager get-secret-value --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_endpoint'")
-				env.SUMO_COLLECTOR_TOKEN = sh(label: 'Get Sumo Token', returnStdout: true, script: "aws secretsmanager get-secret-value --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_token_files'")
+				env.SUMO_COLLECTOR_TOKEN = sh(label: 'Get Sumo Token', returnStdout: true, script: "aws secretsmanager get-secret-value --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_token_$APP'")
 
 			}
 			
@@ -92,17 +92,17 @@ pipeline {
 				IMAGE_ID="$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG"
 				DATE=$(date '+%m/%d/%Y')
 
-				sed -i "s|{{account_id}}|$ACCOUNT_ID|" ctdc-deployments/aws/files_task.json
-				sed -i "s|{{image_id}}|$IMAGE_ID|" ctdc-deployments/aws/files_task.json
-				sed -i "s|{{image_tag}}|$IMAGE_TAG|" ctdc-deployments/aws/files_task.json
-				sed -i "s|{{environment}}|$ENV|" ctdc-deployments/aws/files_task.json
-				sed -i "s|{{project}}|$PROJECT|" ctdc-deployments/aws/files_task.json
-				sed -i "s|{{domain_name}}|$DOMAIN_NAME|" ctdc-deployments/aws/files_task.json
-				sed -i "s|{{sumo_collector_endpoint}}|$SUMO_COLLECTOR_ENDPOINT|" ctdc-deployments/aws/files_task.json
-				sed -i "s|{{sumo_collector_token}}|$SUMO_COLLECTOR_TOKEN|" ctdc-deployments/aws/files_task.json
-				sed -i "s|{{date}}|$DATE|" ctdc-deployments/aws/files_task.json
+				sed -i "s|{{account_id}}|$ACCOUNT_ID|" ctdc-deployments/aws/$APP_task.json
+				sed -i "s|{{image_id}}|$IMAGE_ID|" ctdc-deployments/aws/$APP_task.json
+				sed -i "s|{{image_tag}}|$IMAGE_TAG|" ctdc-deployments/aws/$APP_task.json
+				sed -i "s|{{environment}}|$ENV|" ctdc-deployments/aws/$APP_task.json
+				sed -i "s|{{project}}|$PROJECT|" ctdc-deployments/aws/$APP_task.json
+				sed -i "s|{{domain_name}}|$DOMAIN_NAME|" ctdc-deployments/aws/$APP_task.json
+				sed -i "s|{{sumo_collector_endpoint}}|$SUMO_COLLECTOR_ENDPOINT|" ctdc-deployments/aws/$APP_task.json
+				sed -i "s|{{sumo_collector_token}}|$SUMO_COLLECTOR_TOKEN|" ctdc-deployments/aws/$APP_task.json
+				sed -i "s|{{date}}|$DATE|" ctdc-deployments/aws/$APP_task.json
 
-				aws ecs register-task-definition --cli-input-json file://ctdc-deployments/aws/files_task.json
+				aws ecs register-task-definition --cli-input-json file://ctdc-deployments/aws/$APP_task.json
 
 				'''
 
