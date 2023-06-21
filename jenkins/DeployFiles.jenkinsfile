@@ -106,7 +106,7 @@ pipeline {
 				echo "Sumo Token:     $SUMO_COLLECTOR_TOKEN"
 
 				ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
-				IMAGE_ID="$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG"
+				IMAGE_ID="${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/$ECR_REPO:$IMAGE_TAG"
 				DATE=$(date '+%m/%d/%Y')
 
 				sed -i "s|{{account_id}}|$ACCOUNT_ID|" $TEMPLATE_FILE
