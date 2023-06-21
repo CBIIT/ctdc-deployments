@@ -97,7 +97,7 @@ pipeline {
 
 			script {
 
-			    sh label: 'Task-Definition-Update', script: """#!/bin/bash
+			    sh label: 'Task-Definition-Update', script: '''#!/bin/bash
 
 				# create new revision for $PROJECT-$APP Task Definition
 				echo "Updating Task Defintion to Use: $ECR_REPO:$IMAGE_TAG"
@@ -106,7 +106,7 @@ pipeline {
 				echo "Sumo Token:     $SUMO_COLLECTOR_TOKEN"
 
 				ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
-				IMAGE_ID="${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/$ECR_REPO:$IMAGE_TAG"
+				IMAGE_ID="$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG"
 				DATE=$(date '+%m/%d/%Y')
 
 				sed -i "s|{{account_id}}|$ACCOUNT_ID|" $TEMPLATE_FILE
@@ -115,13 +115,13 @@ pipeline {
 				sed -i "s|{{environment}}|$ENV|" $TEMPLATE_FILE
 				sed -i "s|{{project}}|$PROJECT|" $TEMPLATE_FILE
 				sed -i "s|{{domain_name}}|$DOMAIN_NAME|" $TEMPLATE_FILE
-				sed -i "s|{{sumo_collector_endpoint}}|$SUMO_COLLECTOR_ENDPOINT|" $TEMPLATE_FILE
-				sed -i "s|{{sumo_collector_token}}|$SUMO_COLLECTOR_TOKEN|" $TEMPLATE_FILE
+				sed -i 's|{{sumo_collector_endpoint}}|$SUMO_COLLECTOR_ENDPOINT|' $TEMPLATE_FILE
+				sed -i 's|{{sumo_collector_token}}|$SUMO_COLLECTOR_TOKEN|' $TEMPLATE_FILE
 				sed -i "s|{{date}}|$DATE|" $TEMPLATE_FILE
 
 				aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE
 
-				"""
+				'''
 
 			}
 
