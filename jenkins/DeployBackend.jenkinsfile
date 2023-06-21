@@ -3,7 +3,6 @@
 pipeline {
 	agent {
 		node {
-			//label 'ctdc-docker'
 			label 'slave-ncias-d2947-c'
 		}
 	}
@@ -11,34 +10,43 @@ pipeline {
 	parameters {
 
         string(
-	        defaultValue: '',
-		    description: 'The image tag to deploy',
-		    name: 'ImageTag')
+            defaultValue: '',
+            description: 'The Image to Deploy',
+            name: 'ImageTag')
 
-		extendedChoice(
+        extendedChoice(
             name: 'Environment',
             defaultValue: 'dev',
-            description: 'Choose the environment to build',
+            description: 'Choose the environment to deploy to',
             type: 'PT_SINGLE_SELECT',
             value: 'dev,qa,stage,prod')
 
   }
 
   options {
-  	ansiColor('xterm')
+
 	timestamps()
+
   }
 
   environment {
 
-      PROJECT      = 'ctdc'
-	  SLACK_SECRET = "ctdc_slack_url"
-	  ENV          = "${params.Environment}"
+	PROJECT      = "ctdc"
+	APP          = "backend"
+	SLACK_SECRET = "ctdc_slack_url"
+	REGION       = "us-east-1"
+	ECR_REPO     = "${env.PROJECT}-${env.APP}"
+	IMAGE_TAG    = "${params.ImageTag}"
+	ENV          = "${params.Environment}"
+	CLUSTER      = "${env.PROJECT}-${env.ENV}-ecs"
+	SERVICE_NAME = "${env.PROJECT}-${env.ENV}-${env.APP}"
 
   }
 
   stages{
+
   	stage('checkout'){
+
   		steps {
 
   		checkout([$class: 'GitSCM',
@@ -46,56 +54,89 @@ pipeline {
 			extensions: [[$class: 'SubmoduleOption', 
 			recursiveSubmodules: true],
 			[$class: 'RelativeTargetDirectory',
-			relativeTargetDir: "playbooks"]],
+			relativeTargetDir: 'ctdc-deployments']],
 			userRemoteConfigs:
-			[[url: 'https://github.com/CBIIT/ctdc-deployments']]])
-
-        checkout([$class: 'GitSCM',
-			branches: [[name: "${params.Environment}"]],
-			extensions: [[$class: 'SubmoduleOption', 
-			recursiveSubmodules: true],
-			[$class: 'RelativeTargetDirectory',
-			relativeTargetDir: "${env.PROJECT}-deployments"]],
-			userRemoteConfigs:
-			[[url: 'https://github.com/CBIIT/ctdc-deployments']]])
+			[[url: 'https://github.com/CBIIT/ctdc-deployments.git']]])
 
         }
 
   	}
 
-  	stage('Deploy'){
-
-        agent {
-            docker {
-                image 'cbiitssrepo/cicd-ansible_4.0'
-                args '--net=host -u root -v /var/run/docker.sock:/var/run/docker.sock'
-                reuseNode true
-            }
-        }
-
-	    environment {
-            BE_VERSION = "${params.ImageTag}"
-        }
+    stage('Set Environment Variables'){
 
  		steps {
 
-			wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
-                ansiblePlaybook(
-					playbook: "${WORKSPACE}/playbooks/ansible/playbooks/deploy-backend-microservice.yml", 
-            		inventory: "${WORKSPACE}/playbooks/ansible/playbooks/hosts",
-                    extraVars: [
-                        tier: "${params.Environment}",
-						project_name: "${PROJECT}",
-						iam_prefix: "power-user",
-						subdomain: "trialcommons",
-						domain_name: "cancer.gov",
-						auth_enabled: false
-						],
-                    colorized: true)
- 			}
+ 			script {
+
+			    // set sumo vars for logging
+				env.SUMO_COLLECTOR_ENDPOINT = sh(label: 'Get Sumo Endpoint', returnStdout: true, script: "aws secretsmanager get-secret-value --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_endpoint'").trim()
+				env.SUMO_COLLECTOR_TOKEN = sh(label: 'Get Sumo Token', returnStdout: true, script: "aws secretsmanager get-secret-value --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_token_$APP'").trim()
+
+				// set neo4j vars
+				env.NEO4J_HOST = sh(label: 'Get Neo4j Host', returnStdout: true, script: "aws secretsmanager get-secret-value --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.neo4j_ip'").trim()
+
+				// set template file name
+				env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task.json"
+
+			}
+
  		}
 
   	}
+
+  	stage('Update Task Definition'){
+
+ 		steps {
+
+			script {
+
+			    sh label: 'Task-Definition-Update', script: '''#!/bin/bash
+
+				# create new revision for $PROJECT-$APP Task Definition
+				echo "Updating Task Defintion to Use: $ECR_REPO:$IMAGE_TAG"
+				ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+				IMAGE_ID="$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG"
+
+				sed -i "s|{{account_id}}|$ACCOUNT_ID|" $TEMPLATE_FILE
+				sed -i "s|{{image_id}}|$IMAGE_ID|" $TEMPLATE_FILE
+				sed -i "s|{{image_tag}}|$IMAGE_TAG|" $TEMPLATE_FILE
+				sed -i "s|{{environment}}|$ENV|" $TEMPLATE_FILE
+				sed -i "s|{{project}}|$PROJECT|" $TEMPLATE_FILE
+				sed -i "s|{{sumo_collector_endpoint}}|$SUMO_COLLECTOR_ENDPOINT|" $TEMPLATE_FILE
+				sed -i "s|{{sumo_collector_token}}|$SUMO_COLLECTOR_TOKEN|" $TEMPLATE_FILE
+				sed -i "s|{{neo4j_host}}|$NEO4J_HOST|" $TEMPLATE_FILE
+
+				aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE
+
+				'''
+
+			}
+
+ 		}
+
+  	}
+
+    // stage('Update Service'){
+
+ 	// 	steps {
+
+ 	// 		script {
+
+	// 		    sh label: 'Service-Update', script: '''#!/bin/bash
+
+	// 			# Redeploy Service Using The Latest Task Definition
+	// 			echo "Updating Service: $SERVICE_NAME"
+
+	// 			TASK_REVISION=$(aws ecs describe-task-definition --task-definition $SERVICE_NAME | egrep "revision" | awk '{print $2}' | sed 's/,//')
+	// 			aws ecs update-service --cluster $CLUSTER --region $REGION --service $SERVICE_NAME --task-definition $SERVICE_NAME:$TASK_REVISION --desired-count 1
+
+	// 			'''
+
+	// 		}
+
+ 	// 	}
+
+  	// }
 
 	stage('Add Production Tag'){
 
