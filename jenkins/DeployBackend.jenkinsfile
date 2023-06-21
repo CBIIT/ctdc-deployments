@@ -116,27 +116,27 @@ pipeline {
 
   	}
 
-    // stage('Update Service'){
+    stage('Update Service'){
 
- 	// 	steps {
+ 		steps {
 
- 	// 		script {
+ 			script {
 
-	// 		    sh label: 'Service-Update', script: '''#!/bin/bash
+			    sh label: 'Service-Update', script: '''#!/bin/bash
 
-	// 			# Redeploy Service Using The Latest Task Definition
-	// 			echo "Updating Service: $SERVICE_NAME"
+				# Redeploy Service Using The Latest Task Definition
+				echo "Updating Service: $SERVICE_NAME"
 
-	// 			TASK_REVISION=$(aws ecs describe-task-definition --task-definition $SERVICE_NAME | egrep "revision" | awk '{print $2}' | sed 's/,//')
-	// 			aws ecs update-service --cluster $CLUSTER --region $REGION --service $SERVICE_NAME --task-definition $SERVICE_NAME:$TASK_REVISION --desired-count 1
+				TASK_REVISION=$(aws ecs describe-task-definition --task-definition $SERVICE_NAME | egrep "revision" | awk '{print $2}' | sed 's/,//')
+				aws ecs update-service --cluster $CLUSTER --region $REGION --service $SERVICE_NAME --task-definition $SERVICE_NAME:$TASK_REVISION --desired-count 1
 
-	// 			'''
+				'''
 
-	// 		}
+			}
 
- 	// 	}
+ 		}
 
-  	// }
+  	}
 
 	stage('Add Production Tag'){
 
