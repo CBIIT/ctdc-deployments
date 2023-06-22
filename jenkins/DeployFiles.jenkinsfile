@@ -108,7 +108,6 @@ pipeline {
 				# create new revision for $PROJECT-$APP Task Definition
 				echo "Updating Task Defintion to Use: $ECR_REPO:$IMAGE_TAG"
 				ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
-				#IMAGE_ID="$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG"
 				IMAGE_ID="$REPO_URL:$IMAGE_TAG"
 				DATE=$(date '+%m/%d/%Y')
 
@@ -174,11 +173,8 @@ pipeline {
 
 				# Tag image as production if deploying to prod tier
 				echo "Tagging Image as Production: $ECR_REPO:$IMAGE_TAG"
-				#aws_account=$(aws sts get-caller-identity --query "Account" --output text)
-				#repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
 
 				# login and get manifest
-				#docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $repo_url
 				docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $REPO_URL
 				MANIFEST=$(aws ecr batch-get-image --repository-name $ECR_REPO --image-ids imageTag=$IMAGE_TAG --output json | jq --raw-output --join-output '.images[0].imageManifest')
 
