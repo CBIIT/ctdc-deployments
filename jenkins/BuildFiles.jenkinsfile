@@ -51,6 +51,7 @@ pipeline {
 	  CODE_REPO    = "bento-files"
 	  JOB_PATH     = "_default/_lower/CTDC/_jobs"
 	  REGION       = "us-east-1"
+	  ENV          = "${params.Environment}"
 	  DEPLOY_REPO  = "${env.PROJECT}-deployments"
       CODE_BRANCH  = "${params.CodeBranch}"
       CODE_FOLDER  = "${env.PROJECT}-${env.SERVICE}"
@@ -238,7 +239,7 @@ pipeline {
 		script {
 			if (params.RunDeployStage) {
 				echo 'Run the deployment for this sevice'
-				build job: "$JOB_PATH/$DEPLOY_JOB", parameters: [string(name: 'ImageTag', value: "$CODE_BRANCH.$BUILD_NUMBER"), extendedChoice(name: 'Environment', value: "${params.Environment}")]
+				build job: "$JOB_PATH/$DEPLOY_JOB", parameters: [string(name: 'ImageTag', value: "$CODE_BRANCH.$BUILD_NUMBER"), extendedChoice(name: 'Environment', value: "$ENV")]
 			}
 		}
     }
