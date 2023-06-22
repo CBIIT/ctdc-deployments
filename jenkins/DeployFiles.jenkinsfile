@@ -82,6 +82,12 @@ pipeline {
 				env.SUMO_COLLECTOR_ENDPOINT = sh(label: 'Get Sumo Endpoint', returnStdout: true, script: "aws secretsmanager get-secret-value --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_endpoint'").trim()
 				env.SUMO_COLLECTOR_TOKEN = sh(label: 'Get Sumo Token', returnStdout: true, script: "aws secretsmanager get-secret-value --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_token_$APP'").trim()
 
+				// set ECR account number
+				env.ECR_ACCOUNT = sh(label: 'Get ECR account', returnStdout: true, script: "aws secretsmanager get-secret-value --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.ecr_account'").trim()
+
+				// set repo URL
+				env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
+
 				// set template file name
 				env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task.json"
 
@@ -102,7 +108,8 @@ pipeline {
 				# create new revision for $PROJECT-$APP Task Definition
 				echo "Updating Task Defintion to Use: $ECR_REPO:$IMAGE_TAG"
 				ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
-				IMAGE_ID="$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG"
+				#IMAGE_ID="$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG"
+				IMAGE_ID="$REPO_URL:$IMAGE_TAG"
 				DATE=$(date '+%m/%d/%Y')
 
 				sed -i "s|{{account_id}}|$ACCOUNT_ID|" $TEMPLATE_FILE
@@ -167,11 +174,12 @@ pipeline {
 
 				# Tag image as production if deploying to prod tier
 				echo "Tagging Image as Production: $ECR_REPO:$IMAGE_TAG"
-				aws_account=$(aws sts get-caller-identity --query "Account" --output text)
-				repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
+				#aws_account=$(aws sts get-caller-identity --query "Account" --output text)
+				#repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
 
 				# login and get manifest
-				docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $repo_url
+				#docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $repo_url
+				docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $REPO_URL
 				MANIFEST=$(aws ecr batch-get-image --repository-name $ECR_REPO --image-ids imageTag=$IMAGE_TAG --output json | jq --raw-output --join-output '.images[0].imageManifest')
 
                 # tag as latest and push to ECR
