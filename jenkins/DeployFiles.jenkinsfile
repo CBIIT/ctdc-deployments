@@ -35,7 +35,7 @@ pipeline {
 	APP          = "files"
 	SLACK_SECRET = "ctdc_slack_url"
 	REGION       = "us-east-1"
-	ECR_REPO     = "${env.PROJECT}-${env.APP}"
+	ECR_REPO     = "crdc-${env.PROJECT}-${env.APP}"
 	IMAGE_TAG    = "${params.ImageTag}"
 	ENV          = "${params.Environment}"
 	CLUSTER      = "${env.PROJECT}-${env.ENV}-ecs"
