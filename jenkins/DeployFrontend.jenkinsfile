@@ -31,15 +31,16 @@ pipeline {
 
   environment {
 
+	PROGRAM      = "crdc"
 	PROJECT      = "ctdc"
 	APP          = "frontend"
 	SLACK_SECRET = "ctdc_slack_url"
 	REGION       = "us-east-1"
-	ECR_REPO     = "${env.PROJECT}-${env.APP}"
+	ECR_REPO     = "${env.PROGRAM}-${env.PROJECT}-${env.APP}"
 	IMAGE_TAG    = "${params.ImageTag}"
 	ENV          = "${params.Environment}"
 	CLUSTER      = "${env.PROJECT}-${env.ENV}-ecs"
-	SERVICE_NAME = "${env.PROJECT}-${env.ENV}-${env.APP}"
+	SERVICE      = "${env.PROJECT}-${env.ENV}-${env.APP}"
 
   }
 
@@ -97,6 +98,12 @@ pipeline {
 				// set backend version
 				env.BE_VERSION = getVersion(service: "backend",deploymentFile: "$PROJECT-deployments-$ENV/deployments.yaml")
 
+				// set ECR account number
+				env.ECR_ACCOUNT = sh(label: 'Get ECR account', returnStdout: true, script: "aws secretsmanager get-secret-value --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.ecr_account'").trim()
+
+				// set repo URL
+				env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
+
 				// set template file name
 				env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task.json"
 
@@ -117,7 +124,7 @@ pipeline {
 				# create new revision for $PROJECT-$APP Task Definition
 				echo "Updating Task Defintion to Use: $ECR_REPO:$IMAGE_TAG"
 				ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
-				IMAGE_ID="$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG"
+				IMAGE_ID="$REPO_URL:$IMAGE_TAG"
 
 				sed -i "s|{{project}}|$PROJECT|" $TEMPLATE_FILE
 				sed -i "s|{{environment}}|$ENV|" $TEMPLATE_FILE
@@ -152,10 +159,10 @@ pipeline {
 			    sh label: 'Service-Update', script: '''#!/bin/bash
 
 				# Redeploy Service Using The Latest Task Definition
-				echo "Updating Service: $SERVICE_NAME"
+				echo "Updating Service: $SERVICE"
 
-				TASK_REVISION=$(aws ecs describe-task-definition --task-definition $SERVICE_NAME | egrep "revision" | awk '{print $2}' | sed 's/,//')
-				aws ecs update-service --cluster $CLUSTER --region $REGION --service $SERVICE_NAME --task-definition $SERVICE_NAME:$TASK_REVISION --desired-count 1
+				TASK_REVISION=$(aws ecs describe-task-definition --task-definition $SERVICE | egrep "revision" | awk '{print $2}' | sed 's/,//')
+				aws ecs update-service --cluster $CLUSTER --region $REGION --service $SERVICE --task-definition $SERVICE:$TASK_REVISION --desired-count 1
 
 				'''
 
@@ -185,11 +192,9 @@ pipeline {
 
 				# Tag image as production if deploying to prod tier
 				echo "Tagging Image as Production: $ECR_REPO:$IMAGE_TAG"
-				aws_account=$(aws sts get-caller-identity --query "Account" --output text)
-				repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
 
 				# login and get manifest
-				docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $repo_url
+				docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $REPO_URL
 				MANIFEST=$(aws ecr batch-get-image --repository-name $ECR_REPO --image-ids imageTag=$IMAGE_TAG --output json | jq --raw-output --join-output '.images[0].imageManifest')
 
                 # tag as latest and push to ECR

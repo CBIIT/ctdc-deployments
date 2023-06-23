@@ -31,15 +31,16 @@ pipeline {
 
   environment {
 
+	PROGRAM      = "crdc"
 	PROJECT      = "ctdc"
 	APP          = "files"
 	SLACK_SECRET = "ctdc_slack_url"
 	REGION       = "us-east-1"
-	ECR_REPO     = "crdc-${env.PROJECT}-${env.APP}"
+	ECR_REPO     = "${env.PROGRAM}-${env.PROJECT}-${env.APP}"
 	IMAGE_TAG    = "${params.ImageTag}"
 	ENV          = "${params.Environment}"
 	CLUSTER      = "${env.PROJECT}-${env.ENV}-ecs"
-	SERVICE_NAME = "${env.PROJECT}-${env.ENV}-${env.APP}"
+	SERVICE      = "${env.PROJECT}-${env.ENV}-${env.APP}"
 
   }
 
@@ -140,10 +141,10 @@ pipeline {
 			    sh label: 'Service-Update', script: '''#!/bin/bash
 
 				# Redeploy Service Using The Latest Task Definition
-				echo "Updating Service: $SERVICE_NAME"
+				echo "Updating Service: $SERVICE"
 
-				TASK_REVISION=$(aws ecs describe-task-definition --task-definition $SERVICE_NAME | egrep "revision" | awk '{print $2}' | sed 's/,//')
-				aws ecs update-service --cluster $CLUSTER --region $REGION --service $SERVICE_NAME --task-definition $SERVICE_NAME:$TASK_REVISION --desired-count 1
+				TASK_REVISION=$(aws ecs describe-task-definition --task-definition $SERVICE | egrep "revision" | awk '{print $2}' | sed 's/,//')
+				aws ecs update-service --cluster $CLUSTER --region $REGION --service $SERVICE --task-definition $SERVICE:$TASK_REVISION --desired-count 1
 
 				'''
 

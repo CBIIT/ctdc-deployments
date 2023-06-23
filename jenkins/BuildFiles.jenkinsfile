@@ -43,18 +43,19 @@ pipeline {
 
   environment {
 
-      PROJECT      = "ctdc"
-	  SERVICE      = "files"
-	  ECR_REPO     = "crdc-ctdc-files"
+      PROGRAM      = "crdc"
+	  PROJECT      = "ctdc"
+	  APP          = "files"
 	  DEPLOY_JOB   = "DeployFiles"
 	  SLACK_SECRET = "ctdc_slack_url"
 	  CODE_REPO    = "bento-files"
 	  JOB_PATH     = "_default/_lower/CTDC/_jobs"
 	  REGION       = "us-east-1"
+	  ECR_REPO     = "${env.PROGRAM}-${env.PROJECT}-${env.APP}"
 	  ENV          = "${params.Environment}"
 	  DEPLOY_REPO  = "${env.PROJECT}-deployments"
       CODE_BRANCH  = "${params.CodeBranch}"
-      CODE_FOLDER  = "${env.PROJECT}-${env.SERVICE}"
+      CODE_FOLDER  = "${env.PROJECT}-${env.APP}"
 
   }
 
@@ -189,7 +190,7 @@ pipeline {
                     writeDeployment(
                         version: "${env.CODE_BRANCH}.${BUILD_NUMBER}",
                         image:  "${env.CODE_BRANCH}.${BUILD_NUMBER}",
-                        service: "${env.SERVICE}",
+                        service: "${env.APP}",
                         deploymentFile: "${env.PROJECT}-deployments/deployments.yaml",
                         deploymentRepoUrl: "https://github.com/CBIIT/${env.DEPLOY_REPO}",
                         deploymentCheckoutDirectory: "${env.PROJECT}-deployments"
@@ -210,7 +211,7 @@ pipeline {
                 tagRepo ( 
                     gitTag: "${env.CODE_BRANCH}",
                     gitUrl: "github.com/CBIIT/${env.CODE_REPO}",
-                    checkoutDirectory: "${env.PROJECT}-${env.SERVICE}"
+                    checkoutDirectory: "${env.CODE_FOLDER}"
                 )
 
             }
