@@ -92,9 +92,6 @@ pipeline {
 				env.SUMO_COLLECTOR_ENDPOINT = sh(label: 'Get Sumo Endpoint', returnStdout: true, script: "aws secretsmanager get-secret-value --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_endpoint'").trim()
 				env.SUMO_COLLECTOR_TOKEN = sh(label: 'Get Sumo Token', returnStdout: true, script: "aws secretsmanager get-secret-value --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_token_$APP'").trim()
 
-				// set google analytics ID
-				env.GOOGLE_ID = sh(label: 'Get Google Analytics ID', returnStdout: true, script: "aws secretsmanager get-secret-value --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.google_id'").trim()
-
 				// set backend version
 				env.BE_VERSION = getVersion(service: "backend",deploymentFile: "$PROJECT-deployments-$ENV/deployments.yaml")
 
@@ -137,7 +134,6 @@ pipeline {
 				sed -i "s|{{sumo_collector_token}}|$SUMO_COLLECTOR_TOKEN|" $TEMPLATE_FILE
 
 				sed -i "s|{{domain_name}}|$DOMAIN_NAME|" $TEMPLATE_FILE
-				sed -i "s|{{google_id}}|$GOOGLE_ID|" $TEMPLATE_FILE
 				sed -i "s|{{be_version}}|$BE_VERSION|" $TEMPLATE_FILE
 
 				aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE

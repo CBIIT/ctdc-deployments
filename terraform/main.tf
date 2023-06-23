@@ -56,7 +56,7 @@ module "ecr" {
 
 # ECS
 module "ecs" {
-  source                    = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/ecs?ref=ctdc_prod_terraform"
+  source                    = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/ecs?ref=v1.2"
   stack_name                = var.project
   tags                      = var.tags
   vpc_id                    = var.vpc_id
