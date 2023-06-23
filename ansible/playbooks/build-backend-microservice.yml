@@ -18,12 +18,15 @@
         name: bento.common.ecr_login
       vars:
         region: us-east-1
+        project_name: "{{ lookup('env','PROJECT_NAME') }}"
+        tier: "{{ tier }}"
+        ecr_account: "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.ecr_account', nested=true, region='us-east-1' ) }}"
 
-    - name: log into ncidockerhub
-      community.docker.docker_login:
-        username: "{{ lookup('amazon.aws.aws_secret', 'cbiit/docker.docker_user', nested=true, region='us-east-1') }}"
-        password: "{{ lookup('amazon.aws.aws_secret', 'cbiit/docker.docker_password', nested=true, region='us-east-1') }}"
-        registry: https://ncidockerhub.nci.nih.gov
+#    - name: log into ncidockerhub
+#      community.docker.docker_login:
+#        username: "{{ lookup('amazon.aws.aws_secret', 'cbiit/docker.docker_user', nested=true, region='us-east-1') }}"
+#        password: "{{ lookup('amazon.aws.aws_secret', 'cbiit/docker.docker_password', nested=true, region='us-east-1') }}"
+#        registry: https://ncidockerhub.nci.nih.gov
 
     #build backend
     - name: build {{ project_name }} backend
@@ -44,6 +47,6 @@
         es_host: "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.es_host', nested=true, region='us-east-1' ) }}"
         test_queries_file: "not_needed.txt"
         dockerfile_path: "{{ workspace }}/playbooks/docker/dockerfiles/backend-ctdc-dockerfile"
-        container_image: "{{ ecr_repo }}/{{ project_name }}-{{ container_name }}:{{ image_version }}"
+        container_image: "{{ ecr_repo }}/crdc-{{ project_name }}-{{ container_name }}:{{ image_version }}"
         container_registry_url: "{{ ecr_repo }}"
         #auth_enabled: "false"
