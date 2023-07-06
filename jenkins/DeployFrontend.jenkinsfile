@@ -37,6 +37,7 @@ pipeline {
 	SLACK_SECRET = "ctdc_slack_url"
 	REGION       = "us-east-1"
 	ECR_REPO     = "${env.PROGRAM}-${env.PROJECT}-${env.APP}"
+	DEPLOY_REPO  = "${env.PROJECT}-deployments"
 	IMAGE_TAG    = "${params.ImageTag}"
 	ENV          = "${params.Environment}"
 	CLUSTER      = "${env.PROJECT}-${env.ENV}-ecs"
@@ -57,7 +58,7 @@ pipeline {
 			[$class: 'RelativeTargetDirectory',
 			relativeTargetDir: 'ctdc-deployments']],
 			userRemoteConfigs:
-			[[url: 'https://github.com/CBIIT/ctdc-deployments.git']]])
+			[[url: "https://github.com/CBIIT/${env.DEPLOY_REPO}"]]])
 
 		checkout([$class: 'GitSCM',
 			branches: [[name: "${env.ENV}"]],
@@ -66,7 +67,7 @@ pipeline {
 			[$class: 'RelativeTargetDirectory',
 			relativeTargetDir: "ctdc-deployments-${env.ENV}"]],
 			userRemoteConfigs:
-			[[url: 'https://github.com/CBIIT/ctdc-deployments.git']]])
+			[[url: "https://github.com/CBIIT/${env.DEPLOY_REPO}"]]])
 
         }
 
