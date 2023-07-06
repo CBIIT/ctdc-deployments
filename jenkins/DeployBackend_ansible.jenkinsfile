@@ -32,8 +32,12 @@ pipeline {
   environment {
 
       PROJECT      = 'ctdc'
+	  APP          = "backend"
 	  SLACK_SECRET = "ctdc_slack_url"
+	  REGION       = "us-east-1"
 	  ENV          = "${params.Environment}"
+	  CLUSTER      = "${env.PROJECT}-${env.ENV}-ecs"
+	  SERVICE      = "${env.PROJECT}-${env.ENV}-${env.APP}"
 
   }
 
@@ -97,6 +101,25 @@ pipeline {
 
   	}
 
+	stage('verify deployment'){
+
+		steps {
+
+ 			script {
+
+			    sh label: 'Verify-Deploy', script: '''#!/bin/bash
+
+                # wait untiil the service is stable
+				aws ecs wait services-stable --cluster $CLUSTER --region $REGION --service $SERVICE
+
+				'''
+
+			}
+
+ 		}
+
+  	}
+	
 	stage('Add Production Tag'){
 
  		when {
