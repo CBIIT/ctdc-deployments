@@ -28,7 +28,8 @@ pipeline {
   environment {
 
       PROJECT      = 'ctdc'
-	  JOB_PATH     = '_default/_lower/CTDC/_jobs'
+	  //JOB_PATH     = '_default/_lower/CTDC/_jobs'
+      JOB_PATH     = '_jobs'
       SLACK_SECRET = "ctdc_slack_url"
 
   }
