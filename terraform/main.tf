@@ -1,6 +1,6 @@
 # ALB
 module "alb" {
-  source              = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/loadbalancer?ref=v1.0"
+  source              = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/loadbalancer?ref=v1.8"
   vpc_id              = var.vpc_id
   alb_log_bucket_name = module.s3.bucket_name
   env                 = terraform.workspace
@@ -14,7 +14,7 @@ module "alb" {
 }
 
 module "s3" {
-  source                        = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/s3?ref=v1.0"
+  source                        = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/s3?ref=v1.8"
   bucket_name                   = local.alb_log_bucket_name
   stack_name                    = var.project
   env                           = terraform.workspace
@@ -29,7 +29,7 @@ module "s3" {
 # Cloudfront
 module "cloudfront" {
   count                               = var.create_cloudfront ? 1 : 0
-  source                              = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/cloudfront?ref=v1.0"
+  source                              = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/cloudfront?ref=v1.8"
   alarms                              = var.alarms
   domain_name                         = var.domain_name
   cloudfront_distribution_bucket_name = var.cloudfront_distribution_bucket_name
@@ -46,7 +46,7 @@ module "cloudfront" {
 # ECR
 module "ecr" {
   count                    = var.create_ecr_repos ? 1 : 0
-  source                   = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/ecr?ref=v1.2"
+  source                   = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/ecr?ref=v1.8"
   project                  = var.project
   env                      = terraform.workspace
   resource_prefix          = local.resource_prefix
@@ -56,8 +56,9 @@ module "ecr" {
 
 # ECS
 module "ecs" {
-  source                    = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/ecs?ref=v1.2"
+  source                    = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/ecs?ref=v1.8"
   stack_name                = var.project
+  resource_prefix           = ${var.stack_name}-${terraform.workspace}
   tags                      = var.tags
   vpc_id                    = var.vpc_id
   add_opensearch_permission = var.add_opensearch_permission
@@ -68,11 +69,12 @@ module "ecs" {
   alb_https_listener_arn    = module.alb.alb_https_listener_arn
   target_account_cloudone   = var.target_account_cloudone
   allow_cloudwatch_stream   = var.allow_cloudwatch_stream
+  central_ecr_account_id    = var.central_ecr_account_id
 }
 
 # Monitoring
 module "monitoring" {
-  source               = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/monitoring?ref=v1.0"
+  source               = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/monitoring?ref=v1.8"
   app                  = var.project
   tags                 = var.tags
   sumologic_access_id  = var.sumologic_access_id
@@ -83,7 +85,7 @@ module "monitoring" {
 # Newrelic
 module "new_relic_metric_pipeline" {
   count                    = var.create_newrelic_pipeline ? 1 : 0
-  source                   = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/firehose-metrics?ref=v1.0"
+  source                   = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/firehose-metrics?ref=v1.8"
   account_id               = data.aws_caller_identity.current.account_id
   app                      = var.project
   http_endpoint_access_key = var.newrelic_api_key
@@ -92,12 +94,13 @@ module "new_relic_metric_pipeline" {
   permission_boundary_arn  = local.permissions_boundary
   program                  = var.program
   s3_bucket_arn            = var.newrelic_s3_bucket
+  resource_prefix          = ${var.program}-${var.project}-${var.account_level}
 }
 
 # Opensearch
 module "opensearch" {
   count                             = var.create_opensearch_cluster ? 1 : 0
-  source                            = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/opensearch?ref=v1.0"
+  source                            = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/opensearch?ref=v1.8"
   stack_name                        = var.project
   tags                              = var.tags
   opensearch_instance_type          = var.opensearch_instance_type
@@ -125,7 +128,7 @@ module "deepmerge" {
 }
 
 module "secrets" {
-  source        = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/secrets?ref=v1.0"
+  source        = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/secrets?ref=v1.8"
   app           = var.project
   secret_values = module.deepmerge.merged
   #secret_values = var.secret_values

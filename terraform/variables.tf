@@ -317,3 +317,8 @@ variable "katalon_security_group_id" {
   type        = string
   default     = "sg-0f07eae0a9b3a0bb8"
 }
+
+variable "central_ecr_account_id" {
+  type = string
+  description = "central ecr account number"
+}
