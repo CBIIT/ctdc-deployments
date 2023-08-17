@@ -1,6 +1,6 @@
 # ALB
 module "alb" {
-  source              = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/loadbalancer?ref=v1.8"
+  source              = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/loadbalancer?ref=v1.9"
   resource_prefix     = "${var.program}-${terraform.workspace}-${var.project}"
   vpc_id              = var.vpc_id
   env                 = terraform.workspace
