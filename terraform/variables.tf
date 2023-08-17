@@ -322,3 +322,8 @@ variable "central_ecr_account_id" {
   type = string
   description = "central ecr account number"
 }
+
+variable "service" {
+  type = string
+  description = "Name of the service where the monitoring is configured. example ecs, database etc"
+}

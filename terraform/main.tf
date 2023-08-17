@@ -1,6 +1,7 @@
 # ALB
 module "alb" {
   source              = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/loadbalancer?ref=v1.8"
+  resource_prefix     = "${var.program}-${terraform.workspace}-${var.project}"
   vpc_id              = var.vpc_id
   alb_log_bucket_name = module.s3.bucket_name
   env                 = terraform.workspace
@@ -24,12 +25,14 @@ module "s3" {
   days_for_deep_archive_tiering = 180
   s3_enable_access_logging      = false
   s3_access_log_bucket_id       = ""
+  resource_prefix               = "${var.program}-${terraform.workspace}-${var.project}"
 }
 
 # Cloudfront
 module "cloudfront" {
   count                               = var.create_cloudfront ? 1 : 0
   source                              = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/cloudfront?ref=v1.8"
+  resource_prefix                     = "${var.program}-${terraform.workspace}-${var.project}"
   alarms                              = var.alarms
   domain_name                         = var.domain_name
   cloudfront_distribution_bucket_name = var.cloudfront_distribution_bucket_name
@@ -49,7 +52,7 @@ module "ecr" {
   source                   = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/ecr?ref=v1.8"
   project                  = var.project
   env                      = terraform.workspace
-  resource_prefix          = local.resource_prefix
+  resource_prefix          = "${var.program}-${terraform.workspace}-${var.project}"
   ecr_repo_names           = var.ecr_repo_names
   tags                     = var.tags
 }
@@ -58,7 +61,7 @@ module "ecr" {
 module "ecs" {
   source                    = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/ecs?ref=v1.8"
   stack_name                = var.project
-  resource_prefix           = ${var.stack_name}-${terraform.workspace}
+  resource_prefix           = "${var.program}-${terraform.workspace}-${var.project}"
   tags                      = var.tags
   vpc_id                    = var.vpc_id
   add_opensearch_permission = var.add_opensearch_permission
@@ -80,6 +83,11 @@ module "monitoring" {
   sumologic_access_id  = var.sumologic_access_id
   sumologic_access_key = var.sumologic_access_key
   microservices        = var.microservices
+  service              = var.service
+  program              = var.program
+  newrelic_account_id  = var.newrelic_account_id
+  newrelic_api_key     = var.newrelic_api_key
+  resource_prefix      = "${var.program}-${terraform.workspace}-${var.project}"
 }
 
 # Newrelic
@@ -94,7 +102,7 @@ module "new_relic_metric_pipeline" {
   permission_boundary_arn  = local.permissions_boundary
   program                  = var.program
   s3_bucket_arn            = var.newrelic_s3_bucket
-  resource_prefix          = ${var.program}-${var.project}-${var.account_level}
+  resource_prefix          = "${var.program}-${var.project}-${var.account_level}"
 }
 
 # Opensearch
@@ -102,6 +110,7 @@ module "opensearch" {
   count                             = var.create_opensearch_cluster ? 1 : 0
   source                            = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/opensearch?ref=v1.8"
   stack_name                        = var.project
+  resource_prefix                   = "${var.program}-${terraform.workspace}-${var.project}"
   tags                              = var.tags
   opensearch_instance_type          = var.opensearch_instance_type
   env                               = terraform.workspace
