@@ -150,7 +150,7 @@ module "opensearch_cmb" {
   opensearch_ebs_volume_size        = var.opensearch_ebs_volume_size
   opensearch_instance_count         = var.opensearch_instance_count
   opensearch_log_types              = ["INDEX_SLOW_LOGS"]
-  create_os_service_role            = var.create_os_service_role
+  create_os_service_role            = false
   multi_az_enabled                  = var.multi_az_enabled
   vpc_id                            = var.vpc_id
   opensearch_autotune_rollback_type = "NO_ROLLBACK"
