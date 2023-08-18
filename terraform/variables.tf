@@ -39,6 +39,20 @@ variable "microservices" {
   }))
 }
 
+variable "cmb_microservices" {
+  type = map(object({
+    name                      = string
+    port                      = number
+    health_check_path         = string
+    priority_rule_number      = number
+    image_url                 = string
+    cpu                       = number
+    memory                    = number
+    path                      = list(string)
+    number_container_replicas = number
+  }))
+}
+
 variable "domain_name" {
   description = "domain name for the application"
   type        = string
@@ -321,6 +335,7 @@ variable "katalon_security_group_id" {
 variable "central_ecr_account_id" {
   type = string
   description = "central ecr account number"
+  default = "986019062625"
 }
 
 variable "service" {

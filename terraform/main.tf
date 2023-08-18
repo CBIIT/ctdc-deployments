@@ -17,7 +17,7 @@ module "alb" {
 # Cloudfront
 module "cloudfront" {
   count                               = var.create_cloudfront ? 1 : 0
-  source                              = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/cloudfront?ref=v1.8"
+  source                              = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/cloudfront?ref=v1.9"
   resource_prefix                     = "${var.program}-${terraform.workspace}-${var.project}"
   alarms                              = var.alarms
   domain_name                         = var.domain_name
@@ -32,20 +32,9 @@ module "cloudfront" {
   public_key_path                     = file("${path.module}/workspace/ctdc_public_key.pem")
 }
 
-# ECR
-module "ecr" {
-  count                    = var.create_ecr_repos ? 1 : 0
-  source                   = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/ecr?ref=v1.8"
-  project                  = var.project
-  env                      = terraform.workspace
-  resource_prefix          = "${var.program}-${terraform.workspace}-${var.project}"
-  ecr_repo_names           = var.ecr_repo_names
-  tags                     = var.tags
-}
-
 # ECS
 module "ecs" {
-  source                    = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/ecs?ref=v1.8"
+  source                    = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/ecs?ref=v1.9"
   stack_name                = var.project
   resource_prefix           = "${var.program}-${terraform.workspace}-${var.project}"
   tags                      = var.tags
@@ -61,9 +50,27 @@ module "ecs" {
   central_ecr_account_id    = var.central_ecr_account_id
 }
 
+# ECS
+module "ecs_cmb" {
+  source                    = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/ecs?ref=v1.9"
+  stack_name                = var.project
+  resource_prefix           = "${var.program}-${terraform.workspace}-${var.project}-cmb"
+  tags                      = var.tags
+  vpc_id                    = var.vpc_id
+  add_opensearch_permission = var.add_opensearch_permission
+  ecs_subnet_ids            = var.private_subnet_ids
+  application_url           = local.application_url
+  env                       = terraform.workspace
+  microservices             = var.cmb_microservices
+  alb_https_listener_arn    = module.alb.alb_https_listener_arn
+  target_account_cloudone   = var.target_account_cloudone
+  allow_cloudwatch_stream   = var.allow_cloudwatch_stream
+  central_ecr_account_id    = var.central_ecr_account_id
+}
+
 # Monitoring
 module "monitoring" {
-  source               = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/monitoring?ref=v1.8"
+  source               = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/monitoring?ref=v1.9"
   app                  = var.project
   tags                 = var.tags
   sumologic_access_id  = var.sumologic_access_id
@@ -76,10 +83,25 @@ module "monitoring" {
   resource_prefix      = "${var.program}-${terraform.workspace}-${var.project}"
 }
 
+# Monitoring
+module "cmb_monitoring" {
+  source               = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/monitoring?ref=v1.9"
+  app                  = var.project
+  tags                 = var.tags
+  sumologic_access_id  = var.sumologic_access_id
+  sumologic_access_key = var.sumologic_access_key
+  microservices        = var.cmb_microservices
+  service              = var.service
+  program              = var.program
+  newrelic_account_id  = var.newrelic_account_id
+  newrelic_api_key     = var.newrelic_api_key
+  resource_prefix      = "${var.program}-${terraform.workspace}-${var.project}-cmb"
+}
+
 # Newrelic
 module "new_relic_metric_pipeline" {
   count                    = var.create_newrelic_pipeline ? 1 : 0
-  source                   = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/firehose-metrics?ref=v1.8"
+  source                   = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/firehose-metrics?ref=v1.9"
   account_id               = data.aws_caller_identity.current.account_id
   app                      = var.project
   http_endpoint_access_key = var.newrelic_api_key
@@ -94,9 +116,31 @@ module "new_relic_metric_pipeline" {
 # Opensearch
 module "opensearch" {
   count                             = var.create_opensearch_cluster ? 1 : 0
-  source                            = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/opensearch?ref=v1.8"
+  source                            = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/opensearch?ref=v1.9"
   stack_name                        = var.project
   resource_prefix                   = "${var.program}-${terraform.workspace}-${var.project}"
+  tags                              = var.tags
+  opensearch_instance_type          = var.opensearch_instance_type
+  env                               = terraform.workspace
+  opensearch_subnet_ids             = var.private_subnet_ids
+  opensearch_version                = var.opensearch_version
+  automated_snapshot_start_hour     = var.automated_snapshot_start_hour
+  opensearch_ebs_volume_size        = var.opensearch_ebs_volume_size
+  opensearch_instance_count         = var.opensearch_instance_count
+  opensearch_log_types              = ["INDEX_SLOW_LOGS"]
+  create_os_service_role            = var.create_os_service_role
+  multi_az_enabled                  = var.multi_az_enabled
+  vpc_id                            = var.vpc_id
+  opensearch_autotune_rollback_type = "NO_ROLLBACK"
+  create_cloudwatch_log_policy      = var.create_cloudwatch_log_policy
+}
+
+# Opensearch
+module "opensearch_cmb" {
+  count                             = var.create_opensearch_cluster ? 1 : 0
+  source                            = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/opensearch?ref=v1.9"
+  stack_name                        = var.project
+  resource_prefix                   = "${var.program}-${terraform.workspace}-${var.project}-cmb"
   tags                              = var.tags
   opensearch_instance_type          = var.opensearch_instance_type
   env                               = terraform.workspace
@@ -123,7 +167,7 @@ module "deepmerge" {
 }
 
 module "secrets" {
-  source        = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/secrets?ref=v1.8"
+  source        = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/secrets?ref=v1.9"
   app           = var.project
   secret_values = module.deepmerge.merged
   #secret_values = var.secret_values
