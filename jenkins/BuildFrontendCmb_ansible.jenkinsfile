@@ -101,6 +101,7 @@ pipeline {
 					playbook: "${WORKSPACE}/playbooks/ansible/playbooks/build-cmb-frontend-microservice.yml", 
             		inventory: "${WORKSPACE}/playbooks/ansible/playbooks/hosts",
                     extraVars: [
+                        tier: "${params.Environment}",
 						project_name: "${PROJECT}",
 						auth_enabled: false
 						],
