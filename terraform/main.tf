@@ -14,20 +14,6 @@ module "alb" {
   alb_certificate_arn = data.aws_acm_certificate.amazon_issued.arn
 }
 
-module "s3" {
-  source                        = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/s3?ref=v1.8"
-  bucket_name                   = local.alb_log_bucket_name
-  stack_name                    = var.project
-  env                           = terraform.workspace
-  tags                          = var.tags
-  s3_force_destroy              = var.s3_force_destroy
-  days_for_archive_tiering      = 125
-  days_for_deep_archive_tiering = 180
-  s3_enable_access_logging      = false
-  s3_access_log_bucket_id       = ""
-  resource_prefix               = "${var.program}-${terraform.workspace}-${var.project}"
-}
-
 # Cloudfront
 module "cloudfront" {
   count                               = var.create_cloudfront ? 1 : 0
