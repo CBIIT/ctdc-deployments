@@ -1,7 +1,7 @@
 {
     "family": "{{program}}-{{environment}}-{{project}}-files",
-    "taskRoleArn": "arn:aws:iam::{{account_id}}:role/power-user-ctdc-{{environment}}-ecs-task-role",
-    "executionRoleArn": "arn:aws:iam::{{account_id}}:role/power-user-ctdc-{{environment}}-ecs-task-execution-role",
+    "taskRoleArn": "arn:aws:iam::{{account_id}}:role/power-user-{{program}}-{{environment}}-ctdc-ecs-task-role",
+    "executionRoleArn": "arn:aws:iam::{{account_id}}:role/power-user-{{program}}-{{environment}}-ctdc-ecs-task-execution-role",
     "requiresCompatibilities": [
         "FARGATE"
     ],
