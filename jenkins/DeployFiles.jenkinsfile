@@ -40,8 +40,8 @@ pipeline {
 	DEPLOY_REPO  = "${env.PROJECT}-deployments"
 	IMAGE_TAG    = "${params.ImageTag}"
 	ENV          = "${params.Environment}"
-	CLUSTER      = "${env.PROJECT}-${env.ENV}-ecs"
-	SERVICE      = "${env.PROJECT}-${env.ENV}-${env.APP}"
+	CLUSTER      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-ecs"
+	SERVICE      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-${env.APP}"
 
   }
 
@@ -117,6 +117,7 @@ pipeline {
 				sed -i "s|{{image_id}}|$IMAGE_ID|" $TEMPLATE_FILE
 				sed -i "s|{{image_tag}}|$IMAGE_TAG|" $TEMPLATE_FILE
 				sed -i "s|{{environment}}|$ENV|" $TEMPLATE_FILE
+				sed -i "s|{{program}}|$PROGRAM|" $TEMPLATE_FILE
 				sed -i "s|{{project}}|$PROJECT|" $TEMPLATE_FILE
 				sed -i "s|{{domain_name}}|$DOMAIN_NAME|" $TEMPLATE_FILE
 				sed -i "s|{{sumo_collector_endpoint}}|$SUMO_COLLECTOR_ENDPOINT|" $TEMPLATE_FILE
