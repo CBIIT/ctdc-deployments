@@ -30,14 +30,14 @@ pipeline {
   }
 
   environment {
-
+      PROGRAM      = "crdc"
       PROJECT      = 'ctdc'
 	  APP          = "frontend"
 	  SLACK_SECRET = "ctdc_slack_url"
 	  REGION       = "us-east-1"
 	  ENV          = "${params.Environment}"
-	  CLUSTER      = "${env.PROJECT}-${env.ENV}-ecs"
-	  SERVICE      = "${env.PROJECT}-${env.ENV}-${env.APP}"
+	  CLUSTER      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-ecs"
+	  SERVICE      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-${env.APP}"
 
   }
 

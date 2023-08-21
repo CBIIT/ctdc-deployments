@@ -8,7 +8,6 @@ pipeline {
 	}
 
 	parameters {
-
         string(
             defaultValue: '',
             description: 'The Image to Deploy',
@@ -20,27 +19,23 @@ pipeline {
             description: 'Choose the environment to deploy to',
             type: 'PT_SINGLE_SELECT',
             value: 'dev,qa,stage,prod')
-
   }
 
   options {
-
 	timestamps()
-
   }
 
   environment {
-
 	PROGRAM      = "crdc"
 	PROJECT      = "ctdc"
-	APP          = "frontend"
+	APP          = "cmb-frontend"
 	SLACK_SECRET = "ctdc_slack_url"
 	REGION       = "us-east-1"
 	ECR_REPO     = "${env.PROGRAM}-${env.PROJECT}-${env.APP}"
 	DEPLOY_REPO  = "${env.PROJECT}-deployments"
 	IMAGE_TAG    = "${params.ImageTag}"
 	ENV          = "${params.Environment}"
-	CLUSTER      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-ecs"
+	CLUSTER      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-cmb-ecs"
 	SERVICE      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-${env.APP}"
 
   }
@@ -53,7 +48,7 @@ pipeline {
 
   		checkout([$class: 'GitSCM',
 			branches: [[name: '*/main']],
-			extensions: [[$class: 'SubmoduleOption', 
+			extensions: [[$class: 'SubmoduleOption',
 			recursiveSubmodules: true],
 			[$class: 'RelativeTargetDirectory',
 			relativeTargetDir: 'ctdc-deployments']],
@@ -62,7 +57,7 @@ pipeline {
 
 		checkout([$class: 'GitSCM',
 			branches: [[name: "${env.ENV}"]],
-			extensions: [[$class: 'SubmoduleOption', 
+			extensions: [[$class: 'SubmoduleOption',
 			recursiveSubmodules: true],
 			[$class: 'RelativeTargetDirectory',
 			relativeTargetDir: "ctdc-deployments-${env.ENV}"]],
@@ -192,7 +187,7 @@ pipeline {
 
  		when {
 
-	        expression { 
+	        expression {
 
                 ENV == 'prod'
 
@@ -233,7 +228,7 @@ pipeline {
         notify(
             secretPath: "notification/slack",
             secretName: "${env.SLACK_SECRET}"
-        ) 
+        )
 
     }
 

@@ -64,7 +64,7 @@ pipeline {
 			[[url: 'https://github.com/CBIIT/crdc-ctdc-ui']]])
 
   		checkout([$class: 'GitSCM',
-			branches: [[name: '*/dev-cmb']],
+			branches: [[name: '*/main']],
 			extensions: [[$class: 'SubmoduleOption', 
 			recursiveSubmodules: true],
             [$class: 'RelativeTargetDirectory',

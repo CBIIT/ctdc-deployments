@@ -8,7 +8,6 @@ pipeline {
 	}
 
 	parameters {
-
         extendedChoice(
             name: 'Environment',
             defaultValue: 'dev',
@@ -24,7 +23,7 @@ pipeline {
             selectedValue: 'DEFAULT',
             sortMode: 'ASCENDING_SMART',
             tagFilter: '*',
-            useRepository: 'https://github.com/CBIIT/bento-backend')
+            useRepository: 'https://github.com/CBIIT/crdc-ctdc-ui')
 
         booleanParam(
             defaultValue: true,
@@ -43,18 +42,19 @@ pipeline {
 
   environment {
 
-      PROJECT      = "ctdc"
-	  SERVICE      = "backend"
-	  ECR_REPO     = "crdc-ctdc-backend"
-	  DEPLOY_JOB   = "DeployBackend"
+      PROGRAM      = "crdc"
+	  PROJECT      = "ctdc"
+	  APP          = "cmb-frontend"
+	  DEPLOY_JOB   = "DeployFrontendCmb"
 	  SLACK_SECRET = "ctdc_slack_url"
-	  CODE_REPO    = "bento-backend"
+	  CODE_REPO    = "bento-ctdc-frontend"
 	  JOB_PATH     = "_default/_lower/CTDC/_jobs"
 	  REGION       = "us-east-1"
-	  TIER         = "${env.Environment}"
+	  ECR_REPO     = "${env.PROGRAM}-${env.PROJECT}-${env.APP}"
+	  ENV          = "${params.Environment}"
 	  DEPLOY_REPO  = "${env.PROJECT}-deployments"
       CODE_BRANCH  = "${params.CodeBranch}"
-      CODE_FOLDER  = "${env.PROJECT}-${env.SERVICE}"
+      CODE_FOLDER  = "${env.PROJECT}-${env.APP}"
 
   }
 
@@ -64,7 +64,7 @@ pipeline {
 
 		checkout([$class: 'GitSCM',
 			branches: [[name: "${env.CODE_BRANCH}"]],
-			extensions: [[$class: 'SubmoduleOption', 
+			extensions: [[$class: 'SubmoduleOption',
 			recursiveSubmodules: true],
 			[$class: 'RelativeTargetDirectory',
 			relativeTargetDir: "${env.CODE_FOLDER}"]],
@@ -73,7 +73,7 @@ pipeline {
 
   		checkout([$class: 'GitSCM',
 			branches: [[name: "${params.Environment}"]],
-			extensions: [[$class: 'SubmoduleOption', 
+			extensions: [[$class: 'SubmoduleOption',
 			recursiveSubmodules: true],
 			[$class: 'RelativeTargetDirectory',
 			relativeTargetDir: "${env.PROJECT}-deployments"]],
@@ -95,26 +95,20 @@ pipeline {
  		}
   	}
 
-  	stage('Build'){
-
+	stage('Build'){
  		steps {
-
  			script {
 
 			    sh label: 'Docker-Build', script: '''#!/bin/bash
 
 				# build CTDC Docker container
 				echo "Building: $ECR_REPO:$CODE_BRANCH.$BUILD_NUMBER"
-				#aws_account=$(aws sts get-caller-identity --query "Account" --output text)
-			
+
 				cd $WORKSPACE/$CODE_FOLDER && DOCKER_BUILDKIT=1 docker build --no-cache -t $REPO_URL:$CODE_BRANCH.$BUILD_NUMBER .
 
 				'''
-
 			}
-
  		}
-
   	}
 
   	stage('Test'){
@@ -122,72 +116,60 @@ pipeline {
         agent {
             docker {
                 image 'cbiitssrepo/cicd-ansible_4.0'
+				registryUrl 'https://index.docker.io/v1/'
+				registryCredentialsId 'dockerhub'
                 args '--net=host -u root -v /var/run/docker.sock:/var/run/docker.sock'
                 reuseNode true
             }
         }
 
  		steps {
-
  			script {
-
 			    sh label: 'Trivy-Test', script: '''#!/bin/bash
 
 				# Test image for vulnerabilities
                 echo "Testing Image with Trivy: $ECR_REPO:$CODE_BRANCH.$BUILD_NUMBER"
-                aws_account=$(aws sts get-caller-identity --query "Account" --output text)
-				repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
 
-                #trivy image --exit-code 1 --severity HIGH,CRITICAL $repo_url:$CODE_BRANCH.$BUILD_NUMBER
-                trivy image --timeout 15m --severity HIGH,CRITICAL $repo_url:$CODE_BRANCH.$BUILD_NUMBER
+                #trivy image --exit-code 1 --severity HIGH,CRITICAL $REPO_URL:$CODE_BRANCH.$BUILD_NUMBER
+                trivy image --timeout 15m --severity HIGH,CRITICAL $REPO_URL:$CODE_BRANCH.$BUILD_NUMBER
 
 				'''
 
 			}
-
  		}
-
   	}
 
   	stage('push to ECR'){
-
  		steps {
-
  			script {
-
 			    sh label: 'Docker-Push', script: '''#!/bin/bash
 
 				# push CTDC Docker container to ECR
 				echo "Pushing: $ECR_REPO:$CODE_BRANCH.$BUILD_NUMBER"
-				aws_account=$(aws sts get-caller-identity --query "Account" --output text)
-				repo_url="$aws_account.dkr.ecr.$REGION.amazonaws.com/$ECR_REPO"
 
 				# login and push to ECR
-				docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $repo_url
-				docker push $repo_url:$CODE_BRANCH.$BUILD_NUMBER
+				docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $REPO_URL
+				docker push $REPO_URL:$CODE_BRANCH.$BUILD_NUMBER
 
                 # tag as latest and push to ECR
-				docker tag $repo_url:$CODE_BRANCH.$BUILD_NUMBER $repo_url:latest
-                docker push $repo_url:latest
+				docker tag $REPO_URL:$CODE_BRANCH.$BUILD_NUMBER $REPO_URL:latest
+                docker push $REPO_URL:latest
 
 				'''
-
 			}
-
  		}
-
   	}
 
   	stage('Update Deployment Manifest'){
 
  		steps {
- 			
+
 			script {
                 if (params.UpdateDeploymentVersion) {
                     writeDeployment(
                         version: "${env.CODE_BRANCH}.${BUILD_NUMBER}",
                         image:  "${env.CODE_BRANCH}.${BUILD_NUMBER}",
-                        service: "${env.SERVICE}",
+                        service: "${env.APP}",
                         deploymentFile: "${env.PROJECT}-deployments/deployments.yaml",
                         deploymentRepoUrl: "https://github.com/CBIIT/${env.DEPLOY_REPO}",
                         deploymentCheckoutDirectory: "${env.PROJECT}-deployments"
@@ -202,13 +184,13 @@ pipeline {
   	stage('Update Code Tag'){
 
  		steps {
- 			
+
 			script {
 
-                tagRepo ( 
-                    gitTag: "${env.PROJECT}-${env.CODE_BRANCH}",
+                tagRepo (
+                    gitTag: "${env.CODE_BRANCH}",
                     gitUrl: "github.com/CBIIT/${env.CODE_REPO}",
-                    checkoutDirectory: "${env.PROJECT}-${env.SERVICE}"
+                    checkoutDirectory: "${env.CODE_FOLDER}"
                 )
 
             }
@@ -226,7 +208,7 @@ pipeline {
 		script {
 			if (params.RunDeployStage) {
 				echo 'Run the deployment for this sevice'
-				build job: "$JOB_PATH/$DEPLOY_JOB", parameters: [string(name: 'ImageTag', value: "$CODE_BRANCH.$BUILD_NUMBER"), extendedChoice(name: 'Environment', value: "${params.Environment}")]
+				build job: "$JOB_PATH/$DEPLOY_JOB", parameters: [string(name: 'ImageTag', value: "$CODE_BRANCH.$BUILD_NUMBER"), extendedChoice(name: 'Environment', value: "$ENV")]
 			}
 		}
     }
@@ -236,7 +218,7 @@ pipeline {
         notify(
             secretPath: "notification/slack",
             secretName: "${env.SLACK_SECRET}"
-        ) 
+        )
 
     }
 
