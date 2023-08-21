@@ -1,0 +1,86 @@
+- name: deploy frontend microservice
+  hosts: all
+  connection: local
+  gather_facts: no
+
+  tasks:
+    #install collections
+    - name: install aws collection
+      shell: "ansible-galaxy collection install {{ item | quote }} --force"
+      loop:
+        - community.docker:<=3.4.3
+        - amazon.aws:<=5.4.0
+        - community.aws:<=3.2.0
+        #- git+https://github.com/CBIIT/datacommons-devops.git#/ansible/collections/bento/common/,main
+        - git+https://github.com/CBIIT/datacommons-devops.git#/ansible/collections/bento/common/,ctdc
+
+    #docker login
+    - name: docker login
+      include_role:
+        name: bento.common.ecr_login
+      vars:
+        region: us-east-1
+
+    #deploy frontend
+    - name: deploy stage for frontend microservice
+      include_role:
+        name: bento.common.ecs
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
+        project_name: "{{ project_name }}"
+        program: "ctdc"
+        region: us-east-1
+        container_name: "frontend"
+        frontend_version: "{{ lookup('env','FE_VERSION') }}"
+        backend_version: "{{ lookup('env','BE_VERSION') }}"
+        image_version: "{{ frontend_version }}"
+        tier: "{{ tier }}"
+        ## roles
+        execution_role: "{% if iam_prefix is defined and iam_prefix != '' %}{{ iam_prefix }}-{{ program }}-{{tier}}-{{ project_name }}-cmb-ecs-task-execution-role{% else %}{{ program }}-{{tier}}-{{ project_name }}-cmb-ecs-task-execution-role{% endif %}"
+        task_role: "{% if iam_prefix is defined and iam_prefix != '' %}{{ iam_prefix }}-{{ program }}-{{tier}}-{{ project_name }}-cmb-ecs-task-role{% else %}{{ program }}-{{tier}}-{{ project_name }}-cmb-ecs-task-role{% endif %}"
+        ## opensearch
+        ecs_cluster_name: "{{ program }}-{{tier}}-{{ project_name }}-cmb-ecs"
+        ## sumologic
+        sumo_collector_endpoint: "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.sumo_collector_endpoint', nested=true, region='us-east-1' ) }}"
+        sumo_collector_token: "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.sumo_collector_token_frontend', nested=true, region='us-east-1' ) }}"
+        ## newrelic
+        newrelic_license_key: "{{ lookup('amazon.aws.aws_secret', 'monitoring/newrelic.api_key', nested=true, region='us-east-1' ) }}"
+        ## about content
+        about_content_url: "{% if tier == 'prod' %}https://raw.githubusercontent.com/CBIIT/bento-ctdc-frontend/{{ frontend_version | split('-') | first }}/src/content/prod/aboutPagesContent.yaml{% else %}https://raw.githubusercontent.com/CBIIT/bento-ctdc-frontend/{{ frontend_version | split('-') | first }}/src/content/{{ tier }}/aboutPagesContent.yaml{% endif %}"
+        ## ecs
+        container_port: 80
+        container_memory: "512"
+        container_cpu: "256"
+        container_image_url: "{{ ecr_repo }}/{{ program }}-{{ project_name }}-{{ container_name }}"
+        backend_google_analytics_id: "UA-154442677-1"
+        container_env:
+          # API URLs
+          - name: REACT_APP_BACKEND_API
+            value: "{% if tier == 'prod' %}https://{{subdomain}}.{{domain_name}}/v1/graphql/{% else %}https://{{subdomain}}-{{tier}}.{{domain_name}}/v1/graphql/{% endif %}"
+          - name: REACT_APP_FILE_SERVICE_API
+            value: "{% if tier == 'prod' %}https://{{subdomain}}.{{domain_name}}/api/files/{% else %}https://{{subdomain}}-{{tier}}.{{domain_name}}/api/files/{% endif %}"
+          # Versions
+          - name: REACT_APP_BE_VERSION
+            value: "{{ backend_version }}"
+          - name: REACT_APP_FE_VERSION
+            value: "{{ frontend_version }}"
+          # Static Content
+          - name: REACT_APP_ABOUT_CONTENT_URL
+            value: "{{ about_content_url }}"
+          # New Relic
+          - name: NEW_RELIC_LICENSE_KEY
+            value: "{{ newrelic_license_key }}"
+          - name: NEW_RELIC_APP_NAME
+            value: "{{ project_name }}-{{ tier }}-cmb-{{ container_name }}"
+          - name: NEW_RELIC_DISTRIBUTED_TRACING_ENABLED
+            value: "true"
+          - name: NEW_RELIC_HOST
+            value: "gov-collector.newrelic.com"
+          - name: NEW_RELIC_NO_CONFIG_FILE
+            value: "true"
+          - name: NEW_RELIC_LABELS
+            value: "Project:{{ project_name }};Environment:{{ tier }}"
+          # Analytics
+          - name: REACT_APP_GA_TRACKING_ID
+            value: "{{ backend_google_analytics_id }}"
+
