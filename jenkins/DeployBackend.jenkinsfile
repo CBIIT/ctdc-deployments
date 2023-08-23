@@ -40,8 +40,8 @@ pipeline {
 	DEPLOY_REPO  = "${env.PROJECT}-deployments"
 	IMAGE_TAG    = "${params.ImageTag}"
 	ENV          = "${params.Environment}"
-	CLUSTER      = "${env.PROJECT}-${env.ENV}-ecs"
-	SERVICE = "${env.PROJECT}-${env.ENV}-${env.APP}"
+	CLUSTER      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-ecs"
+	SERVICE      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-${env.APP}"
 
   }
 
