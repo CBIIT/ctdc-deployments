@@ -109,6 +109,7 @@ pipeline {
 				sed -i "s|{{image_id}}|$IMAGE_ID|" $TEMPLATE_FILE
 				sed -i "s|{{image_tag}}|$IMAGE_TAG|" $TEMPLATE_FILE
 				sed -i "s|{{environment}}|$ENV|" $TEMPLATE_FILE
+				sed -i "s|{{program}}|$PROGRAM|" $TEMPLATE_FILE
 				sed -i "s|{{project}}|$PROJECT|" $TEMPLATE_FILE
 				sed -i "s|{{sumo_collector_endpoint}}|$SUMO_COLLECTOR_ENDPOINT|" $TEMPLATE_FILE
 				sed -i "s|{{sumo_collector_token}}|$SUMO_COLLECTOR_TOKEN|" $TEMPLATE_FILE

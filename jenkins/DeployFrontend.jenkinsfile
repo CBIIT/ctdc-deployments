@@ -124,6 +124,7 @@ pipeline {
 				ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 				IMAGE_ID="$REPO_URL:$IMAGE_TAG"
 
+				sed -i "s|{{program}}|$PROGRAM|" $TEMPLATE_FILE
 				sed -i "s|{{project}}|$PROJECT|" $TEMPLATE_FILE
 				sed -i "s|{{environment}}|$ENV|" $TEMPLATE_FILE
 				sed -i "s|{{account_id}}|$ACCOUNT_ID|" $TEMPLATE_FILE
