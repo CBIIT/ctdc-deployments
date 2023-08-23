@@ -1,7 +1,7 @@
 {
     "family": "{{program}}-{{environment}}-{{project}}-frontend",
     "taskRoleArn": "arn:aws:iam::{{account_id}}:role/power-user-{{program}}-{{environment}}-{{project}}-ecs-task-role",
-    "executionRoleArn": "arn:aws:iam::{{account_id}}:role/power-user-{{program}}-{{environment}}{{project}}-ecs-task-execution-role",
+    "executionRoleArn": "arn:aws:iam::{{account_id}}:role/power-user-{{program}}-{{environment}}-{{project}}-ecs-task-execution-role",
     "requiresCompatibilities": [
         "FARGATE"
     ],
