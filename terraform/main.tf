@@ -54,7 +54,7 @@ module "ecs" {
 module "ecs_cmb" {
   source                    = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/ecs?ref=v1.9"
   stack_name                = var.project
-  resource_prefix           = "${var.program}-${terraform.workspace}-${var.project}-cmb"
+  resource_prefix           = "${var.program}-${terraform.workspace}-cmb-${var.project}"
   tags                      = var.tags
   vpc_id                    = var.vpc_id
   add_opensearch_permission = var.add_opensearch_permission
@@ -95,7 +95,7 @@ module "cmb_monitoring" {
   program              = var.program
   newrelic_account_id  = var.newrelic_account_id
   newrelic_api_key     = var.newrelic_api_key
-  resource_prefix      = "${var.program}-${terraform.workspace}-${var.project}-cmb"
+  resource_prefix      = "${var.program}-${terraform.workspace}-cmb-${var.project}"
 }
 
 # Newrelic
@@ -140,7 +140,7 @@ module "opensearch_cmb" {
   count                             = var.create_opensearch_cluster ? 1 : 0
   source                            = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/opensearch?ref=v1.9"
   stack_name                        = var.project
-  resource_prefix                   = "${var.program}-${terraform.workspace}-${var.project}-cmb"
+  resource_prefix                   = "${var.program}-${terraform.workspace}-cmb-${var.project}"
   tags                              = var.tags
   opensearch_instance_type          = var.opensearch_instance_type
   env                               = terraform.workspace
