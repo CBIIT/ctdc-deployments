@@ -1,0 +1,216 @@
+{
+    "family": "{{program}}-{{environment}}-{{project}}-frontend",
+    "taskRoleArn": "arn:aws:iam::{{account_id}}:role/power-user-{{program}}-{{environment}}-{{project}}-ecs-task-role",
+    "executionRoleArn": "arn:aws:iam::{{account_id}}:role/power-user-{{program}}-{{environment}}-{{project}}-ecs-task-execution-role",
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "networkMode": "awsvpc",
+    "cpu": "256",
+    "memory": "512",
+    "containerDefinitions": [
+        {
+            "name": "sumologic-firelens",
+            "image": "public.ecr.aws/aws-observability/aws-for-fluent-bit:stable",
+            "cpu": 0,
+            "portMappings": [],
+            "essential": true,
+            "environment": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "user": "0",
+            "firelensConfiguration": {
+                "type": "fluentbit",
+                "options": {
+                    "enable-ecs-log-metadata": "true"
+                }
+            }
+        },
+        {
+            "name": "newrelic-infra",
+            "image": "newrelic/nri-ecs:1.9.2",
+            "cpu": 0,
+            "portMappings": [],
+            "essential": true,
+            "secrets": [
+                {
+                    "name": "NRIA_LICENSE_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:monitoring/newrelic:api_key::"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "NEW_RELIC_HOST",
+                    "value": "gov-collector.newrelic.com"
+                },
+                {
+                    "name": "NEW_RELIC_APP_NAME",
+                    "value": "{{project}}-{{environment}}-frontend"
+                },
+                {
+                    "name": "NRIA_IS_FORWARD_ONLY",
+                    "value": "true"
+                },
+                {
+                    "name": "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "NRIA_PASSTHROUGH_ENVIRONMENT",
+                    "value": "ECS_CONTAINER_METADATA_URI,ECS_CONTAINER_METADATA_URI_V4,FARGATE"
+                },
+                {
+                    "name": "FARGATE",
+                    "value": "true"
+                },
+                {
+                    "name": "NRIA_CUSTOM_ATTRIBUTES",
+                    "value": "{\"nrDeployMethod\":\"downloadPage\"}"
+                },
+                {
+                    "name": "NRIA_OVERRIDE_HOST_ROOT",
+                    "value": ""
+                }
+            ],
+            "mountPoints": [],
+            "volumesFrom": []
+        },
+        {
+            "name": "frontend",
+            "image": "{{image_id}}",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "containerPort": 80,
+                    "hostPort": 80,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "entryPoint": [],
+            "secrets": [
+                {
+                    "name": "NEW_RELIC_LICENSE_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:monitoring/newrelic:api_key::"
+                },
+                {
+                    "name": "REACT_APP_GOOGLE_CLIENT_ID",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:google_id::"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "REACT_APP_BACKEND_GETUSERINFO_API",
+                    "value": ""
+                },
+                {
+                    "name": "REACT_APP_LOGIN_URL",
+                    "value": ""
+                },
+                {
+                    "name": "REACT_APP_USER_LOGOUT_URL",
+                    "value": ""
+                },
+                {
+                    "name": "REACT_APP_BACKEND_API",
+                    "value": ""
+                },
+                {
+                    "name": "REACT_APP_FE_VERSION",
+                    "value": "{{image_tag}}"
+                },
+                {
+                    "name": "REACT_APP_BE_VERSION",
+                    "value": "{{be_version}}"
+                },
+                {
+                    "name": "REACT_APP_APPLICATION_VERSION",
+                    "value": ""
+                },
+                {
+                    "name": "REACT_APP_GA_TRACKING_ID",
+                    "value": ""
+                },
+                {
+                    "name": "REACT_APP_FILE_SERVICE_API",
+                    "value": ""
+                },
+                {
+                    "name": "REACT_APP_AUTH_API",
+                    "value": ""
+                },
+                {
+                    "name": "REACT_APP_AUTH_SERVICE_API",
+                    "value": ""
+                },
+                {
+                    "name": "REACT_APP_USER_SERVICE_API",
+                    "value": ""
+                },
+                {
+                    "name": "REACT_APP_NIH_CLIENT_ID",
+                    "value": ""
+                },
+                {
+                    "name": "REACT_APP_NIH_AUTH_URL",
+                    "value": ""
+                },
+                {
+                    "name": "REACT_APP_BACKEND_PUBLIC_API",
+                    "value": ""
+                },
+                {
+                    "name": "REACT_APP_AUTH",
+                    "value": ""
+                },
+                {
+                    "name": "PUBLIC_ACCESS",
+                    "value": ""
+                },
+                {
+                    "name": "NODE_LEVEL_ACCESS",
+                    "value": ""
+                },
+                {
+                    "name": "NODE_LABEL",
+                    "value": ""
+                },
+                {
+                    "name": "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "NEW_RELIC_NO_CONFIG_FILE",
+                    "value": "true"
+                },
+                {
+                    "name": "NEW_RELIC_HOST",
+                    "value": "gov-collector.newrelic.com"
+                },
+                {
+                    "name": "NEW_RELIC_LABELS",
+                    "value": "Project:{{project}};Environment:{{environment}}"
+                },
+                {
+                    "name": "NEW_RELIC_APP_NAME",
+                    "value": "{{project}}-{{environment}}-frontend"
+                }
+            ],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "logConfiguration": {
+                "logDriver": "awsfirelens",
+                "options": {
+                    "Format": "json_lines",
+                    "Host": "{{sumo_collector_endpoint}}",
+                    "Name": "http",
+                    "Port": "443",
+                    "Retry_Limit": "2",
+                    "URI": "/receiver/v1/http/{{sumo_collector_token}}",
+                    "tls": "on",
+                    "tls.verify": "off"
+                }
+            }
+        }
+    ]
+}
