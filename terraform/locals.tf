@@ -13,6 +13,7 @@ locals {
   #nih_ip_cidrs =  terraform.workspace == "prod" || terraform.workspace == "stage" ? ["0.0.0.0/0"] : [ "129.43.0.0/16" , "137.187.0.0/16"  , "165.112.0.0/16" , "156.40.0.0/16"  , "128.231.0.0/16" , "130.14.0.0/16" , "157.98.0.0/16"]
   nih_ip_cidrs = ["0.0.0.0/0"]
   all_ips      =  local.nih_ip_cidrs
+  nih_cidrs               = ["129.43.0.0/16", "137.187.0.0/16", "10.128.0.0/9", "165.112.0.0/16", "156.40.0.0/16", "10.208.0.0/21", "128.231.0.0/16", "130.14.0.0/16", "157.98.0.0/16", "10.133.0.0/16"]
   #allowed_alb_ip_range = terraform.workspace == "prod" || terraform.workspace == "stage" ?  local.all_ips : local.nih_ip_cidrs
   allowed_alb_ip_range         = local.nih_ip_cidrs
   fargate_security_group_ports = ["443", "3306", "7473", "7474", "7687"]

@@ -104,7 +104,7 @@ resource "aws_security_group_rule" "cmb_opensearch_inbound" {
   to_port           = local.https_port
   security_group_id = module.opensearch_cmb[count.index].opensearch_security_group_id
   type              = "ingress"
-  cidr_blocks       = var.allowed_ip_blocks
+  cidr_blocks       = local.nih_cidrs
 }
 
 #create opensearch_cmb egres rule
