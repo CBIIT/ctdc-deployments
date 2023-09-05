@@ -45,7 +45,7 @@ pipeline {
       PROGRAM      = "crdc"
 	  PROJECT      = "ctdc"
 	  APP          = "frontend"
-	  DEPLOY_JOB   = "DeployFrontendCmb"
+	  DEPLOY_JOB   = "DeployFrontend"
 	  SLACK_SECRET = "ctdc_slack_url"
 	  CODE_REPO    = "crdc-ctdc-ui"
 	  JOB_PATH     = "_default/_lower/CTDC/_jobs"
