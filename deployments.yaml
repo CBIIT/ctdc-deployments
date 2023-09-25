@@ -6,9 +6,9 @@ services:
     image: CTDC-Develop.26
     buildNumber: '26'
   frontend:
-    version: mvp-cmb.26
-    image: mvp-cmb.26
-    buildNumber: '26'
+    version: mvp-cmb.27
+    image: mvp-cmb.27
+    buildNumber: '27'
   files:
     version: 1.4.0.27
     image: 1.4.0.27
