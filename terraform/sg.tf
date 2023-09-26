@@ -48,32 +48,6 @@ resource "aws_security_group_rule" "app_inbound" {
   ]
 }
 
-
-#create ecs_cmb ingress sg
-resource "aws_security_group_rule" "cmb_inbound_fargate" {
-  for_each          = toset(local.fargate_security_group_ports)
-  from_port         = each.key
-  protocol          = local.tcp_protocol
-  to_port           = each.key
-  security_group_id = module.ecs_cmb.ecs_security_group_id
-  cidr_blocks       = [data.aws_vpc.vpc.cidr_block]
-  type              = "ingress"
-}
-
-#create app_cmb ingress
-resource "aws_security_group_rule" "cmb_app_inbound" {
-  for_each                 = var.microservices
-  from_port                = each.value.port
-  protocol                 = local.tcp_protocol
-  to_port                  = each.value.port
-  security_group_id        = module.ecs_cmb.app_security_group_id
-  source_security_group_id = module.alb.alb_securitygroup_id
-  type                     = "ingress"
-  depends_on = [
-    module.alb
-  ]
-}
-
 #create opensearch ingress rule
 resource "aws_security_group_rule" "opensearch_inbound" {
   count             = var.create_opensearch_cluster ? 1 : 0

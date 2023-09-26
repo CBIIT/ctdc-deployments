@@ -24,7 +24,7 @@ pipeline {
             selectedValue: 'DEFAULT',
             sortMode: 'ASCENDING_SMART',
             tagFilter: '*',
-            useRepository: 'https://github.com/CBIIT/bento-backend')
+            useRepository: 'https://github.com/CBIIT/crdc-ctdc-backend')
 
         booleanParam(
             defaultValue: true,
@@ -48,7 +48,7 @@ pipeline {
 	  ECR_REPO     = "crdc-ctdc-backend"
 	  DEPLOY_JOB   = "DeployBackend"
 	  SLACK_SECRET = "ctdc_slack_url"
-	  CODE_REPO    = "bento-backend"
+	  CODE_REPO    = "crdc-ctdc-backend"
 	  JOB_PATH     = "_default/_lower/CTDC/_jobs"
 	  REGION       = "us-east-1"
 	  TIER         = "${env.Environment}"

@@ -50,24 +50,6 @@ module "ecs" {
   central_ecr_account_id    = var.central_ecr_account_id
 }
 
-# ECS
-module "ecs_cmb" {
-  source                    = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/ecs?ref=v1.9"
-  stack_name                = var.project
-  resource_prefix           = "${var.program}-${terraform.workspace}-cmb-${var.project}"
-  tags                      = var.tags
-  vpc_id                    = var.vpc_id
-  add_opensearch_permission = var.add_opensearch_permission
-  ecs_subnet_ids            = var.private_subnet_ids
-  application_url           = local.application_url
-  env                       = terraform.workspace
-  microservices             = var.cmb_microservices
-  alb_https_listener_arn    = module.alb.alb_https_listener_arn
-  target_account_cloudone   = var.target_account_cloudone
-  allow_cloudwatch_stream   = var.allow_cloudwatch_stream
-  central_ecr_account_id    = var.central_ecr_account_id
-}
-
 # Monitoring
 module "monitoring" {
   source               = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/monitoring?ref=v1.9"
@@ -81,21 +63,6 @@ module "monitoring" {
   newrelic_account_id  = var.newrelic_account_id
   newrelic_api_key     = var.newrelic_api_key
   resource_prefix      = "${var.program}-${terraform.workspace}-${var.project}"
-}
-
-# Monitoring
-module "cmb_monitoring" {
-  source               = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/monitoring?ref=v1.9"
-  app                  = var.project
-  tags                 = var.tags
-  sumologic_access_id  = var.sumologic_access_id
-  sumologic_access_key = var.sumologic_access_key
-  microservices        = var.cmb_microservices
-  service              = var.service
-  program              = var.program
-  newrelic_account_id  = var.newrelic_account_id
-  newrelic_api_key     = var.newrelic_api_key
-  resource_prefix      = "${var.program}-${terraform.workspace}-cmb-${var.project}"
 }
 
 # Newrelic
