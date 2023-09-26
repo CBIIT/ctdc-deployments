@@ -90,14 +90,14 @@ pipeline {
 
   	stage('get frontend code'){
 
-        environment {
-            FE_VERSION = getVersion(service: "frontend",deploymentFile: "${env.PROJECT}-deployments/deployments.yaml")
-        }
+//        environment {
+ //           FE_VERSION = getVersion(service: "frontend",deploymentFile: "${env.PROJECT}-deployments/deployments.yaml")
+//        }
 
  		steps {
 
 		checkout([$class: 'GitSCM',
-			branches: [[name: "${env.FE_VERSION}"]],
+			branches: [[name: "main"]],
 			doGenerateSubmoduleConfigurations: false,
 			extensions: [[$class: 'RelativeTargetDirectory',
 			relativeTargetDir: "${env.PROJECT}-frontend"]],
