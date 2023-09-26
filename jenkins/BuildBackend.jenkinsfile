@@ -17,7 +17,7 @@ pipeline {
             value: 'dev,qa,stage,prod')
 
         gitParameter(branchFilter: 'origin/(.*)',
-            defaultValue: 'main',
+            defaultValue: 'master',
             name: 'CodeBranch',
             type: 'GitParameterDefinition',
             quickFilterEnabled: true,

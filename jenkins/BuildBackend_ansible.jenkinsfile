@@ -25,7 +25,7 @@ pipeline {
             selectedValue: 'DEFAULT',
             sortMode: 'ASCENDING_SMART',
             tagFilter: '*',
-            useRepository: 'https://github.com/CBIIT/bento-backend')
+            useRepository: 'https://github.com/CBIIT/crdc-ctdc-backend')
 
         booleanParam(
             defaultValue: true,
@@ -64,7 +64,7 @@ pipeline {
 			[$class: 'RelativeTargetDirectory',
 			relativeTargetDir: "${env.CODE_FOLDER}"]],
 			userRemoteConfigs:
-			[[url: 'https://github.com/CBIIT/bento-backend']]])
+			[[url: 'https://github.com/CBIIT/crdc-ctdc-backend']]])
 
   		checkout([$class: 'GitSCM',
 			branches: [[name: '*/main']],
@@ -103,7 +103,7 @@ pipeline {
 			relativeTargetDir: "${env.PROJECT}-frontend"]],
 			submoduleCfg: [],
 			userRemoteConfigs:
-			[[url: 'https://github.com/CBIIT/bento-ctdc-frontend']]])
+			[[url: 'https://github.com/CBIIT/crdc-ctdc-ui']]])
  		}
 
   	}
@@ -163,7 +163,7 @@ pipeline {
 
                 tagRepo ( 
                     gitTag: "ctdc-${params.CodeBranch}",
-                    gitUrl: "github.com/CBIIT/bento-backend",
+                    gitUrl: "https://github.com/CBIIT/crdc-ctdc-backend",
                     checkoutDirectory: "${env.PROJECT}-backend"
                 )
 
