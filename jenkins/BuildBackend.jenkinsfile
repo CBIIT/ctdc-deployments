@@ -104,7 +104,7 @@ pipeline {
 			    sh label: 'Docker-Build', script: '''#!/bin/bash
 
 				# build CTDC Docker container
-				echo "Building: $ECR_REPO:$CODE_BRANCH.$BUILD_NUMBER"
+				echo "Building into $REPO_URL : $ECR_REPO:$CODE_BRANCH.$BUILD_NUMBER"
 				#aws_account=$(aws sts get-caller-identity --query "Account" --output text)
 			
 				cd $WORKSPACE/$CODE_FOLDER && DOCKER_BUILDKIT=1 docker build --no-cache -t $REPO_URL:$CODE_BRANCH.$BUILD_NUMBER .
