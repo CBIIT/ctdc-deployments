@@ -6,9 +6,9 @@ services:
     image: mvp.42
     buildNumber: '42'
   frontend:
-    version: mvp.44
-    image: mvp.44
-    buildNumber: '44'
+    version: mvp.45
+    image: mvp.45
+    buildNumber: '45'
   files:
     version: 1.4.0.27
     image: 1.4.0.27
