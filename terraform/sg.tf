@@ -69,25 +69,3 @@ resource "aws_security_group_rule" "opensearch_outbound" {
   security_group_id = module.opensearch[count.index].opensearch_security_group_id
   type              = "egress"
 }
-
-#create opensearch_cmb ingress rule
-resource "aws_security_group_rule" "cmb_opensearch_inbound" {
-  count             = var.create_opensearch_cluster ? 1 : 0
-  from_port         = local.https_port
-  protocol          = local.tcp_protocol
-  to_port           = local.https_port
-  security_group_id = module.opensearch_cmb[count.index].opensearch_security_group_id
-  type              = "ingress"
-  cidr_blocks       = local.nih_cidrs
-}
-
-#create opensearch_cmb egres rule
-resource "aws_security_group_rule" "cmb_opensearch_outbound" {
-  count             = var.create_opensearch_cluster ? 1 : 0
-  from_port         = local.any_port
-  protocol          = local.any_protocol
-  to_port           = local.any_port
-  cidr_blocks       = local.all_ips
-  security_group_id = module.opensearch_cmb[count.index].opensearch_security_group_id
-  type              = "egress"
-}
