@@ -10,6 +10,6 @@ services:
     image: mvp.63
     buildNumber: '63'
   files:
-    version: 1.4.0.27
-    image: 1.4.0.27
-    buildNumber: '27'
+    version: main.32
+    image: main.32
+    buildNumber: '32'
