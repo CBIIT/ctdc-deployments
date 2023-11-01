@@ -104,7 +104,7 @@
                 {
                     "name": "NEO4J_PASSWORD",
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:neo4j_password::"
-                },
+                }
             ],
             "environment": [
                 {
