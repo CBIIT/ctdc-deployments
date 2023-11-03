@@ -47,7 +47,7 @@ locals {
         sumo_collector_token_backend  = module.monitoring.sumo_source_urls.backend[0]
         sumo_collector_token_files    = module.monitoring.sumo_source_urls.files[0]
         rds_host                      = var.create_rds_mysql ? module.rds_mysql[0].endpoint : ""
-        rds_username                  = var.create_rds_mysql ? var.database_user : ""
+        rds_username                  = var.create_rds_mysql ? var.rds_username : ""
         rds_password                  = var.create_rds_mysql ? random_password.rds_password.result, ""
       }
     }
