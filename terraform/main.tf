@@ -118,7 +118,7 @@ module "rds_mysql" {
   db_name                      = var.project
   instance_class               = var.rds_instance_class
   username                     = var.rds_username
-  password                     = random_password.rds_password.result
+  password                     = random_password.rds_password[count.index].result
   subnet_ids                   = var.private_subnet_ids
   vpc_id                       = data.aws_vpc.vpc.id
 }
