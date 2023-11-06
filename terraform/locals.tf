@@ -5,9 +5,11 @@ locals {
   any_protocol                    = "-1"
   tcp_protocol                    = "tcp"
   https_port                      = "443"
+  mysql_port                      = 3306
   neo4j_http                      = 7474
   neo4j_https                     = 7473
   neo4j_bolt                      = 7687
+  level                              = terraform.workspace == "stage" || terraform.workspace == "prod" ? "prod" : "nonprod"
   integration_server_profile_name = "${var.iam_prefix}-integration-server-profile"
   permissions_boundary            = terraform.workspace == "dev" || terraform.workspace == "qa" ? "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/PermissionBoundary_PowerUser" : null
   #nih_ip_cidrs =  terraform.workspace == "prod" || terraform.workspace == "stage" ? ["0.0.0.0/0"] : [ "129.43.0.0/16" , "137.187.0.0/16"  , "165.112.0.0/16" , "156.40.0.0/16"  , "128.231.0.0/16" , "130.14.0.0/16" , "157.98.0.0/16"]
@@ -44,6 +46,9 @@ locals {
         sumo_collector_token_frontend = module.monitoring.sumo_source_urls.frontend[0]
         sumo_collector_token_backend  = module.monitoring.sumo_source_urls.backend[0]
         sumo_collector_token_files    = module.monitoring.sumo_source_urls.files[0]
+        rds_host                      = var.create_rds_mysql ? module.rds_mysql[0].endpoint : ""
+        rds_username                  = var.create_rds_mysql ? var.rds_username : ""
+        rds_password                  = var.create_rds_mysql ? random_password.rds_password.result, ""
       }
     }
   }
