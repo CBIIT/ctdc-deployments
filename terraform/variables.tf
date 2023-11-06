@@ -342,6 +342,13 @@ variable "service" {
   description = "Name of the service where the monitoring is configured. example ecs, database etc"
 }
 
+variable "create_rds_mysql" {
+  type        = bool
+  description = "whether to create a rds database or not"
+  default     = true
+  sensitive   = false
+}
+
 variable "rds_allocated_storage" {
   type        = number
   description = "allocated storage in gibibytes - minimum is 100"
@@ -374,4 +381,5 @@ variable "rds_username" {
   type        = string
   description = "username for the rds mysql database"
   sensitive   = false
+  default     = "ctdc_admin"
 }
