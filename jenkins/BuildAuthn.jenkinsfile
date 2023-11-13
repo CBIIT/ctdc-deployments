@@ -17,7 +17,7 @@ pipeline {
             value: 'dev,qa,stage,prod')
 
         gitParameter(branchFilter: 'origin/(.*)',
-            defaultValue: 'main',
+            defaultValue: 'master',
             name: 'CodeBranch',
             type: 'GitParameterDefinition',
             quickFilterEnabled: true,
@@ -202,23 +202,23 @@ pipeline {
 
   	}
 
-  	// stage('Update Code Tag'){
+  	stage('Update Code Tag'){
 
- 	// 	steps {
+ 		steps {
  			
-	// 		script {
+			script {
 
-    //             tagRepo ( 
-    //                 gitTag: "${env.CODE_BRANCH}",
-    //                 gitUrl: "github.com/CBIIT/${env.CODE_REPO}",
-    //                 checkoutDirectory: "${env.CODE_FOLDER}"
-    //             )
+                tagRepo ( 
+                    gitTag: "${env.CODE_BRANCH}",
+                    gitUrl: "github.com/CBIIT/${env.CODE_REPO}",
+                    checkoutDirectory: "${env.CODE_FOLDER}"
+                )
 
-    //         }
+            }
 
- 	// 	}
+ 		}
 
-  	// }
+  	}
 
   }
 
