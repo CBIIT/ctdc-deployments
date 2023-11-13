@@ -1,0 +1,248 @@
+{
+    "family": "{{program}}-{{environment}}-{{project}}-authn",
+    "taskRoleArn": "arn:aws:iam::{{account_id}}:role/power-user-{{program}}-{{environment}}-{{project}}-ecs-task-role",
+    "executionRoleArn": "arn:aws:iam::{{account_id}}:role/power-user-{{program}}-{{environment}}-{{project}}-ecs-task-execution-role",
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "networkMode": "awsvpc",
+    "cpu": "256",
+    "memory": "512",
+    "containerDefinitions": [
+        {
+            "name": "sumologic-firelens",
+            "image": "public.ecr.aws/aws-observability/aws-for-fluent-bit:stable",
+            "cpu": 0,
+            "portMappings": [],
+            "essential": true,
+            "environment": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "user": "0",
+            "firelensConfiguration": {
+                "type": "fluentbit",
+                "options": {
+                    "enable-ecs-log-metadata": "true"
+                }
+            }
+        },
+        {
+            "name": "newrelic-infra",
+            "image": "newrelic/nri-ecs:1.9.2",
+            "cpu": 0,
+            "portMappings": [],
+            "essential": true,
+            "secrets": [
+                {
+                    "name": "NRIA_LICENSE_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:monitoring/newrelic:api_key::"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "NEW_RELIC_HOST",
+                    "value": "gov-collector.newrelic.com"
+                },
+                {
+                    "name": "NEW_RELIC_APP_NAME",
+                    "value": "{{program}}-{{environment}}-{{project}}-files"
+                },
+                {
+                    "name": "NRIA_IS_FORWARD_ONLY",
+                    "value": "true"
+                },
+                {
+                    "name": "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "NRIA_PASSTHROUGH_ENVIRONMENT",
+                    "value": "ECS_CONTAINER_METADATA_URI,ECS_CONTAINER_METADATA_URI_V4,FARGATE"
+                },
+                {
+                    "name": "FARGATE",
+                    "value": "true"
+                },
+                {
+                    "name": "NRIA_CUSTOM_ATTRIBUTES",
+                    "value": "{\"nrDeployMethod\":\"downloadPage\"}"
+                },
+                {
+                    "name": "NRIA_OVERRIDE_HOST_ROOT",
+                    "value": ""
+                }
+            ],
+            "mountPoints": [],
+            "volumesFrom": []
+        },
+        {
+            "name": "authn",
+            "image": "{{image_id}}",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "containerPort": 8082,
+                    "hostPort": 8082,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "entryPoint": [],
+            "secrets": [
+                {
+                    "name": "INDEXD_URL",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:indexd_url::"
+                },
+                {
+                    "name": "NEW_RELIC_LICENSE_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:monitoring/newrelic:api_key::"
+                },
+                {
+                    "name": "NEO4J_USER",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:neo4j_user::"
+                },
+                {
+                    "name": "NEO4J_PASSWORD",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:neo4j_password::"
+                },
+                {
+                    "name": "MYSQL_DB_HOST",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:rds_host::"
+                },
+                {
+                    "name": "MYSQL_DB_USERNAME",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:rds_username::"
+                },
+                {
+                    "name": "MYSQL_DB_PASSWORD",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:rds_password::"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "PROJECT",
+                    "value": "{{project}}"
+                },
+                {
+                    "name": "VERSION",
+                    "value": "{{image_tag}}"
+                },
+                {
+                    "name": "SESSION_SECRET",
+                    "value": "abcd256asghaaamnkloofghj"
+                },
+                {
+                    "name": "IDP",
+                    "value": "nih"
+                },
+                {
+                    "name": "PROJECT",
+                    "value": "{{project}}"
+                },
+                {
+                    "name": "BACKEND_URL",
+                    "value": "https://{{domain_name}}/v1/graphql/"
+                },
+                {
+                    "name": "NEO4J_URI",
+                    "value": "bolt://{{neo4j_host}}:7687"
+                },
+                {
+                    "name": "AUTH_ENABLED",
+                    "value": "false"
+                },
+                {
+                    "name": "DATE",
+                    "value": "{{date}}"
+                },
+                {
+                    "name": "URL_SRC",
+                    "value": "indexd"
+                },
+                {
+                    "name": "MYSQL_DB_PORT",
+                    "value": "{{mysql_database_port}}"
+                },
+                {
+                    "name": "MYSQL_DATABASE_NAME",
+                    "value": "{{mysql_database_name}}"
+                },
+                {
+                    "name": "NEW_RELIC_LABELS",
+                    "value": "Project:{{project}};Environment:{{environment}}"
+                },
+                {
+                    "name": "NEW_RELIC_APP_NAME",
+                    "value": "{{project}}-{{environment}}-files"
+                },
+                {
+                    "name": "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "NEW_RELIC_LOG_FILE_NAME",
+                    "value": "STDOUT"
+                },
+                {
+                    "name": "NEW_RELIC_HOST",
+                    "value": "gov-collector.newrelic.com"
+                },
+                {
+                    "name": "NIH_CLIENT_ID",
+                    "value": "{{nih_client_id}}"
+                },
+                {
+                    "name": "NIH_CLIENT_SECRET",
+                    "value": "{{nih_client_secret}}"
+                },
+                {
+                    "name": "NIH_BASE_URL",
+                    "value": "{{nih_base_url}}"
+                },
+                {
+                    "name": "NIH_REDIRECT_URL",
+                    "value": "{{nih_redirect_url}}"
+                },
+                {
+                    "name": "NIH_USERINFO_URL",
+                    "value": "{{nih_userinfo_url}}"
+                },
+                {
+                    "name": "NIH_AUTHORIZE_URL",
+                    "value": "{{nih_authorize_url}}"
+                },
+                {
+                    "name": "NIH_TOKEN_URL",
+                    "value": "{{nih_token_url}}"
+                },
+                {
+                    "name": "NIH_LOGOUT_URL",
+                    "value": "{{nih_logout_url}}"
+                },
+                {
+                    "name": "NIH_SCOPE",
+                    "value": "openid email profile"
+                },
+                {
+                    "name": "NIH_PROMPT",
+                    "value": "login"
+                }
+            ],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "logConfiguration": {
+                "logDriver": "awsfirelens",
+                "options": {
+                    "Format": "json_lines",
+                    "Host": "{{sumo_collector_endpoint}}",
+                    "Name": "http",
+                    "Port": "443",
+                    "Retry_Limit": "2",
+                    "URI": "/receiver/v1/http/{{sumo_collector_token}}",
+                    "tls": "on",
+                    "tls.verify": "off"
+                }
+            }
+        }
+    ]
+}
