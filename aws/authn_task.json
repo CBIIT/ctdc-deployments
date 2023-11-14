@@ -146,46 +146,6 @@
                 {
                     "name": "NEW_RELIC_APP_NAME",
                     "value": "{{project}}-{{environment}}-authn"
-                },
-                {
-                    "name": "NIH_CLIENT_ID",
-                    "value": "{{nih_client_id}}"
-                },
-                {
-                    "name": "NIH_CLIENT_SECRET",
-                    "value": "{{nih_client_secret}}"
-                },
-                {
-                    "name": "NIH_BASE_URL",
-                    "value": "{{nih_base_url}}"
-                },
-                {
-                    "name": "NIH_REDIRECT_URL",
-                    "value": "{{nih_redirect_url}}"
-                },
-                {
-                    "name": "NIH_USERINFO_URL",
-                    "value": "{{nih_userinfo_url}}"
-                },
-                {
-                    "name": "NIH_AUTHORIZE_URL",
-                    "value": "{{nih_authorize_url}}"
-                },
-                {
-                    "name": "NIH_TOKEN_URL",
-                    "value": "{{nih_token_url}}"
-                },
-                {
-                    "name": "NIH_LOGOUT_URL",
-                    "value": "{{nih_logout_url}}"
-                },
-                {
-                    "name": "NIH_SCOPE",
-                    "value": "openid email profile"
-                },
-                {
-                    "name": "NIH_PROMPT",
-                    "value": "login"
                 }
             ],
             "mountPoints": [],
