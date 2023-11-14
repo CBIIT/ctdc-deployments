@@ -123,18 +123,6 @@
                     "name": "VERSION",
                     "value": "{{image_tag}}"
                 },
-                // {
-                //     "name": "COOKIE_SECRET",
-                //     "value": "abcd256asghaaamnkloofghj"
-                // },
-                // {
-                //     "name": "SESSION_TIMEOUT",
-                //     "value": ""
-                // },
-                // {
-                //     "name": "TOKEN_SECRET",
-                //     "value": ""
-                // },
                 {
                     "name": "MYSQL_PORT",
                     "value": "{{mysql_database_port}}"
@@ -151,18 +139,6 @@
                     "name": "IDP",
                     "value": "nih"
                 },
-                // {
-                //     "name": "GOOGLE_CLIENT_ID",
-                //     "value": ""
-                // },
-                // {
-                //     "name": "GOOGLE_CLIENT_SECRET",
-                //     "value": ""
-                // },
-                // {
-                //     "name": "GOOGLE_REDIRECT_URL",
-                //     "value": ""
-                // },
                 {
                     "name": "NEW_RELIC_LABELS",
                     "value": "Project:{{project}};Environment:{{environment}}"
