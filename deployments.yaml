@@ -14,6 +14,6 @@ services:
     image: main.33
     buildNumber: '33'
   authn:
-    version: master.4
-    image: master.4
-    buildNumber: '4'
+    version: master.5
+    image: master.5
+    buildNumber: '5'
