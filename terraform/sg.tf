@@ -78,5 +78,5 @@ resource "aws_security_group_rule" "mysql_inbound" {
   to_port           = local.mysql_port
   security_group_id = module.rds_mysql[count.index].security_group_id
   type              = "ingress"
-  cidr_blocks       = var.allowed_ip_blocks
+  cidr_blocks       = local.nih_cidrs
 }
