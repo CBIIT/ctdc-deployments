@@ -115,6 +115,7 @@ pipeline {
 			    sh label: 'Docker-Tag', script: '''#!/bin/bash
 				# Tag image as production if deploying to prod tier
 				echo "Tagging Image as Production: $ECR_REPO:$IMAGE_TAG"
+				
 				# login and get manifest
 				docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $REPO_URL
 				docker pull $REPO_URL:$IMAGE_TAG
@@ -154,7 +155,6 @@ pipeline {
 				sed -i "s|{{sumo_collector_endpoint}}|$SUMO_COLLECTOR_ENDPOINT|" $TEMPLATE_FILE
 				sed -i "s|{{sumo_collector_token}}|$SUMO_COLLECTOR_TOKEN|" $TEMPLATE_FILE
 				sed -i "s|{{date}}|$DATE|" $TEMPLATE_FILE
-
 				aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE
 
 				'''
