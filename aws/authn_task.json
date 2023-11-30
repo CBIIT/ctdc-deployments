@@ -112,6 +112,46 @@
                 {
                     "name": "MYSQL_PASSWORD",
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:rds_password::"
+                },
+                {
+                    "name": "DCF_CLIENT_ID",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_client_id::"
+                },
+                {
+                    "name": "DCF_CLIENT_SECRET",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_client_secret::"
+                },
+                {
+                    "name": "DCF_BASE_URL",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_base_url::"
+                },
+                {
+                    "name": "DCF_REDIRECT_URL",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_redirect_url::"
+                },
+                {
+                    "name": "DCF_USERINFO_URL",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_userinfo_url::"
+                },
+                {
+                    "name": "DCF_AUTHORIZE_URL",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_authorize_url::"
+                },
+                {
+                    "name": "DCF_TOKEN_URL",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_token_url::"
+                },
+                {
+                    "name": "DCF_LOGOUT_URL",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_logout_url::"
+                },
+                {
+                    "name": "DCF_SCOPE",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_scope::"
+                },
+                {
+                    "name": "DCF_PROMPT",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_prompt::"
                 }
             ],
             "environment": [
