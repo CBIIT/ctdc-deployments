@@ -6,9 +6,9 @@ services:
     image: Global-search.77
     buildNumber: '77'
   frontend:
-    version: mvp.86
-    image: mvp.86
-    buildNumber: '86'
+    version: mvp.87
+    image: mvp.87
+    buildNumber: '87'
   files:
     version: main.33
     image: main.33
