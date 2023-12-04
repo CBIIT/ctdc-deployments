@@ -2,9 +2,9 @@ Notes: Jenkins pipeline
 project: ctdc
 services:
   backend:
-    version: Global-search.77
-    image: Global-search.77
-    buildNumber: '77'
+    version: mvp.78
+    image: mvp.78
+    buildNumber: '78'
   frontend:
     version: mvp.87
     image: mvp.87
