@@ -16,7 +16,7 @@ pipeline {
         selectedValue: 'DEFAULT', 
         sortMode: 'ASCENDING_SMART', 
         tagFilter: '*', 
-        useRepository: 'https://github.com/CBIIT/icdc-dataloader')
+        useRepository: 'https://github.com/CBIIT/crdc-ctdc-dataloader')
 
     extendedChoice( 
         name: 'Environment', 
@@ -83,7 +83,7 @@ pipeline {
   				false, extensions: [], submoduleCfg: [], 
   			    recursiveSubmodules: true,
   				userRemoteConfigs: 
-  				[[url: 'https://github.com/CBIIT/icdc-dataloader']]])
+  				[[url: 'https://github.com/CBIIT/crdc-ctdc-dataloader']]])
 
 			sh 'git submodule update --init'
 				
