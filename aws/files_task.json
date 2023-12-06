@@ -96,6 +96,14 @@
                 {
                     "name": "NEW_RELIC_LICENSE_KEY",
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:monitoring/newrelic:api_key::"
+                },
+                {
+                    "name": "NEO4J_USER",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:neo4j_user::"
+                },
+                {
+                    "name": "NEO4J_PASSWORD",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:neo4j_password::"
                 }
             ],
             "environment": [
@@ -110,6 +118,10 @@
                 {
                     "name": "BACKEND_URL",
                     "value": "https://{{domain_name}}/v1/graphql/"
+                },
+                {
+                    "name": "NEO4J_URI",
+                    "value": "bolt://{{neo4j_host}}:7687"
                 },
                 {
                     "name": "AUTH_ENABLED",

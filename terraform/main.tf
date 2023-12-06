@@ -102,6 +102,37 @@ module "opensearch" {
   create_cloudwatch_log_policy      = var.create_cloudwatch_log_policy
 }
 
+#mysql
+module "rds_mysql" {
+  count                        = var.create_rds_mysql ? 1 : 0
+  source                       = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/rds-mysql?ref=mysql"   #ref needs to changed after the tag is created.
+
+  program                      = var.program
+  app                          = var.project
+  env                          = terraform.workspace
+  resource_prefix              = "${var.program}-${terraform.workspace}-${var.project}"
+  allocated_storage            = var.rds_allocated_storage
+  attach_permissions_boundary  = local.level == "nonprod" ? true : false
+  create_db_subnet_group       = var.create_rds_db_subnet_group
+  create_security_group        = var.create_rds_security_group
+  db_name                      = var.project
+  instance_class               = var.rds_instance_class
+  username                     = var.rds_username
+  password                     = random_password.rds_password[0].result
+  subnet_ids                   = var.private_subnet_ids
+  vpc_id                       = data.aws_vpc.vpc.id
+}
+
+resource "random_password" "rds_password" {
+  count                        = var.create_rds_mysql ? 1 : 0
+  length                       = 12
+  special                      = true
+  override_special             = "!#$%^&*()-_=+[]{}<>:?"
+  keepers = {
+    keep = true
+  }
+}
+
 # Secrets
 module "deepmerge" {
   source = "Invicton-Labs/deepmerge/null"

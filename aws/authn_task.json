@@ -1,13 +1,13 @@
 {
-    "family": "{{program}}-{{environment}}-{{project}}-backend",
+    "family": "{{program}}-{{environment}}-{{project}}-authn",
     "taskRoleArn": "arn:aws:iam::{{account_id}}:role/power-user-{{program}}-{{environment}}-{{project}}-ecs-task-role",
     "executionRoleArn": "arn:aws:iam::{{account_id}}:role/power-user-{{program}}-{{environment}}-{{project}}-ecs-task-execution-role",
     "requiresCompatibilities": [
         "FARGATE"
     ],
     "networkMode": "awsvpc",
-    "cpu": "1024",
-    "memory": "2048",
+    "cpu": "256",
+    "memory": "512",
     "containerDefinitions": [
         {
             "name": "sumologic-firelens",
@@ -45,7 +45,7 @@
                 },
                 {
                     "name": "NEW_RELIC_APP_NAME",
-                    "value": "{{project}}-{{environment}}-backend"
+                    "value": "{{program}}-{{environment}}-{{project}}-authn"
                 },
                 {
                     "name": "NRIA_IS_FORWARD_ONLY",
@@ -76,23 +76,23 @@
             "volumesFrom": []
         },
         {
-            "name": "backend",
+            "name": "authn",
             "image": "{{image_id}}",
             "cpu": 0,
             "portMappings": [
                 {
-                    "containerPort": 8080,
-                    "hostPort": 8080,
+                    "containerPort": 8082,
+                    "hostPort": 8082,
                     "protocol": "tcp"
                 }
             ],
             "essential": true,
-            "entryPoint": [
-                "/bin/sh",
-                "-c",
-                "wget \"https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic-java.zip\" -O newrelic-java.zip && rm -rf newrelic && unzip -o newrelic-java.zip && bin/catalina.sh run"
-            ],
+            "entryPoint": [],
             "secrets": [
+                {
+                    "name": "NEW_RELIC_LICENSE_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:monitoring/newrelic:api_key::"
+                },
                 {
                     "name": "NEO4J_USER",
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:neo4j_user::"
@@ -102,70 +102,82 @@
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:neo4j_password::"
                 },
                 {
-                    "name": "ES_HOST",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:es_host::"
+                    "name": "MYSQL_HOST",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:rds_host::"
                 },
                 {
-                    "name": "NEW_RELIC_LICENSE_KEY",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:monitoring/newrelic:api_key::"
+                    "name": "MYSQL_USER",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:rds_username::"
+                },
+                {
+                    "name": "MYSQL_PASSWORD",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:rds_password::"
+                },
+                {
+                    "name": "DCF_CLIENT_ID",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_client_id::"
+                },
+                {
+                    "name": "DCF_CLIENT_SECRET",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_client_secret::"
+                },
+                {
+                    "name": "DCF_BASE_URL",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_base_url::"
+                },
+                {
+                    "name": "DCF_REDIRECT_URL",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_redirect_url::"
+                },
+                {
+                    "name": "DCF_USERINFO_URL",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_userinfo_url::"
+                },
+                {
+                    "name": "DCF_AUTHORIZE_URL",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_authorize_url::"
+                },
+                {
+                    "name": "DCF_TOKEN_URL",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_token_url::"
+                },
+                {
+                    "name": "DCF_LOGOUT_URL",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_logout_url::"
+                },
+                {
+                    "name": "DCF_SCOPE",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_scope::"
+                },
+                {
+                    "name": "DCF_PROMPT",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_prompt::"
                 }
             ],
             "environment": [
                 {
-                    "name": "PROJECT",
-                    "value": "{{project}}"
+                    "name": "DATE",
+                    "value": "{{date}}"
                 },
                 {
-                    "name": "BENTO_API_VERSION",
+                    "name": "VERSION",
                     "value": "{{image_tag}}"
                 },
                 {
-                    "name": "NEO4J_URL",
+                    "name": "MYSQL_PORT",
+                    "value": "{{mysql_database_port}}"
+                },
+                {
+                    "name": "MYSQL_DATABASE",
+                    "value": "{{mysql_database_name}}"
+                },
+                {
+                    "name": "NEO4J_URI",
                     "value": "bolt://{{neo4j_host}}:7687"
-                },                
-                {
-                    "name": "NEO4J_GRAPHQL_ENDPOINT",
-                    "value": "http://{{neo4j_host}}:7474/graphql/"
                 },
                 {
-                    "name": "ES_FILTER_ENABLED",
-                    "value": "true"
-                },
-                {
-                    "name": "ES_SCHEMA",
-                    "value": "es-schema-ctdc.graphql"
-                },
-                {
-                    "name": "REDIS_HOST",
-                    "value": "localhost"
-                },
-                {
-                    "name": "REDIS_ENABLE",
-                    "value": "false"
-                },
-                {
-                    "name": "REDIS_USE_CLUSTER",
-                    "value": "true"
-                },
-                {
-                    "name": "REDIS_PORT",
-                    "value": "6379"
-                },
-                {
-                    "name": "REDIS_FILTER_ENABLE",
-                    "value": "false"
-                },
-                {
-                    "name": "NEW_RELIC_LOG_FILE_NAME",
-                    "value": "STDOUT"
-                },
-                {
-                    "name": "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED",
-                    "value": "true"
-                },
-                {
-                    "name": "NEW_RELIC_HOST",
-                    "value": "gov-collector.newrelic.com"
+                    "name": "IDP",
+                    "value": "nih"
                 },
                 {
                     "name": "NEW_RELIC_LABELS",
@@ -173,11 +185,7 @@
                 },
                 {
                     "name": "NEW_RELIC_APP_NAME",
-                    "value": "{{project}}-{{environment}}-backend"
-                },
-                {
-                    "name": "JAVA_OPTS",
-                    "value": "-javaagent:/usr/local/tomcat/newrelic/newrelic.jar"
+                    "value": "{{project}}-{{environment}}-authn"
                 }
             ],
             "mountPoints": [],

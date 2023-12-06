@@ -315,7 +315,7 @@ variable "secret_values" {
 
 # Security Group
 variable "allowed_ip_blocks" {
-  description = "allowed ip block for the opensearch"
+  description = "allowed ip block for the opensearch/mysql"
   type        = list(string)
   default     = []
 }
@@ -340,4 +340,46 @@ variable "central_ecr_account_id" {
 variable "service" {
   type = string
   description = "Name of the service where the monitoring is configured. example ecs, database etc"
+}
+
+variable "create_rds_mysql" {
+  type        = bool
+  description = "whether to create a rds database or not"
+  default     = true
+  sensitive   = false
+}
+
+variable "rds_allocated_storage" {
+  type        = number
+  description = "allocated storage in gibibytes - minimum is 100"
+  default     = 20
+  sensitive   = false
+}
+
+variable "create_rds_db_subnet_group" {
+  type        = bool
+  description = "whether to create a db subnet group"
+  default     = true
+  sensitive   = false
+}
+
+variable "create_rds_security_group" {
+  type        = bool
+  description = "Whether to create a security group for the rds instance"
+  default     = true
+  sensitive   = false
+}
+
+variable "rds_instance_class" {
+  type        = string
+  description = "rds instance class to use"
+  default     = "db.t3.medium"
+  sensitive   = false
+}
+
+variable "rds_username" {
+  type        = string
+  description = "username for the rds mysql database"
+  sensitive   = false
+  default     = "ctdc_admin"
 }

@@ -69,3 +69,14 @@ resource "aws_security_group_rule" "opensearch_outbound" {
   security_group_id = module.opensearch[count.index].opensearch_security_group_id
   type              = "egress"
 }
+
+# create rds mysql ingress rule
+resource "aws_security_group_rule" "mysql_inbound" {
+  count             = var.create_rds_mysql ? 1 : 0
+  from_port         = local.mysql_port
+  protocol          = local.tcp_protocol
+  to_port           = local.mysql_port
+  security_group_id = module.rds_mysql[count.index].security_group_id
+  type              = "ingress"
+  cidr_blocks       = local.nih_cidrs
+}
