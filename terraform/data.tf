@@ -291,3 +291,45 @@ data "aws_iam_policy_document" "s3_alb_policy" {
     }
   }
 }
+
+
+data "aws_iam_policy_document" "s3_opensearch_snapshot_policy" {
+  count  = terraform.workspace == "stage" ? 1 : 0
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:ListBucketVersions",
+        "s3:GetObjectVersion"
+      ],
+      "Resource": [
+        "arn:aws:s3:::${local.s3_snapshot_bucket_name}",
+        "arn:aws:s3:::${local.s3_snapshot_bucket_name}/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": "s3:ListAllMyBuckets",
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "s3:GetBucketVersioning",
+      "Resource": "arn:aws:s3:::${local.s3_snapshot_bucket_name}"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::${local.s3_snapshot_bucket_name}*",
+      "Condition": {
+        "StringEquals": {
+          "aws:PrincipalAccount": "${local.prod_account_id}"
+        }
+      }
+    }
+  ]
+}

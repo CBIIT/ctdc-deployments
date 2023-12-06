@@ -35,7 +35,10 @@ locals {
   
   # ECS
   application_url = terraform.workspace == "prod" ? var.domain_name : "${var.application_subdomain}-${terraform.workspace}.${var.domain_name}"
-  
+
+  #prod account id
+  prod_account_id = "101183076466"
+
   # Secrets
   dynamic_secrets = {
     app = {
