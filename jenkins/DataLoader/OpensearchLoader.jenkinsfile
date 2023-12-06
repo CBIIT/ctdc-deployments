@@ -33,7 +33,7 @@ pipeline {
 			selectedValue: 'DEFAULT', 
 			sortMode: 'ASCENDING_SMART', 
 			tagFilter: '*', 
-			useRepository: 'https://github.com/CBIIT/bento-backend')
+			useRepository: 'https://github.com/CBIIT/crdc-ctdc-backend')
 
 		gitParameter(branchFilter: 'origin/(.*)', 
 			defaultValue: 'main',
@@ -43,7 +43,7 @@ pipeline {
 			selectedValue: 'DEFAULT', 
 			sortMode: 'ASCENDING_SMART', 
 			tagFilter: '*', 
-			useRepository: 'https://github.com/CBIIT/bento-ctdc-frontend')
+			useRepository: 'https://github.com/CBIIT/crdc-ctdc-ui')
 
 		gitParameter(branchFilter: 'origin/(.*)',
             defaultValue: 'master',
@@ -86,16 +86,16 @@ pipeline {
 				relativeTargetDir: 'ctdc-frontend']],
 				submoduleCfg: [],
 				userRemoteConfigs: 
-				[[url: 'https://github.com/CBIIT/bento-ctdc-frontend']]])
+				[[url: 'https://github.com/CBIIT/crdc-ctdc-ui']]])
 			
 			checkout([$class: 'GitSCM',
 				branches: [[name: "${params.Backend_Branch}"]],
 				doGenerateSubmoduleConfigurations: false,
 				extensions: [[$class: 'RelativeTargetDirectory',
-				relativeTargetDir: 'bento-backend']],
+				relativeTargetDir: 'ctdc-backend']],
 				submoduleCfg: [],
 				userRemoteConfigs: 
-				[[url: 'https://github.com/CBIIT/bento-backend']]])
+				[[url: 'https://github.com/CBIIT/crdc-ctdc-backend']]])
             
 			dir('ctdc-model'){
                 git branch: "${params.Model_Branch}",
