@@ -292,8 +292,8 @@ data "aws_iam_policy_document" "s3_alb_policy" {
   }
 }
 
-
-data "aws_iam_policy_document" "s3_opensearch_snapshot_policy" {
+# S3 snapshot bucket
+data "aws_iam_policy_document" "s3bucket_policy" {
   count  = terraform.workspace == "stage" ? 1 : 0
   "Statement": [
     {
@@ -310,26 +310,77 @@ data "aws_iam_policy_document" "s3_opensearch_snapshot_policy" {
         "arn:aws:s3:::${local.s3_snapshot_bucket_name}",
         "arn:aws:s3:::${local.s3_snapshot_bucket_name}/*"
       ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": "s3:ListAllMyBuckets",
-      "Resource": "*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": "s3:GetBucketVersioning",
-      "Resource": "arn:aws:s3:::${local.s3_snapshot_bucket_name}"
-    },
-    {
-      "Effect": "Allow",
-      "Action": "s3:PutObject",
-      "Resource": "arn:aws:s3:::${local.s3_snapshot_bucket_name}*",
-      "Condition": {
-        "StringEquals": {
-          "aws:PrincipalAccount": "${local.prod_account_id}"
-        }
-      }
     }
   ]
+}
+
+#Opensearch snapshot policy
+
+data "aws_iam_policy_document" "trust" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["es.amazonaws.com"]
+    }
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "opensearch_snapshot_role" {
+  name                  = "power-user-${var.program}-${terraform.workspace}-${var.project}-opensearch-snapshot"
+  assume_role_policy    = data.aws_iam_policy_document.trust.json
+  description           = "role that allows the opensearch service to create snapshots stored in s3"
+  force_detach_policies = false
+  permissions_boundary  = local.permissions_boundary_arn
+}
+
+resource "aws_iam_policy" "opensearch_snapshot_policy" {
+  name        = "power-user-${var.program}-${terraform.workspace}-${var.project}-opensearch-snapshot"
+  description = "role that allows the opensearch service to create snapshots stored in s3"
+  policy      = data.aws_iam_policy_document.opensearch_snapshot_policy_document.json
+}
+
+data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
+  statement {
+    effect    = "Allow"
+    actions   = ["s3:ListBucket"]
+    resources = [arn:aws:s3:::${local.s3_snapshot_bucket_name}]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:DeleteObject"
+    ]
+    "Resource": [
+      "arn:aws:s3:::${local.s3_snapshot_bucket_name}",
+      "arn:aws:s3:::${local.s3_snapshot_bucket_name}/*"
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "iam:PassRole",
+      "iam:GetRole"
+    ]
+    resources = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/power-user*"]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = ["es:ESHttpPut"]
+    resources = [
+      "arn:aws:es:us-east-1:${data.aws_caller_identity.current.account_id}:domain/*/*"
+    ]
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "opensearch_snapshot_policy_attachment" {
+  role       = aws_iam_role.opensearch_snapshot_role.name
+  policy_arn = aws_iam_policy.opensearch_snapshot_policy.arn
 }
