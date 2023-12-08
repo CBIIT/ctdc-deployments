@@ -36,6 +36,8 @@ locals {
   # ECS
   application_url = terraform.workspace == "prod" ? var.domain_name : "${var.application_subdomain}-${terraform.workspace}.${var.domain_name}"
 
+  s3_snapshot_bucket_name = "${var.program}-${terraform.workspace}-${var.project}-opensearch-snapshot-bucket"
+
   # Secrets
   dynamic_secrets = {
     app = {
