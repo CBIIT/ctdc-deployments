@@ -295,20 +295,19 @@ data "aws_iam_policy_document" "s3_alb_policy" {
 # S3 snapshot bucket
 data "aws_iam_policy_document" "s3bucket_policy" {
   count  = terraform.workspace == "stage" ? 1 : 0
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
+  statement = {
+      effect = "Allow"
+      actions = [
         "s3:ListBucket",
         "s3:GetObject",
         "s3:PutObject",
         "s3:DeleteObject",
         "s3:ListBucketVersions",
         "s3:GetObjectVersion"
-      ],
-      "Resource": [
-        "arn:aws:s3:::${local.s3_snapshot_bucket_name}",
-        "arn:aws:s3:::${local.s3_snapshot_bucket_name}/*"
+      ]
+      resources = [
+        "arn:aws:s3:::${module.s3[0].bucket_name}",
+        "arn:aws:s3:::${module.s3[0].bucket_name}/*"
       ]
     }
   ]
@@ -350,7 +349,7 @@ data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
   statement {
     effect    = "Allow"
     actions   = ["s3:ListBucket"]
-    resources = [arn:aws:s3:::${local.s3_snapshot_bucket_name}]
+    resources = ["arn:aws:s3:::${module.s3[0].bucket_name}",]
   }
 
   statement {
@@ -361,8 +360,8 @@ data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
       "s3:DeleteObject"
     ]
     "Resource": [
-      "arn:aws:s3:::${local.s3_snapshot_bucket_name}",
-      "arn:aws:s3:::${local.s3_snapshot_bucket_name}/*"
+      "arn:aws:s3:::${module.s3[0].bucket_name}",
+      "arn:aws:s3:::${module.s3[0].bucket_name}/*"
     ]
   }
 
@@ -379,7 +378,7 @@ data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
     effect = "Allow"
     actions = ["es:ESHttpPut"]
     resources = [
-      "arn:aws:es:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:domain/${module.opensearch.opensearch_arn}/*"
+      "arn:aws:es:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:domain/${module.opensearch[0].opensearch_arn}/*"
     ]
   }
 }
