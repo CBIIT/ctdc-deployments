@@ -105,7 +105,7 @@ module "opensearch" {
 #mysql
 module "rds_mysql" {
   count                        = var.create_rds_mysql ? 1 : 0
-  source                       = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/rds-mysql?ref=mysql"   #ref needs to changed after the tag is created.
+  source                       = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/rds-mysql?ref=main"   #ref needs to changed after the tag is created.
 
   program                      = var.program
   app                          = var.project
@@ -152,7 +152,7 @@ module "secrets" {
 #S3 bucket for storing OpenSearch Snapshots
 module "s3" {
   count  = terraform.workspace == "stage" ? 1 : 0
-  source = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/s3?ref=v1.13"
+  source = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/s3?ref=main"
   bucket_name = local.s3_snapshot_bucket_name
   resource_prefix = "${var.program}-${terraform.workspace}-${var.project}"
   env = terraform.workspace
