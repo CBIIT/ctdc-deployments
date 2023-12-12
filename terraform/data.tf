@@ -295,7 +295,7 @@ data "aws_iam_policy_document" "s3_alb_policy" {
 # S3 snapshot bucket
 data "aws_iam_policy_document" "s3bucket_policy" {
   count  = terraform.workspace == "stage" ? 1 : 0
-  statement = {
+  statement {
       effect = "Allow"
       actions = [
         "s3:ListBucket",
@@ -316,10 +316,10 @@ data "aws_iam_policy_document" "s3bucket_policy" {
 
 data "aws_iam_policy_document" "trust" {
   count     = terraform.workspace == "dev" ? 1 : 0
-  statement = {
+  statement {
     effect = "Allow"
 
-    principals {
+    principals = {
       type        = "Service"
       identifiers = ["es.amazonaws.com"]
     }
@@ -358,7 +358,7 @@ data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
       "s3:PutObject",
       "s3:DeleteObject"
     ]
-    "Resource": [
+    resources = [
       "arn:aws:s3:::${module.s3[0].bucket_name}",
       "arn:aws:s3:::${module.s3[0].bucket_name}/*"
     ]
