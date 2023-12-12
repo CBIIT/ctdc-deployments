@@ -333,7 +333,7 @@ resource "aws_iam_role" "opensearch_snapshot_role" {
   assume_role_policy    = data.aws_iam_policy_document.trust[0].json
   description           = "role that allows the opensearch service to create snapshots stored in s3"
   force_detach_policies = false
-  permissions_boundary  = local.permissions_boundary_arn
+  permissions_boundary  = local.permissions_boundary
 }
 
 resource "aws_iam_policy" "opensearch_snapshot_policy" {
@@ -348,7 +348,7 @@ data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
   statement {
     effect    = "Allow"
     actions   = ["s3:ListBucket"]
-    resources = ["arn:aws:s3:::${module.s3[0].bucket_name}",]
+    resources = ["arn:aws:s3:::${var.s3_opensearch_snapshot_bucket}",]
   }
 
   statement {
@@ -359,8 +359,8 @@ data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
       "s3:DeleteObject"
     ]
     resources = [
-      "arn:aws:s3:::${module.s3[0].bucket_name}",
-      "arn:aws:s3:::${module.s3[0].bucket_name}/*"
+      "arn:aws:s3:::${var.s3_opensearch_snapshot_bucket}",
+      "arn:aws:s3:::${var.s3_opensearch_snapshot_bucket}/*"
     ]
   }
 

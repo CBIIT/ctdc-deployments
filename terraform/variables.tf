@@ -383,3 +383,10 @@ variable "rds_username" {
   sensitive   = false
   default     = "ctdc_admin"
 }
+
+#Opensearch snapshot bucket
+variable "s3_opensearch_snapshot_bucket" {
+  type = string
+  description = "name of the S3 Opensearch snapshot bucket created in prod account"
+  sensitive   = false
+}
