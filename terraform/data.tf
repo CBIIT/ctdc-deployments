@@ -319,7 +319,7 @@ data "aws_iam_policy_document" "trust" {
   statement {
     effect = "Allow"
 
-    principals = {
+    principals {
       type        = "Service"
       identifiers = ["es.amazonaws.com"]
     }

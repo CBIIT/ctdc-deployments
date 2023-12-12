@@ -155,7 +155,6 @@ module "s3" {
   source = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/s3?ref=v1.13"
   bucket_name = local.s3_snapshot_bucket_name
   resource_prefix = "${var.program}-${terraform.workspace}-${var.project}"
-  stack_name = var.stack_name
   env = terraform.workspace
   tags = var.tags
   s3_force_destroy = var.s3_force_destroy
