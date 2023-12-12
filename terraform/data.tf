@@ -310,14 +310,13 @@ data "aws_iam_policy_document" "s3bucket_policy" {
         "arn:aws:s3:::${module.s3[0].bucket_name}/*"
       ]
     }
-  ]
 }
 
 #Opensearch snapshot policy
 
 data "aws_iam_policy_document" "trust" {
   count     = terraform.workspace == "dev" ? 1 : 0
-  statement {
+  statement = {
     effect = "Allow"
 
     principals {
