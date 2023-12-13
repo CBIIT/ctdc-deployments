@@ -97,14 +97,6 @@
             ],
             "secrets": [
                 {
-                    "name": "NEO4J_USER",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:neo4j_user::"
-                },
-                {
-                    "name": "NEO4J_PASSWORD",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:neo4j_password::"
-                },
-                {
                     "name": "ES_HOST",
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:es_host::"
                 },
@@ -123,40 +115,8 @@
                     "value": "{{image_tag}}"
                 },
                 {
-                    "name": "NEO4J_URL",
-                    "value": "bolt://{{neo4j_host}}:7687"
-                },                
-                {
-                    "name": "NEO4J_GRAPHQL_ENDPOINT",
-                    "value": "http://{{neo4j_host}}:7474/graphql/"
-                },
-                {
                     "name": "ES_FILTER_ENABLED",
                     "value": "true"
-                },
-                {
-                    "name": "ES_SCHEMA",
-                    "value": "es-schema-ctdc.graphql"
-                },
-                {
-                    "name": "REDIS_HOST",
-                    "value": "localhost"
-                },
-                {
-                    "name": "REDIS_ENABLE",
-                    "value": "false"
-                },
-                {
-                    "name": "REDIS_USE_CLUSTER",
-                    "value": "true"
-                },
-                {
-                    "name": "REDIS_PORT",
-                    "value": "6379"
-                },
-                {
-                    "name": "REDIS_FILTER_ENABLE",
-                    "value": "false"
                 },
                 {
                     "name": "NEW_RELIC_LOG_FILE_NAME",
