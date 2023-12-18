@@ -10,10 +10,10 @@ services:
     image: mvp.97
     buildNumber: '97'
   files:
-    version: main.34
-    image: main.34
-    buildNumber: '34'
+    version: main.35
+    image: main.35
+    buildNumber: '35'
   authn:
-    version: CTDC-1205.15
-    image: CTDC-1205.15
-    buildNumber: '15'
+    version: CTDC-1205.17
+    image: CTDC-1205.17
+    buildNumber: '17'
