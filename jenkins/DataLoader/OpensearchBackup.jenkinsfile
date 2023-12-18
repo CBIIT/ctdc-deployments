@@ -1,0 +1,85 @@
+import groovy.json.JsonOutput
+
+pipeline {
+  agent {
+    node {
+      label 'slave-ncias-d2957-c'
+    }
+  }
+	parameters {
+    extendedChoice( 
+        name: 'Environment', 
+        defaultValue: 'dev', 
+        description: 'Choose the environment to build', 
+        type: 'PT_SINGLE_SELECT',
+        value: 'dev,qa,stage,prod' )
+    string(defaultValue: "ctdc",
+        description: 'snapshot repository name',
+        name: 'PROJECT_NAME')
+    string(defaultValue: "ctdc",
+        description: 'snapshot repository name',
+        name: 'SNAPSHOT_REPO')
+    string(defaultValue: "v_1_0",
+        description: 'Snapshot name used for restore operation',
+        name: 'SNAPSHOT_VALUE')
+    string(defaultValue: "crdc-stage-ctdc-opensearch-snapshot-bucket",
+        description: 'S3 bucket which has the snapshot to restore',
+        name: 'S3_BUCKET')
+    string(defaultValue: "es-backup",
+        description: 'sub folder in S3 bucket where the snapshot is present',
+        name: 'BASE_PATH')
+  }
+  options {
+  	ansiColor('xterm')
+  }
+  tools {
+  	maven 'Default' 
+    jdk 'Default' 
+  }
+  stages{
+      stage('checkout'){
+      steps {
+
+        checkout( poll: false, 
+        changelog:false,
+        scm: [$class: 'GitSCM', 
+        branches: [[name: '*/opensearch_snapshot']], 
+        doGenerateSubmoduleConfigurations: false, 
+        extensions: [[$class: 'DisableRemotePoll'],
+        [$class: 'PathRestriction', excludedRegions: '*'], 
+        [$class: 'RelativeTargetDirectory', 
+        relativeTargetDir: 'ctdc-deployments']], 
+        submoduleCfg: [], 
+        userRemoteConfigs: 
+        [[credentialsId: 'sowmya-jenkins-token',url: 'https://github.com/CBIIT/ctdc-deployments.git']]])
+
+        }
+ 
+    }
+  	stage('opensearch_backup'){
+      environment {
+        TIER = "${params.Environment}"
+      }
+ 		  steps{
+        wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]){
+             ansiblePlaybook( 
+                playbook: '${WORKSPACE}/ctdc-deployments/ansible/playbooks/dataloader/opensearchbackup.yml',
+                inventory: '${WORKSPACE}/ctdc-deployments/ansible/playbooks/hosts',
+                extraVars: [
+                    tier: "${params.Environment}",
+                    project_name: "${params.PROJECT_NAME}",
+                    snapshot_repo: "${params.SNAPSHOT_REPO}", 
+                    snapshot_value: "${params.SNAPSHOT_VALUE}",
+                    base_path: "${params.BASE_PATH}",
+                    s3_bucket: "${params.S3_BUCKET}",
+                    project: "ctdc"
+                    rolearn: "arn:aws:iam::265135454114:role/power-user-crdc-dev-ctdc-opensearch-snapshot"
+                    ],
+                  hostKeyChecking: false,
+                  colorized: true,
+                  extras: '-vvv') 
+        }
+      }
+    }
+  }
+}
