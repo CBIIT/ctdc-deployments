@@ -1,3 +1,4 @@
+@Library('datacommons-jenkins-shared-library@v1.1') _
 import groovy.json.JsonOutput
 
 pipeline {
@@ -36,6 +37,14 @@ pipeline {
   	maven 'Default' 
     jdk 'Default' 
   }
+  environment {
+      PROGRAM      = "crdc"
+	  PROJECT      = "ctdc"
+	  SLACK_SECRET = "ctdc_slack_url"
+	  ENV          = "${params.Environment}"
+	  REGION       = "us-east-1"
+	  DEPLOY_REPO  = "${env.PROJECT}-deployments"
+  }
   stages{
       stage('checkout'){
       steps {
@@ -48,10 +57,10 @@ pipeline {
         extensions: [[$class: 'DisableRemotePoll'],
         [$class: 'PathRestriction', excludedRegions: '*'], 
         [$class: 'RelativeTargetDirectory', 
-        relativeTargetDir: 'ctdc-deployments']], 
+        relativeTargetDir: "${env.PROJECT}-deployments"]],
         submoduleCfg: [], 
-        userRemoteConfigs: 
-        [[credentialsId: 'sowmya-jenkins-token',url: 'https://github.com/CBIIT/ctdc-deployments.git']]])
+	    userRemoteConfigs:
+		[[url: "https://github.com/CBIIT/${env.DEPLOY_REPO}"]]])
 
         }
  
@@ -66,13 +75,13 @@ pipeline {
                 playbook: '${WORKSPACE}/ctdc-deployments/ansible/playbooks/dataloader/opensearchbackup.yml',
                 inventory: '${WORKSPACE}/ctdc-deployments/ansible/playbooks/hosts',
                 extraVars: [
-                    tier: "${params.Environment}",
-                    project_name: "${params.PROJECT_NAME}",
+                    tier: ${ENV},
+                    project_name: ${PROJECT},
                     snapshot_repo: "${params.SNAPSHOT_REPO}", 
                     snapshot_value: "${params.SNAPSHOT_VALUE}",
                     base_path: "${params.BASE_PATH}",
                     s3_bucket: "${params.S3_BUCKET}",
-                    project: "ctdc"
+                    project: ${PROJECT},
                     rolearn: "arn:aws:iam::265135454114:role/power-user-crdc-dev-ctdc-opensearch-snapshot"
                     ],
                   hostKeyChecking: false,
