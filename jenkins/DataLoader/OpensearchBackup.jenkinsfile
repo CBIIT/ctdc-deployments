@@ -75,13 +75,13 @@ pipeline {
                 playbook: '${WORKSPACE}/ctdc-deployments/ansible/playbooks/dataloader/opensearchbackup.yml',
                 inventory: '${WORKSPACE}/ctdc-deployments/ansible/playbooks/hosts',
                 extraVars: [
-                    tier: ${ENV},
-                    project_name: ${PROJECT},
+                    tier: "${ENV}",
+                    project_name: "${PROJECT}",
                     snapshot_repo: "${params.SNAPSHOT_REPO}", 
                     snapshot_value: "${params.SNAPSHOT_VALUE}",
                     base_path: "${params.BASE_PATH}",
                     s3_bucket: "${params.S3_BUCKET}",
-                    project: ${PROJECT},
+                    project: "${PROJECT}",
                     rolearn: "arn:aws:iam::265135454114:role/power-user-crdc-dev-ctdc-opensearch-snapshot"
                     ],
                   hostKeyChecking: false,
