@@ -82,7 +82,7 @@ pipeline {
                     base_path: "${params.BASE_PATH}",
                     s3_bucket: "${params.S3_BUCKET}",
                     project: "${PROJECT}",
-                    rolearn: "arn:aws:iam::265135454114:role/power-user-crdc-dev-ctdc-opensearch-snapshot"
+                    role_arn: "arn:aws:iam::265135454114:role/power-user-crdc-dev-ctdc-opensearch-snapshot"
                     ],
                   hostKeyChecking: false,
                   colorized: true,
