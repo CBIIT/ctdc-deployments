@@ -6,14 +6,14 @@ services:
     image: mvp.99
     buildNumber: '99'
   frontend:
-    version: mvp.110
-    image: mvp.110
-    buildNumber: '110'
+    version: mvp.111
+    image: mvp.111
+    buildNumber: '111'
   files:
     version: main.36
     image: main.36
     buildNumber: '36'
   authn:
-    version: CTDC-1205.17
-    image: CTDC-1205.17
-    buildNumber: '17'
+    version: CTDC-1205.19
+    image: CTDC-1205.19
+    buildNumber: '19'
