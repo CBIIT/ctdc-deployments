@@ -4,7 +4,7 @@ pipeline {
 	agent {
 		node {
 			//label 'ctdc-docker'
-			label 'slave-ncias-d2947-c'
+			label 'ctdc-deploy-agent'
 		}
 	}
 

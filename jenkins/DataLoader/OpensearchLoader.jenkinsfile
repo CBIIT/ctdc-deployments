@@ -3,7 +3,7 @@
 pipeline {
 	agent {
 		node {
-			label 'slave-ncias-d2957-c'
+			label 'ctdc-deploy-agent'
 		}
 	}
 	parameters {
