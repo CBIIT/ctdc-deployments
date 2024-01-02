@@ -34,7 +34,7 @@ locals {
   resource_prefix = var.project
   
   # ECS
-  application_url = terraform.workspace == "prod" ? var.domain_name : "${var.application_subdomain}-${terraform.workspace}.${var.domain_name}"
+  application_url = terraform.workspace == "prod" ? "${var.application_subdomain}.${var.domain_name}" : "${var.application_subdomain}-${terraform.workspace}.${var.domain_name}"
 
   s3_snapshot_bucket_name = "opensearch-snapshot-bucket"
 
