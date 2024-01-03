@@ -14,6 +14,6 @@ services:
     image: main.36
     buildNumber: '36'
   authn:
-    version: CTDC-1205.19
-    image: CTDC-1205.19
-    buildNumber: '19'
+    version: CTDC-1205.20
+    image: CTDC-1205.20
+    buildNumber: '20'
