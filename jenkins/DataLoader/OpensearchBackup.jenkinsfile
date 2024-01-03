@@ -52,7 +52,7 @@ pipeline {
         checkout( poll: false, 
         changelog:false,
         scm: [$class: 'GitSCM', 
-        branches: [[name: '*/opensearch_snapshot']], 
+        branches: [[name: '*/main']], 
         doGenerateSubmoduleConfigurations: false, 
         extensions: [[$class: 'DisableRemotePoll'],
         [$class: 'PathRestriction', excludedRegions: '*'], 
