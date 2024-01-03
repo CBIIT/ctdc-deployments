@@ -10,7 +10,7 @@
       shell: "ansible-galaxy collection install {{ item | quote }} --force"
       loop:
         - community.docker:<=3.4.3
-        - git+https://github.com/CBIIT/datacommons-devops.git#/ansible/collections/bento/common/,opensearch_snapshot #update branch
+        - git+https://github.com/CBIIT/datacommons-devops.git#/ansible/collections/bento/common/,opensearch_snapshot
 
     #load data
     - name: perform opensearch backup
