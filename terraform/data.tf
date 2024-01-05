@@ -297,6 +297,12 @@ data "aws_iam_policy_document" "s3bucket_policy" {
   count  = terraform.workspace == "stage" ? 1 : 0
   statement {
       effect = "Allow"
+      principle {
+        AWS = [
+            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root",
+            "arn:aws:iam::${lookup(var.aws_nonprod_account_id,var.region,"us-east-1" )}:role/${aws_iam_role.opensearch_snapshot_role[0].name}",
+        ]
+      }
       actions = [
         "s3:ListBucket",
         "s3:GetObject",
@@ -385,4 +391,56 @@ data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
 resource "aws_iam_role_policy_attachment" "opensearch_snapshot_policy_attachment" {
   role       = aws_iam_role.opensearch_snapshot_role[0].name
   policy_arn = aws_iam_policy.opensearch_snapshot_policy[0].arn
+}
+
+#role for cross account access
+
+data "aws_iam_policy_document" "cross_account_trust" {
+  count     = terraform.workspace == "stage" ? 1 : 0
+  statement {
+    effect = "Allow"
+
+    principals {
+    	  identifiers = ["arn:aws:iam::${lookup(var.aws_nonprod_account_id,var.region,"us-east-1" )}:root"]
+          type        = "AWS"
+    }
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "s3_opensearch_cross_account_access_role" {
+  count                 = terraform.workspace == "stage" ? 1 : 0
+  name                  = "power-user-${var.program}-${terraform.workspace}-${var.project}-s3-opensearch-cross-account-access"
+  assume_role_policy    = data.aws_iam_policy_document.cross_account_trust[0].json
+  description           = "role that allows the opensearch service to access prod s3"
+  force_detach_policies = false
+}
+
+resource "aws_iam_policy" "s3_opensearch_cross_account_access_policy" {
+  count       = terraform.workspace == "stage" ? 1 : 0
+  name        = "power-user-${var.program}-${terraform.workspace}-${var.project}-s3-opensearch-cross-account-access"
+  description = "role that allows the opensearch service to access prod s3"
+  policy      = data.aws_iam_policy_document.s3_opensearch_cross_account_access_policy_document[0].json
+}
+
+data "aws_iam_policy_document" "s3_opensearch_cross_account_access_policy_document" {
+  count     = terraform.workspace == "stage" ? 1 : 0
+  statement {
+    effect = "Allow"
+    actions = [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:ListBucket"
+    ]
+    resources = [
+      "arn:aws:s3:::${var.s3_opensearch_snapshot_bucket}",
+      "arn:aws:s3:::${var.s3_opensearch_snapshot_bucket}/*"
+    ]
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "s3_opensearch_cross_account_access" {
+  count                 = terraform.workspace == "stage" ? 1 : 0
+  role                  = aws_iam_role.s3_opensearch_cross_account_access_role[0].name
+  policy_arn            = aws_iam_policy.s3_opensearch_cross_account_access_policy[0].arn
 }

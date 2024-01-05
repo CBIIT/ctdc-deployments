@@ -304,6 +304,14 @@ variable "aws_account_id" {
   }
 }
 
+variable "aws_nonprod_account_id" {
+  type = map(string)
+  description = "aws account to allow for cross account access"
+  default = {
+    us-east-1 = "265135454114"
+  }
+}
+
 # Secrets
 variable "secret_values" {
   type = map(object({
