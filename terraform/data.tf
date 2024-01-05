@@ -377,7 +377,7 @@ data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
     effect = "Allow"
     actions = ["es:ESHttpPut"]
     resources = [
-      "arn:aws:es:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:domain/${module.opensearch[0].opensearch_arn}/*"
+      "${module.opensearch[0].opensearch_arn}/*"
     ]
   }
 }
