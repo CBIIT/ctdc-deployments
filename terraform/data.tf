@@ -301,7 +301,7 @@ data "aws_iam_policy_document" "s3bucket_policy" {
         type        = "AWS"
         identifiers = [
             "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root",
-            "arn:aws:iam::${lookup(var.aws_nonprod_account_id,var.region,"us-east-1" )}:role/${aws_iam_role.opensearch_snapshot_role[0].name}",
+            "arn:aws:iam::${lookup(var.aws_nonprod_account_id,var.region,"us-east-1" )}:root",
         ]
       }
       actions = [
@@ -390,6 +390,7 @@ data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
 }
 
 resource "aws_iam_role_policy_attachment" "opensearch_snapshot_policy_attachment" {
+  count     = terraform.workspace == "dev" ? 1 : 0
   role       = aws_iam_role.opensearch_snapshot_role[0].name
   policy_arn = aws_iam_policy.opensearch_snapshot_policy[0].arn
 }
