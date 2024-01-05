@@ -375,7 +375,7 @@ data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
 
   statement {
     effect = "Allow"
-    actions = ["es:ESHttpPut"]
+    actions = ["es:*"]
     resources = [
       "${module.opensearch[0].opensearch_arn}/*"
     ]
