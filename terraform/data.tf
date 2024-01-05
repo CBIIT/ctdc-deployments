@@ -298,7 +298,8 @@ data "aws_iam_policy_document" "s3bucket_policy" {
   statement {
       effect = "Allow"
       principals {
-        AWS = [
+        type        = "AWS"
+        identifiers = [
             "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root",
             "arn:aws:iam::${lookup(var.aws_nonprod_account_id,var.region,"us-east-1" )}:role/${aws_iam_role.opensearch_snapshot_role[0].name}",
         ]
