@@ -28,5 +28,5 @@
         s3_bucket: "{{lookup('env','S3_Bucket')}}"
         snapshot_value: "{{lookup('env','SNAPSHOT_VALUE')}}"
         base_path: "{{lookup('env', 'BASE_PATH')}}"
-        role_arn: "{{lookup('env', 'ROLE_ARN')}}"
+        role_arn: "{% if tier == 'dev' or tier == 'qa' %}arn:aws:iam::265135454114:role/power-user-crdc-dev-ctdc-opensearch-snapshot{% else %}arn:aws:iam::265135454114:role/power-user-crdc-dev-ctdc-opensearch-snapshot{% endif %}" 
         indices: "{{lookup('env', 'INDICES')}}"
