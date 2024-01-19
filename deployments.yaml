@@ -2,9 +2,9 @@ Notes: Jenkins pipeline
 project: ctdc
 services:
   backend:
-    version: mvp.106
-    image: mvp.106
-    buildNumber: '106'
+    version: mvp.107
+    image: mvp.107
+    buildNumber: '107'
   frontend:
     version: mvp.124
     image: mvp.124
