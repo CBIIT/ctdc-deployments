@@ -142,6 +142,22 @@
                 {
                     "name": "NEW_RELIC_APP_NAME",
                     "value": "{{project}}-{{environment}}-frontend"
+                },
+                {
+                    "name": "REACT_APP_AUTH",
+                    "value": "true"
+                },
+                {
+                    "name": "NODE_LEVEL_ACCESS",
+                    "value": "gov-collector.newrelic.com"
+                },
+                {
+                    "name": "REACT_APP_BACKEND_GETUSERINFO_API",
+                    "value": "https://k9dc.essential-dev.com/fence/login/"
+                },
+                {
+                    "name": "REACT_APP_LOGIN_URL",
+                    "value": "https://nci-crdc-staging.datacommons.io/user/oauth2/authorize?client_id=9ZpYjAWqntLON2Z4Jdvstwe9yCwPA3aFFpQOaZo4&response_type=code&redirect_uri=http://localhost:3000/login&scope=openid%20user"
                 }
             ],
             "mountPoints": [],
