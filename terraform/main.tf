@@ -6,8 +6,8 @@ module "alb" {
   env                 = terraform.workspace
   alb_internal        = var.internal_alb
   alb_type            = var.lb_type
-  #alb_subnet_ids      = local.alb_subnet_ids
-  alb_subnet_ids      = var.private_subnet_ids
+  alb_subnet_ids      = local.alb_subnet_ids
+  #alb_subnet_ids      = var.private_subnet_ids
   tags                = var.tags
   stack_name          = var.project
   program             = "crdc"
