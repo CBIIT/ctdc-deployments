@@ -322,7 +322,7 @@ data "aws_iam_policy_document" "s3bucket_policy" {
 #Opensearch snapshot policy
 
 data "aws_iam_policy_document" "trust" {
-  count     = terraform.workspace == "dev" ? 1 : 0
+  count     = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0
   statement {
     effect = "Allow"
 
@@ -335,7 +335,7 @@ data "aws_iam_policy_document" "trust" {
 }
 
 resource "aws_iam_role" "opensearch_snapshot_role" {
-  count                 = terraform.workspace == "dev" ? 1 : 0
+  count                 = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0
   name                  = "power-user-${var.program}-${terraform.workspace}-${var.project}-opensearch-snapshot"
   assume_role_policy    = data.aws_iam_policy_document.trust[0].json
   description           = "role that allows the opensearch service to create snapshots stored in s3"
@@ -344,14 +344,14 @@ resource "aws_iam_role" "opensearch_snapshot_role" {
 }
 
 resource "aws_iam_policy" "opensearch_snapshot_policy" {
-  count       = terraform.workspace == "dev" ? 1 : 0
+  count       = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0
   name        = "power-user-${var.program}-${terraform.workspace}-${var.project}-opensearch-snapshot"
   description = "role that allows the opensearch service to create snapshots stored in s3"
   policy      = data.aws_iam_policy_document.opensearch_snapshot_policy_document[0].json
 }
 
 data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
-  count     = terraform.workspace == "dev" ? 1 : 0
+  count     = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0
   statement {
     effect    = "Allow"
     actions   = ["s3:ListBucket"]
@@ -390,7 +390,7 @@ data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
 }
 
 resource "aws_iam_role_policy_attachment" "opensearch_snapshot_policy_attachment" {
-  count     = terraform.workspace == "dev" ? 1 : 0
+  count     = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0
   role       = aws_iam_role.opensearch_snapshot_role[0].name
   policy_arn = aws_iam_policy.opensearch_snapshot_policy[0].arn
 }
