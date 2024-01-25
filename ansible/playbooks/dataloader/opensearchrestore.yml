@@ -3,7 +3,8 @@
   hosts: loader
   connection: local
   gather_facts: yes
-
+  remote_user: commonsdocker
+  
   tasks:
     #install collections
     - name: install aws collection
