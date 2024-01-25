@@ -157,7 +157,11 @@
                 },
                 {
                     "name": "REACT_APP_LOGIN_URL",
-                    "value": "https://nci-crdc-staging.datacommons.io/user/oauth2/authorize?client_id=9ZpYjAWqntLON2Z4Jdvstwe9yCwPA3aFFpQOaZo4&response_type=code&redirect_uri=http://localhost:3000/login&scope=openid%20user"
+                    "value": "https://nci-crdc-staging.datacommons.io/user/oauth2/authorize?client_id=9ZpYjAWqntLON2Z4Jdvstwe9yCwPA3aFFpQOaZo4&response_type=code&redirect_uri=https://{{domain_name}}/login&scope=openid%20user"
+                },
+                {
+                    "name": "REACT_APP_AUTH_SERVICE_API",
+                    "value": "https://{{domain_name}}/api/auth/"
                 }
             ],
             "mountPoints": [],
