@@ -14,6 +14,6 @@ services:
     image: main.36
     buildNumber: '36'
   authn:
-    version: mvp.21
-    image: mvp.21
-    buildNumber: '21'
+    version: mvp.22
+    image: mvp.22
+    buildNumber: '22'
