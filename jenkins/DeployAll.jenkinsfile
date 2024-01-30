@@ -27,6 +27,7 @@ pipeline {
 
   environment {
 
+      LD_LIBRARY_PATH = '/usr/local/openssl3.0/lib64'
       PROJECT      = 'ctdc'
 	  //JOB_PATH     = '_default/_lower/CTDC/_jobs'
       JOB_PATH     = '_jobs'
