@@ -73,10 +73,12 @@ pipeline {
 			    // set domain name
 				if (env.ENV == 'prod') {
 
-                    env.DOMAIN_NAME = "trialcommons.cancer.gov"
+                    env.DOMAIN_NAME = "clinical.datacommons.cancer.gov"
 
-                } else {
-
+                } else if(env.ENV == 'stage'){
+                     env.DOMAIN_NAME = "clinical-${env.ENV}.datacommons.cancer.gov"
+				} 
+				else{
                     env.DOMAIN_NAME = "trialcommons-${env.ENV}.cancer.gov"
                 }
 
