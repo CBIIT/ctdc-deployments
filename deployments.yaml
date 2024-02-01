@@ -6,9 +6,9 @@ services:
     image: mvp.113
     buildNumber: '113'
   frontend:
-    version: mvp.139
-    image: mvp.139
-    buildNumber: '139'
+    version: nginx.140
+    image: nginx.140
+    buildNumber: '140'
   files:
     version: main.36
     image: main.36
