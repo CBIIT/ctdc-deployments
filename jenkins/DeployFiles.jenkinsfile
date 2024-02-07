@@ -95,8 +95,6 @@ pipeline {
 				// set template file name
 				env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task.json"
 
-				env.NEO4J_HOST= sh(label: 'Get Neo4j host', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.neo4j_ip'").trim()
-
 			}
 
  		}
@@ -148,7 +146,6 @@ pipeline {
 				sed -i "s|{{program}}|$PROGRAM|" $TEMPLATE_FILE
 				sed -i "s|{{project}}|$PROJECT|" $TEMPLATE_FILE
 				sed -i "s|{{domain_name}}|$DOMAIN_NAME|" $TEMPLATE_FILE
-				sed -i "s|{{neo4j_host}}|$NEO4J_HOST|" $TEMPLATE_FILE
 				sed -i "s|{{sumo_collector_endpoint}}|$SUMO_COLLECTOR_ENDPOINT|" $TEMPLATE_FILE
 				sed -i "s|{{sumo_collector_token}}|$SUMO_COLLECTOR_TOKEN|" $TEMPLATE_FILE
 				sed -i "s|{{date}}|$DATE|" $TEMPLATE_FILE
