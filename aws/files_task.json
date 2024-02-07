@@ -104,6 +104,26 @@
                 {
                     "name": "NEO4J_PASSWORD",
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:neo4j_password::"
+                },
+                {
+                    "name": "MYSQL_HOST",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:rds_host::"
+                },
+                {
+                    "name": "MYSQL_USER",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:rds_username::"
+                },
+                {
+                    "name": "MYSQL_PASSWORD",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:rds_password::"
+                },
+                {
+                    "name": "DCF_BASE_URL",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_base_url::"
+                },
+                {
+                    "name": "DCF_FILE_URL",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_file_url::"
                 }
             ],
             "environment": [
@@ -124,7 +144,7 @@
                     "value": "bolt://{{neo4j_host}}:7687"
                 },
                 {
-                    "name": "AUTH_ENABLED",
+                    "name": "AUTHORIZATION_ENABLED",
                     "value": "false"
                 },
                 {
@@ -142,6 +162,18 @@
                 {
                     "name": "NEW_RELIC_APP_NAME",
                     "value": "{{project}}-{{environment}}-files"
+                },
+                {
+                    "name": "MYSQL_PORT",
+                    "value": "3306"
+                },
+                {
+                    "name": "MYSQL_DATABASE",
+                    "value": "ctdc"
+                },
+                {
+                    "name": "FAKE",
+                    "value": "false"
                 }
             ],
             "mountPoints": [],
