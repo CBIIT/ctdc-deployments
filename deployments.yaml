@@ -14,6 +14,6 @@ services:
     image: dev.38
     buildNumber: '38'
   authn:
-    version: token.27
-    image: token.27
-    buildNumber: '27'
+    version: token.28
+    image: token.28
+    buildNumber: '28'
