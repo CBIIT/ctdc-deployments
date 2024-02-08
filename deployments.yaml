@@ -10,9 +10,9 @@ services:
     image: mvp.145
     buildNumber: '145'
   files:
-    version: main.37
-    image: main.37
-    buildNumber: '37'
+    version: dev.38
+    image: dev.38
+    buildNumber: '38'
   authn:
     version: token.27
     image: token.27
