@@ -352,7 +352,7 @@ resource "aws_iam_policy" "opensearch_snapshot_policy" {
 }
 
 data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
-  count     = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0
+  count     = terraform.workspace == "stage" ? 1 : 0
   statement {
     effect    = "Allow"
     actions   = ["s3:ListBucket"]
@@ -387,6 +387,53 @@ data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
     resources = [
       "${module.opensearch[0].opensearch_arn}/*"
     ]
+  }
+}
+
+data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
+  count     = terraform.workspace == "dev" ? 1 : 0
+  statement {
+    effect    = "Allow"
+    actions   = ["s3:ListBucket"]
+    resources = ["arn:aws:s3:::${var.s3_opensearch_snapshot_bucket}",]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:DeleteObject",
+      "s3:GetBucketOwnershipControls",
+      "s3:PutObjectAcl"
+    ]
+    resources = [
+      "arn:aws:s3:::${var.s3_opensearch_snapshot_bucket}",
+      "arn:aws:s3:::${var.s3_opensearch_snapshot_bucket}/*"
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "iam:PassRole",
+      "iam:GetRole"
+    ]
+    resources = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/power-user*"]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = ["es:*"]
+    resources = [
+      "${module.opensearch[0].opensearch_arn}/*"
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = ["sts:AssumeRole"]
+    resources = ["arn:aws:iam::${lookup(var.aws_prod_account_id,var.region,"us-east-1" )}:role/power-user-crdc-stage-ctdc-s3-opensearch-cross-account-access"]
   }
 }
 
