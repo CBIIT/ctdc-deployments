@@ -86,6 +86,7 @@ pipeline {
                     base_path: "${params.BASE_PATH}",
                     s3_bucket: "${params.S3_BUCKET}",
                     project: "${PROJECT}",
+                    region: "${params.REGION}",
                     indices: "${params.INDICES}"
                     ],
                   hostKeyChecking: false,
