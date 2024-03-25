@@ -426,7 +426,7 @@ data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
     effect = "Allow"
     actions = ["es:*"]
     resources = [
-      "${module.opensearch[0].opensearch_arn}/*"
+      "arn:aws:es:us-east-1:${data.aws_caller_identity.current.account_id}:domain/*/*"     #"${module.opensearch[0].opensearch_arn}/*"
     ]
   }
 
