@@ -12,16 +12,20 @@ provider "aws" {
   
   default_tags {
     tags = {
-      Customer       = "nci od cbiit ods"
-      DevLead        = "yizhen chen"
-      DevOps         = "venkatasaikiran kotepalli"
-      FISMA          = "moderate"
-      ManagedBy      = "terraform"
-      OpsModel       = "cbiit managed hybrid"
-      Program        = "crdc"
-      PII            = "yes"
-      Project        = "ctdc"
-      ProjectManager = "Hayley Dingerdissen"
+      EnvironmentTier = terraform.workspace
+      Customer        = "nci od cbiit ods"
+      DevLead         = "yizhen chen"
+      CreatedBy       = "venkatasaikiran kotepalli"
+      ResourceName    = "NCI-ctdc-${terraform.workspace}"
+      FISMA           = "moderate"
+      ManagedBy       = "terraform"
+      OpsModel        = "cbiit managed hybrid"
+      Program         = "crdc"
+      PII             = "yes"
+      Backup          = local.level
+      PatchGroup      = local.level
+      ApplicationName = "Clinical and Translational Data Commons"
+      ProjectManager  = "Hayley Dingerdissen"
     }
   }
 }
