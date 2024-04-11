@@ -37,7 +37,7 @@ locals {
   application_url = terraform.workspace == "prod" ? "${var.application_subdomain}.${var.domain_name}" : "${var.application_subdomain}-${terraform.workspace}.${var.domain_name}"
 
   s3_snapshot_bucket_name = "opensearch-snapshot-bucket"
-
+  s3_neo4j_bucket_name = "neo4j-data-dump"
   # Secrets
   dynamic_secrets = {
     app = {
