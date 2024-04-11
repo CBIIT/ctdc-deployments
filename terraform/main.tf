@@ -165,7 +165,7 @@ module "s3" {
 }
 
 #S3 bucket for storing Neo4j dump
-module "s3" {
+module "s3_neo4jdump" {
   count  = terraform.workspace == "dev" ? 1 : 0
   source = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/s3?ref=main"
   bucket_name = local.s3_neo4j_bucket_name

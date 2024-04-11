@@ -320,6 +320,33 @@ data "aws_iam_policy_document" "s3bucket_policy" {
     }
 }
 
+# S3 neo4j bucket
+data "aws_iam_policy_document" "s3_neo4jdump_policy" {
+  count  = terraform.workspace == "dev" ? 1 : 0
+  statement {
+      effect = "Allow"
+      principals {
+        type        = "AWS"
+        identifiers = [
+            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        ]
+      }
+      actions = [
+        "s3:ListBucket",
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:ListBucketVersions",
+        "s3:GetObjectVersion",
+        "s3:PutObjectAcl"
+      ]
+      resources = [
+        "arn:aws:s3:::${module.s3_neo4jdump[0].bucket_name}",
+        "arn:aws:s3:::${module.s3_neo4jdump[0].bucket_name}/*"
+      ]
+    }
+}
+
 #Opensearch snapshot policy
 
 data "aws_iam_policy_document" "trust" {
