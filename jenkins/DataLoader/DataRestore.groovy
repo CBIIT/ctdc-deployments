@@ -31,7 +31,7 @@ pipeline {
     SLACK_SECRET  = "ctdc_slack_url"
     PROGRAM       = "crdc"
     PROJECT       = "ctdc"
-    S3_BUCKET     = "crdc-dev-ctdc-neo4j-data-dump""
+    S3_BUCKET     = "crdc-dev-ctdc-neo4j-data-dump"
  }
   stages{
 
