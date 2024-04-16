@@ -1,11 +1,11 @@
 @Library('datacommons-jenkins-shared-library@v1.1') _
 
 pipeline {
-  agent {
-    node {
-      label 'ctdc-deploy-agent'
+    agent {
+      node {
+        label 'ctdc-deploy-agent'
+      }
     }
-  }
 
 	parameters {
       extendedChoice( 
@@ -20,18 +20,18 @@ pipeline {
     
     }
 
-  tools {
-  	maven 'Default' 
-    jdk 'Default' 
-  }
- environment {
-    DUMP_FILE     = "${params.DumpFileName}"
-	TIER          = "${params.Environment}"
-    SLACK_SECRET  = "ctdc_slack_url"
-    PROJECT       = "ctdc"
-    S3_BUCKET     = "crdc-dev-ctdc-neo4j-data-dump"
- }
-  stages{
+    tools {
+  	  maven 'Default' 
+      jdk 'Default' 
+    }
+    environment {
+        DUMP_FILE     = "${params.DumpFileName}"
+	    TIER          = "${params.Environment}"
+        SLACK_SECRET  = "ctdc_slack_url"
+        PROJECT       = "ctdc"
+        S3_BUCKET     = "crdc-dev-ctdc-neo4j-data-dump"
+    }
+    stages{
 
   	stage('create inventory'){
  		steps {
