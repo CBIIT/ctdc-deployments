@@ -5,7 +5,7 @@
   become: yes
   remote_user: commonsdocker
   vars:
-    - ansible_python_interpreter: /usr/local/bin/python3
+    - ansible_python_interpreter: /usr/bin/python3
     
   tasks:    
     - name: 
