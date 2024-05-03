@@ -6,9 +6,9 @@ services:
     image: mvp.143
     buildNumber: '143'
   frontend:
-    version: fix_for_CTDC-1423_and_CTDC-1373.211
-    image: fix_for_CTDC-1423_and_CTDC-1373.211
-    buildNumber: '211'
+    version: mvp.212
+    image: mvp.212
+    buildNumber: '212'
   files:
     version: refine.42
     image: refine.42
