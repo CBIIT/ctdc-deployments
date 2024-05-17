@@ -157,7 +157,7 @@
                 },
                 {
                     "name": "REACT_APP_LOGIN_URL",
-                    "value": "https://nci-crdc-staging.datacommons.io/user/oauth2/authorize?client_id={{dcf_client_id}}&response_type=code&redirect_uri=https://{{domain_name}}/login&scope=openid%20user"
+                    "value": "https://nci-crdc-staging.datacommons.io/user/oauth2/authorize?client_id={{dcf_client_id}}&response_type=code&redirect_uri=https://{{domain_name}}/login&scope=openid%20user%20data"
                 },
                 {
                     "name": "REACT_APP_AUTH_SERVICE_API",
