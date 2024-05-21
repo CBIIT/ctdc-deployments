@@ -14,6 +14,6 @@ services:
     image: refine.42
     buildNumber: '42'
   authn:
-    version: mvp.33
-    image: mvp.33
-    buildNumber: '33'
+    version: mvp.34
+    image: mvp.34
+    buildNumber: '34'
