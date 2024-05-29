@@ -83,14 +83,17 @@ pipeline {
 				if (env.ENV == 'prod') {
 
                     env.DOMAIN_NAME = "clinical.datacommons.cancer.gov"
+					env.REDIRECT_URL = "nci-crdc-staging.datacommons.io"
 
                 } else if(env.ENV == 'stage'){
 
                      env.DOMAIN_NAME = "clinical-${env.ENV}.datacommons.cancer.gov"
+					 env.REDIRECT_URL = "nci-crdc-staging.datacommons.io"
 					 
 				}  else {
 
                     env.DOMAIN_NAME = "trialcommons-${env.ENV}.cancer.gov"
+					env.REDIRECT_URL = "nci-crdc.datacommons.io"
                 }
 
                 // set sumo vars for logging
@@ -174,6 +177,9 @@ pipeline {
 				sed -i "s|{{sumo_collector_token}}|$SUMO_COLLECTOR_TOKEN|" $TEMPLATE_FILE
 
 				sed -i "s|{{domain_name}}|$DOMAIN_NAME|" $TEMPLATE_FILE
+				
+				sed -i "s|{{redirect_url}}|$REDIRECT_URL|" $TEMPLATE_FILE
+				
 				sed -i "s|{{dcf_client_id}}|$DCF_CLIENT_ID|" $TEMPLATE_FILE
 				
 				sed -i "s|{{be_version}}|$BE_VERSION|" $TEMPLATE_FILE
