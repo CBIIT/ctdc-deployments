@@ -83,17 +83,17 @@ pipeline {
 				if (env.ENV == 'prod') {
 
                     env.DOMAIN_NAME = "clinical.datacommons.cancer.gov"
-					env.REDIRECT_URL = "nci-crdc-staging.datacommons.io"
+					env.REDIRECT_URL = "nci-crdc.datacommons.io"
 
                 } else if(env.ENV == 'stage'){
 
                      env.DOMAIN_NAME = "clinical-${env.ENV}.datacommons.cancer.gov"
-					 env.REDIRECT_URL = "nci-crdc-staging.datacommons.io"
+					 env.REDIRECT_URL = "nci-crdc.datacommons.io"
 					 
 				}  else {
 
                     env.DOMAIN_NAME = "trialcommons-${env.ENV}.cancer.gov"
-					env.REDIRECT_URL = "nci-crdc.datacommons.io"
+					env.REDIRECT_URL = "nci-crdc-staging.datacommons.io"
                 }
 
                 // set sumo vars for logging
