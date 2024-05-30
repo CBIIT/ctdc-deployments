@@ -88,7 +88,7 @@ pipeline {
                 } else if(env.ENV == 'stage'){
 
                      env.DOMAIN_NAME = "clinical-${env.ENV}.datacommons.cancer.gov"
-					 env.REDIRECT_URL = "nci-crdc.datacommons.io"
+					 env.REDIRECT_URL = "nci-crdc-staging.datacommons.io"
 					 
 				}  else {
 
