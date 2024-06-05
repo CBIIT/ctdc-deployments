@@ -6,9 +6,9 @@ services:
     image: mvp.152
     buildNumber: '152'
   frontend:
-    version: hardcoded_file_download.232
-    image: hardcoded_file_download.232
-    buildNumber: '232'
+    version: hardcoded_file_download.236
+    image: hardcoded_file_download.236
+    buildNumber: '236'
   files:
     version: refine.45
     image: refine.45
