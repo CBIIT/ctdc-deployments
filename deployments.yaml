@@ -10,9 +10,9 @@ services:
     image: mvp.229
     buildNumber: '229'
   files:
-    version: refine.45
-    image: refine.45
-    buildNumber: '45'
+    version: refine.51
+    image: refine.51
+    buildNumber: '51'
   authn:
     version: mvp.36
     image: mvp.36
