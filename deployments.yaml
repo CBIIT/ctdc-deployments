@@ -10,9 +10,9 @@ services:
     image: hardcoded_file_download.236
     buildNumber: '236'
   files:
-    version: refine.45
-    image: refine.45
-    buildNumber: '45'
+    version: refine.49
+    image: refine.49
+    buildNumber: '49'
   authn:
     version: mvp.36
     image: mvp.36
