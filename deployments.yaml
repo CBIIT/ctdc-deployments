@@ -6,9 +6,9 @@ services:
     image: mvp.154
     buildNumber: '154'
   frontend:
-    version: CTDC-1516_notification.242
-    image: CTDC-1516_notification.242
-    buildNumber: '242'
+    version: mvp.243
+    image: mvp.243
+    buildNumber: '243'
   files:
     version: mvp.53
     image: mvp.53
