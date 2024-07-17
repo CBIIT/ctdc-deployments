@@ -10,9 +10,9 @@ services:
     image: 1.0.0.259
     buildNumber: '259'
   files:
-    version: mvp.53
-    image: mvp.53
-    buildNumber: '53'
+    version: 1.0.0.55
+    image: 1.0.0.55
+    buildNumber: '55'
   authn:
     version: 1.0.0.41
     image: 1.0.0.41
