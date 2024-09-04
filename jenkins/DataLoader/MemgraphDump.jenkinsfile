@@ -47,7 +47,8 @@ pipeline {
                     env.DB_PASS = sh(label: 'Get DB Host', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id memgraph/$ENV --query SecretString --output text | jq -r '.db_pass'").trim()
 
                     // set output file name
-				    env.BACKUP_FILE="$PROJECT-$ENV-test.cypherl"
+                    env.DATE = sh(label: 'Get Date', returnStdout: true, script: "$(date '+%m/%d/%Y')").trim()
+				    env.BACKUP_FILE = "$PROJECT-$ENV-$DATE.cypherl"
 
                 }
 
@@ -83,8 +84,6 @@ pipeline {
                     
                     echo "DUMP DATABASE;" | mgconsole --host $DB_HOST --port 7687 --username $DB_USER --password $DB_PASS --output-format=cypherl > $WORKSPACE/output/$BACKUP_FILE
 
-                    ls -la $WORKSPACE/output
-
                     '''
 
                     }
@@ -106,7 +105,7 @@ pipeline {
 				# Push cypher file
 				echo "Uploading File: $BACKUP_FILE"
 
-				aws s3 cp $WORKSPACE/output/$BACKUP_FILE s3://$S3_BUCKET/test/$BACKUP_FILE
+				aws s3 cp $WORKSPACE/output/$BACKUP_FILE s3://$S3_BUCKET/$DATE/$BACKUP_FILE
 
 				'''
 
