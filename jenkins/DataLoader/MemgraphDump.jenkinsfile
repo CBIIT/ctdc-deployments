@@ -47,7 +47,8 @@ pipeline {
                     env.DB_PASS = sh(label: 'Get DB Host', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id memgraph/$ENV --query SecretString --output text | jq -r '.db_pass'").trim()
 
                     // set output file name
-                    env.DATE = sh(label: 'Get Date', returnStdout: true, script: "echo \$(date '+%m%d%Y')").trim()
+                    //env.DATE = sh(label: 'Get Date', returnStdout: true, script: "echo \$(date '+%m%d%Y')").trim()
+                    env.DATE = Date().format('mmddyyyy') 
 				    env.BACKUP_FILE = "$PROJECT-$ENV-$DATE.cypherl"
 
                 }
