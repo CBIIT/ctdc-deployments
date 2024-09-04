@@ -106,7 +106,7 @@ pipeline {
 				# Push cypher file
 				echo "Uploading File: $BACKUP_FILE"
 
-				aws s3 cp $WORKSPACE/output/$BACKUP_FILE s3://$S3_BUCKET/test
+				aws s3 cp $WORKSPACE/output/$BACKUP_FILE s3://$S3_BUCKET/test/$BACKUP_FILE
 
 				'''
 
