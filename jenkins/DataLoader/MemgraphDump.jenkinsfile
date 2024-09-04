@@ -75,6 +75,9 @@ pipeline {
                     # build CTDC Docker container
                     echo "Dumping Data For: $PROJECT $ENV"
 
+                    # create output directory
+                    mkdir $WORKSPACE/output
+                    
                     echo "DUMP DATABASE;" | mgconsole --host $DB_HOST --port 7687 --username $DB_USER --password $DB_PASS --output-format=cypherl > $WORKSPACE/output/$PROJECT-$ENV-test.cypherl
 
                     ls -la $WORKSPACE/output
