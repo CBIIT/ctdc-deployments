@@ -1,0 +1,113 @@
+@Library('datacommons-jenkins-shared-library@v1.1') _
+
+pipeline {
+	agent {
+		node {
+			label 'slave-ncias-d2947-c'
+		}
+	}
+	parameters {
+
+        extendedChoice(
+            name: 'Environment',
+            defaultValue: 'dev',
+            description: 'Choose the environment to build',
+            type: 'PT_SINGLE_SELECT',
+            value: 'curation')
+        
+        string(defaultValue: "", 
+            description: 'S3 Bucket to dump data to', 
+            name: 'S3Bucket')
+
+    }
+
+    environment {
+
+        S3_BUCKET    = "${params.S3Bucket}"
+        ENV          = "${params.Environment}"
+        SLACK_SECRET = "ctdc_slack_url"
+        REGION       = "us-east-1"
+        PROJECT      = "ctdc"
+
+    }
+
+    stages{
+    
+        stage('Set Environment Variables'){
+
+            steps {
+
+                script {
+
+                    // set memgraph endpoint
+                    env.DB_HOST = sh(label: 'Get DB Host', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id memgraph/$ENV --query SecretString --output text | jq -r '.db_host'").trim()
+                    // set memgraph user
+                    env.DB_USER = sh(label: 'Get DB Host', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id memgraph/$ENV --query SecretString --output text | jq -r '.db_user'").trim()
+                    // set memgraph password
+                    env.DB_PASS = sh(label: 'Get DB Host', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id memgraph/$ENV --query SecretString --output text | jq -r '.db_pass'").trim()
+
+                }
+
+            }
+
+  	    }
+        
+        stage('dump-data'){
+
+            agent {
+
+                docker {
+                    image 'cbiitssrepo/mgconsole'
+                    args '--net=host -u root -v /var/run/docker.sock:/var/run/docker.sock'
+                    reuseNode true
+                }
+
+            }
+            
+            steps {
+
+                maskPasswords(varPasswordPairs: [[password: "${DB_PASS}"]]){
+                
+                    script {
+
+                        sh label: 'Dump-Data', script: '''#!/bin/bash
+
+                        # build CTDC Docker container
+                        echo "Dumping Data For: $PROJECT $ENV"
+
+                        echo "DUMP DATABASE;" | mgconsole --host $DB_HOST --port 7687 --username $DB_USER --password $DB_PASS --output-format=cypherl > $WORKSPACE/output/$PROJECT-$ENV-test.cypherl
+
+                        ls -la $WORKSPACE/output
+
+                        '''
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+
+    post {
+
+        // always {
+
+        //     notify(
+        //         secretPath: "notification/slack",
+        //         secretName: "${env.SLACK_SECRET}"
+        //     ) 
+
+        // }
+
+        cleanup {
+
+            cleanWs()
+        
+        }
+
+    }
+
+}
