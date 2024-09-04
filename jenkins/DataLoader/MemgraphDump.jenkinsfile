@@ -48,7 +48,7 @@ pipeline {
 
                     // set output file name
                     env.DATE = sh(label: 'Get Date', returnStdout: true, script: "echo `date +%m%d%Y`").trim()
-				    env.BACKUP_FILE = "$PROJECT-$ENV-$DATE\.cypherl"
+				    env.BACKUP_FILE = "${PROJECT}-${ENV}-${DATE}.cypherl"
 
                 }
 
