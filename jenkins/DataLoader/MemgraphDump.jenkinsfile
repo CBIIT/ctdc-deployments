@@ -66,20 +66,20 @@ pipeline {
             
             steps {
 
-                maskPasswords(varPasswordPairs: [[password: "${env.DB_PASS}"]]){
-                
-                    script {
+                script {
 
-                        sh label: 'Dump-Data', script: '''#!/bin/bash
+                    maskPasswords(varPasswordPairs: [[password: "${env.DB_PASS}"]]){
 
-                        # build CTDC Docker container
-                        echo "Dumping Data For: $PROJECT $ENV"
+                    sh label: 'Dump-Data', script: '''#!/bin/bash
 
-                        echo "DUMP DATABASE;" | mgconsole --host $DB_HOST --port 7687 --username $DB_USER --password $DB_PASS --output-format=cypherl > $WORKSPACE/output/$PROJECT-$ENV-test.cypherl
+                    # build CTDC Docker container
+                    echo "Dumping Data For: $PROJECT $ENV"
 
-                        ls -la $WORKSPACE/output
+                    echo "DUMP DATABASE;" | mgconsole --host $DB_HOST --port 7687 --username $DB_USER --password $DB_PASS --output-format=cypherl > $WORKSPACE/output/$PROJECT-$ENV-test.cypherl
 
-                        '''
+                    ls -la $WORKSPACE/output
+
+                    '''
 
                     }
 
