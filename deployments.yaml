@@ -10,9 +10,9 @@ services:
     image: 1.0.0.259
     buildNumber: '259'
   files:
-    version: CVE-2023-42282.67
-    image: CVE-2023-42282.67
-    buildNumber: '67'
+    version: snyk-fix-a300bb134dfb66d6f3538be45c001d2b.68
+    image: snyk-fix-a300bb134dfb66d6f3538be45c001d2b.68
+    buildNumber: '68'
   authn:
     version: 1.0.0.41
     image: 1.0.0.41
