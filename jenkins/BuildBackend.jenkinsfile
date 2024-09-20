@@ -65,7 +65,10 @@ pipeline {
 		checkout([$class: 'GitSCM',
 			branches: [[name: "${env.CODE_BRANCH}"]],
 			extensions: [[$class: 'SubmoduleOption', 
-			recursiveSubmodules: true],
+			recursiveSubmodules: true,
+			reference: '', 
+            trackingSubmodules: true,
+            disableSubmodules: false], ],
 			[$class: 'RelativeTargetDirectory',
 			relativeTargetDir: "${env.CODE_FOLDER}"]],
 			userRemoteConfigs:
