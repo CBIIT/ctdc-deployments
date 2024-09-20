@@ -6,9 +6,9 @@ services:
     image: 1.0.0.166
     buildNumber: '166'
   frontend:
-    version: 1.0.0.259
-    image: 1.0.0.259
-    buildNumber: '259'
+    version: 1.1.0.260
+    image: 1.1.0.260
+    buildNumber: '260'
   files:
     version: snyk-fix-a300bb134dfb66d6f3538be45c001d2b.68
     image: snyk-fix-a300bb134dfb66d6f3538be45c001d2b.68
