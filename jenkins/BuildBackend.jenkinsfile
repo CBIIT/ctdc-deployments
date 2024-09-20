@@ -68,7 +68,7 @@ pipeline {
 			recursiveSubmodules: true,
 			reference: '', 
             trackingSubmodules: true,
-            disableSubmodules: false], ],
+            disableSubmodules: false],
 			[$class: 'RelativeTargetDirectory',
 			relativeTargetDir: "${env.CODE_FOLDER}"]],
 			userRemoteConfigs:
