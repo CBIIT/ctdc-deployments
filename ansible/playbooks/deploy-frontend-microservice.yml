@@ -73,8 +73,8 @@
           # Static Content
           - name: REACT_APP_ABOUT_CONTENT_URL
             value: "{{ react_app_about_data[tier] }}"
-          - name: REACT_APP_ABOUT_CONTENT_URL
-            value: "{{ about_content_url }}"
+          #- name: REACT_APP_ABOUT_CONTENT_URL
+            #value: "{{ about_content_url }}"
           # New Relic
           - name: NEW_RELIC_LICENSE_KEY
             value: "{{ newrelic_license_key }}"
