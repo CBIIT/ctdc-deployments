@@ -111,10 +111,6 @@
                     "name": "REACT_APP_BE_VERSION",
                     "value": "{{be_version}}"
                 },
-                /*{
-                    "name": "REACT_APP_ABOUT_CONTENT_URL",
-                    "value": "https://raw.githubusercontent.com/CBIIT/bento-ctdc-frontend/{{image_tag}}/src/content/dev/aboutPagesContent.yaml"
-                },*/
                 {
                     "name": "REACT_APP_ABOUT_CONTENT_URL",
                     "value": "{{#switch:environment}} dev|dev2=https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/develop/aboutPagesContent.yaml {{#case:qa|qa2}}https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/qa/aboutPagesContent.yaml {{#case:stage}}https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/stage/aboutPagesContent.yaml {{#case:prod}}https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/production/aboutPagesContent.yaml"
