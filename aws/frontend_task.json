@@ -144,6 +144,10 @@
                     "value": "true"
                 },
                 {
+                    "name": "REACT_APP_ABOUT_CONTENT_URL",
+                    "value": "{{react_app_about_content_url}}"
+                },
+                {
                     "name": "NODE_LEVEL_ACCESS",
                     "value": "gov-collector.newrelic.com"
                 },
