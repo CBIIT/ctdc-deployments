@@ -1,0 +1,105 @@
+@Library('datacommons-jenkins-shared-library@v1.1') _
+
+pipeline {
+    agent {
+        node {
+            label 'ctdc-deploy-agent'
+        }
+    }
+
+    parameters {
+        string(
+            defaultValue: '',
+            description: 'The Image to Deploy',
+            name: 'ImageTag')
+
+        extendedChoice(
+            name: 'Environment',
+            defaultValue: 'dev',
+            description: 'Choose the environment to deploy to',
+            type: 'PT_SINGLE_SELECT',
+            value: 'dev,qa,stage,prod')
+    }
+
+    options {
+        timestamps()
+    }
+
+    environment {
+        PROGRAM      = "crdc"
+        PROJECT      = "ctdc"
+        APP          = "frontend"
+        SLACK_SECRET = "ctdc_slack_url"
+        REGION       = "us-east-1"
+        ECR_REPO     = "${env.PROGRAM}-${env.PROJECT}-${env.APP}"
+        DEPLOY_REPO  = "${env.PROJECT}-deployments"
+        IMAGE_TAG    = "${params.ImageTag}"
+        ENV          = "${params.Environment}"
+        CLUSTER      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-ecs"
+        SERVICE      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-${env.APP}"
+    }
+
+    stages {
+        stage('checkout') {
+            steps {
+                checkout([$class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    extensions: [[$class: 'SubmoduleOption', recursiveSubmodules: true],
+                                [$class: 'RelativeTargetDirectory', relativeTargetDir: 'ctdc-deployments']],
+                    userRemoteConfigs: [[url: "https://github.com/CBIIT/${env.DEPLOY_REPO}"]]])
+
+                checkout([$class: 'GitSCM',
+                    branches: [[name: "${env.ENV}"]],
+                    extensions: [[$class: 'SubmoduleOption', recursiveSubmodules: true],
+                                [$class: 'RelativeTargetDirectory', relativeTargetDir: "ctdc-deployments-${env.ENV}"]],
+                    userRemoteConfigs: [[url: "https://github.com/CBIIT/${env.DEPLOY_REPO}"]]])
+            }
+        }
+
+        stage('Set Environment Variables') {
+            steps {
+                script {
+                    // Set REACT_APP_ABOUT_CONTENT_URL based on environment
+                    if (env.ENV == 'dev' || env.ENV == 'dev2') {
+                        env.REACT_APP_ABOUT_CONTENT_URL = "https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/develop/aboutPagesContent.yaml"
+                    } else if (env.ENV == 'qa' || env.ENV == 'qa2') {
+                        env.REACT_APP_ABOUT_CONTENT_URL = "https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/qa/aboutPagesContent.yaml"
+                    } else if (env.ENV == 'stage') {
+                        env.REACT_APP_ABOUT_CONTENT_URL = "https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/stage/aboutPagesContent.yaml"
+                    } else if (env.ENV == 'prod') {
+                        env.REACT_APP_ABOUT_CONTENT_URL = "https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/production/aboutPagesContent.yaml"
+                    }
+                }
+            }
+        }
+
+        stage('Update Task Definition') {
+            steps {
+                script {
+                    sh label: 'Task-Definition-Update', script: '''#!/bin/bash
+                    echo "Updating Task Definition to Use: $ECR_REPO:$IMAGE_TAG"
+                    ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+                    IMAGE_ID="$REPO_URL:$IMAGE_TAG"
+
+                    sed -i "s|{{react_app_about_content_url}}|$REACT_APP_ABOUT_CONTENT_URL|" $TEMPLATE_FILE
+
+                    aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            notify(
+                secretPath: "notification/slack",
+                secretName: "${env.SLACK_SECRET}"
+            ) 
+        }
+
+        cleanup {
+            cleanWs()
+        }
+    }
+}
