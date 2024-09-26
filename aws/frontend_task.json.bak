@@ -1,7 +1,7 @@
 {
-    "family": "$PROGRAM-$ENVIRONMENT-$PROJECT-frontend",
-    "taskRoleArn": "arn:aws:iam::$ACCOUNT_ID:role/power-user-$PROGRAM-$ENVIRONMENT-$PROJECT-ecs-task-role",
-    "executionRoleArn": "arn:aws:iam::$ACCOUNT_ID:role/power-user-$PROGRAM-$ENVIRONMENT-$PROJECT-ecs-task-execution-role",
+    "family": "{{program}}-{{environment}}-{{project}}-frontend",
+    "taskRoleArn": "arn:aws:iam::{{account_id}}:role/power-user-{{program}}-{{environment}}-{{project}}-ecs-task-role",
+    "executionRoleArn": "arn:aws:iam::{{account_id}}:role/power-user-{{program}}-{{environment}}-{{project}}-ecs-task-execution-role",
     "requiresCompatibilities": [
         "FARGATE"
     ],
@@ -35,7 +35,7 @@
             "secrets": [
                 {
                     "name": "NRIA_LICENSE_KEY",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:monitoring/newrelic:api_key::"
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:monitoring/newrelic:api_key::"
                 }
             ],
             "environment": [
@@ -45,7 +45,7 @@
                 },
                 {
                     "name": "NEW_RELIC_APP_NAME",
-                    "value": "$PROJECT-$ENVIRONMENT-frontend"
+                    "value": "{{project}}-{{environment}}-frontend"
                 },
                 {
                     "name": "NRIA_IS_FORWARD_ONLY",
@@ -77,7 +77,7 @@
         },
         {
             "name": "frontend",
-            "image": "$IMAGE_ID",
+            "image": "{{image_id}}",
             "cpu": 0,
             "portMappings": [
                 {
@@ -91,33 +91,33 @@
             "secrets": [
                 {
                     "name": "NEW_RELIC_LICENSE_KEY",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:monitoring/newrelic:api_key::"
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:monitoring/newrelic:api_key::"
                 },
                 {
                     "name": "REACT_APP_GA_TRACKING_ID",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENVIRONMENT:google_id::"
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:google_id::"
                 }
             ],
             "environment": [
                 {
                     "name": "PROJECT",
-                    "value": "$PROJECT"
+                    "value": "{{project}}"
                 },
                 {
                     "name": "REACT_APP_FE_VERSION",
-                    "value": "$IMAGE_TAG"
+                    "value": "{{image_tag}}"
                 },
                 {
                     "name": "REACT_APP_BE_VERSION",
-                    "value": "$BE_VERSION"
+                    "value": "{{be_version}}"
                 },            
                 {
                     "name": "REACT_APP_BACKEND_API",
-                    "value": "https://$DOMAIN_NAME/v1/graphql/"
+                    "value": "https://{{domain_name}}/v1/graphql/"
                 },
                 {
                     "name": "REACT_APP_FILE_SERVICE_API",
-                    "value": "https://$DOMAIN_NAME/api/files/"
+                    "value": "https://{{domain_name}}/api/files/"
                 },
                 {
                     "name": "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED",
@@ -133,11 +133,11 @@
                 },
                 {
                     "name": "NEW_RELIC_LABELS",
-                    "value": "Project:$PROJECT;Environment:$ENVIRONMENT"
+                    "value": "Project:{{project}};Environment:{{environment}}"
                 },
                 {
                     "name": "NEW_RELIC_APP_NAME",
-                    "value": "$PROJECT-$ENVIRONMENT-frontend"
+                    "value": "{{project}}-{{environment}}-frontend"
                 },
                 {
                     "name": "REACT_APP_AUTH",
@@ -145,7 +145,7 @@
                 },
                 {
                     "name": "REACT_APP_ABOUT_CONTENT_URL",
-                    "value": "$REACT_APP_ABOUT_CONTENT_URL"
+                    "value": "{{react_app_about_content_url}}"
                 },
                 {
                     "name": "NODE_LEVEL_ACCESS",
@@ -157,11 +157,11 @@
                 },
                 {
                     "name": "REACT_APP_LOGIN_URL",
-                    "value": "https://$REDIRECT_URL/user/oauth2/authorize?client_id=$DCF_CLIENT_ID&response_type=code&redirect_uri=https://$DOMAIN_NAME/login&scope=openid%20user%20data"
+                    "value": "https://{{redirect_url}}/user/oauth2/authorize?client_id={{dcf_client_id}}&response_type=code&redirect_uri=https://{{domain_name}}/login&scope=openid%20user%20data"
                 },
                 {
                     "name": "REACT_APP_AUTH_SERVICE_API",
-                    "value": "https://$DOMAIN_NAME/api/auth/"
+                    "value": "https://{{domain_name}}/api/auth/"
                 }
             ],
             "mountPoints": [],
@@ -170,11 +170,11 @@
                 "logDriver": "awsfirelens",
                 "options": {
                     "Format": "json_lines",
-                    "Host": "$SUMO_COLLECTOR_ENDPOINT",
+                    "Host": "{{sumo_collector_endpoint}}",
                     "Name": "http",
                     "Port": "443",
                     "Retry_Limit": "2",
-                    "URI": "/receiver/v1/http/$SUMO_COLLECTOR_TOKEN",
+                    "URI": "/receiver/v1/http/{{sumo_collector_token}}",
                     "tls": "on",
                     "tls.verify": "off"
                 }
