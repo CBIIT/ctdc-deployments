@@ -1,7 +1,7 @@
 {
-    "family": "$PROGRAM-$ENVIRONMENT-$PROJECT-frontend",
-    "taskRoleArn": "arn:aws:iam::$ACCOUNT_ID:role/power-user-$PROGRAM-$ENVIRONMENT-$PROJECT-ecs-task-role",
-    "executionRoleArn": "arn:aws:iam::$ACCOUNT_ID:role/power-user-$PROGRAM-$ENVIRONMENT-$PROJECT-ecs-task-execution-role",
+    "family": "$PROGRAM-$ENV-$PROJECT-frontend",
+    "taskRoleArn": "arn:aws:iam::$ACCOUNT_ID:role/power-user-$PROGRAM-$ENV-$PROJECT-ecs-task-role",
+    "executionRoleArn": "arn:aws:iam::$ACCOUNT_ID:role/power-user-$PROGRAM-$ENV-$PROJECT-ecs-task-execution-role",
     "requiresCompatibilities": [
         "FARGATE"
     ],
@@ -45,7 +45,7 @@
                 },
                 {
                     "name": "NEW_RELIC_APP_NAME",
-                    "value": "$PROJECT-$ENVIRONMENT-frontend"
+                    "value": "$PROJECT-$ENV-frontend"
                 },
                 {
                     "name": "NRIA_IS_FORWARD_ONLY",
@@ -95,7 +95,7 @@
                 },
                 {
                     "name": "REACT_APP_GA_TRACKING_ID",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENVIRONMENT:google_id::"
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:google_id::"
                 }
             ],
             "environment": [
@@ -133,11 +133,11 @@
                 },
                 {
                     "name": "NEW_RELIC_LABELS",
-                    "value": "Project:$PROJECT;Environment:$ENVIRONMENT"
+                    "value": "Project:$PROJECT;Environment:$ENV"
                 },
                 {
                     "name": "NEW_RELIC_APP_NAME",
-                    "value": "$PROJECT-$ENVIRONMENT-frontend"
+                    "value": "$PROJECT-$ENV-frontend"
                 },
                 {
                     "name": "REACT_APP_AUTH",
