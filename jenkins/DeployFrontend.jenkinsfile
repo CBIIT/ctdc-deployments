@@ -173,8 +173,8 @@ pipeline {
 
 				# create new revision for $PROJECT-$APP Task Definition
 				echo "Updating Task Defintion to Use: $ECR_REPO:$IMAGE_TAG"
-				ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
-				IMAGE_ID="$REPO_URL:$IMAGE_TAG"
+				export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+				export IMAGE_ID="$REPO_URL:$IMAGE_TAG"
 
 				#sed -i "s|{{program}}|$PROGRAM|" $TEMPLATE_FILE
 				#sed -i "s|{{project}}|$PROJECT|" $TEMPLATE_FILE
