@@ -198,7 +198,10 @@ pipeline {
 				#sed -i "s|{{react_app_about_content_url}}|$REACT_APP_ABOUT_CONTENT_URL|" $TEMPLATE_FILE
 
 				# Update and register task definition
+				cat $TEMPLATE_FILE
 				envsubst < $TEMPLATE_FILE > $TEMPLATE_FILE
+				cat $TEMPLATE_FILE
+
 				aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE
 
 				'''
