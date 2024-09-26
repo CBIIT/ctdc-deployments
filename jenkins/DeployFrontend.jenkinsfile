@@ -199,10 +199,10 @@ pipeline {
 
 				# Update and register task definition
 				cat $TEMPLATE_FILE
-				envsubst < $TEMPLATE_FILE > $TEMPLATE_FILE
-				cat $TEMPLATE_FILE
+				envsubst < $TEMPLATE_FILE > $TEMPLATE_FILE.updated
+				cat $TEMPLATE_FILE.updated
 
-				aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE
+				aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE.updated
 
 				'''
 
