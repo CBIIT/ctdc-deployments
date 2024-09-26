@@ -10,9 +10,9 @@ services:
     image: 1.1.0.262
     buildNumber: '262'
   files:
-    version: snyk-fix-a300bb134dfb66d6f3538be45c001d2b.68
-    image: snyk-fix-a300bb134dfb66d6f3538be45c001d2b.68
-    buildNumber: '68'
+    version: 1.1.0.69
+    image: 1.1.0.69
+    buildNumber: '69'
   authn:
     version: 1.0.0.41
     image: 1.0.0.41
