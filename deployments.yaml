@@ -10,9 +10,9 @@ services:
     image: 1.0.1.268
     buildNumber: '268'
   files:
-    version: 1.1.0.72
-    image: 1.1.0.72
-    buildNumber: '72'
+    version: vulnerability-fix.73
+    image: vulnerability-fix.73
+    buildNumber: '73'
   authn:
     version: 1.0.0.41
     image: 1.0.0.41
