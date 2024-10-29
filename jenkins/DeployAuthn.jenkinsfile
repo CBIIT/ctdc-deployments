@@ -87,7 +87,7 @@ pipeline {
                      env.DOMAIN_NAME = "clinical-${env.ENV}.datacommons.cancer.gov"
 				} 
 				else{
-                    env.DOMAIN_NAME = "trialcommons-${env.ENV}.cancer.gov"
+                    env.DOMAIN_NAME = "clinical-${env.ENV}.datacommons.cancer.gov"
                 }
 
                 // set sumo vars for logging
