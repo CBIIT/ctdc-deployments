@@ -111,7 +111,7 @@ pipeline {
 					 
 				}  else {
 
-                    env.DOMAIN_NAME = "trialcommons-${env.ENV}.cancer.gov"
+                    env.DOMAIN_NAME = "clinical-${env.ENV}.datacommons.cancer.gov"
 					env.REDIRECT_URL = "nci-crdc-staging.datacommons.io"
                 }
 
