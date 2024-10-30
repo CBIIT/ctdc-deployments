@@ -111,10 +111,9 @@ pipeline {
 					 
 				}  else {
 
-                    env.DOMAIN_NAME = "clinical-${env.ENV}.datacommons.cancer.gov"
-					//env.REDIRECT_URL = "nci-crdc-staging.datacommons.io"
-					env.REDIRECT_URL = "nci-crdc.datacommons.io"
-                }
+                    env.DOMAIN_NAME = "trialcommons-${env.ENV}.cancer.gov"
+					env.REDIRECT_URL = "nci-crdc-staging.datacommons.io"					
+			    }
 
                 // set sumo vars for logging
 				env.SUMO_COLLECTOR_ENDPOINT = sh(label: 'Get Sumo Endpoint', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_endpoint'").trim()
