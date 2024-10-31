@@ -6,9 +6,9 @@ services:
     image: 1.1.0.178
     buildNumber: '178'
   frontend:
-    version: 1.1.0.272
-    image: 1.1.0.272
-    buildNumber: '272'
+    version: 1.1.0.273
+    image: 1.1.0.273
+    buildNumber: '273'
   files:
     version: vulnerability-fix.73
     image: vulnerability-fix.73
