@@ -134,7 +134,7 @@ resource "random_password" "rds_password" {
 }
 
 # Secrets
-/*module "deepmerge" {
+module "deepmerge" {
   source = "Invicton-Labs/deepmerge/null"
   maps = [
     local.dynamic_secrets,
@@ -147,7 +147,7 @@ module "secrets" {
   app           = var.project
   #secret_values = module.deepmerge.merged
   secret_values = var.secret_values
-}*/
+}
 
 #S3 bucket for storing OpenSearch Snapshots
 module "s3_openseach" {
