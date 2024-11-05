@@ -378,7 +378,7 @@ resource "aws_iam_policy" "opensearch_snapshot_policy" {
   policy      = data.aws_iam_policy_document.opensearch_snapshot_policy_document[0].json
 }
 
-data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
+/*data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
   count     = terraform.workspace == "stage" ? 1 : 0
   statement {
     effect    = "Allow"
@@ -416,7 +416,7 @@ data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
     ]
   }
 }
-
+*/
 data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
   count     = terraform.workspace == "dev" ? 1 : 0
   statement {
