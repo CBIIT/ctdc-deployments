@@ -401,11 +401,11 @@ variable "rds_username" {
 }
 
 #Opensearch snapshot bucket
-variable "s3_opensearch_snapshot_bucket" {
+/*variable "s3_opensearch_snapshot_bucket" {
   type = string
   description = "name of the S3 Opensearch snapshot bucket created in prod account"
   sensitive   = false
-}
+}*/
 
 variable "stack_name" {
   description = "name of the project"
