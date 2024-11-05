@@ -407,12 +407,6 @@ variable "s3_opensearch_snapshot_bucket" {
   sensitive   = false
 }
 
-variable "create_files_bucket" {
-  description = "indicate if you want to create files bucket or use existing one"
-  type = bool
-  default = false
-}
-
 variable "stack_name" {
   description = "name of the project"
   type = string
