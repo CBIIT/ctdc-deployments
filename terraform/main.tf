@@ -183,7 +183,7 @@ module "s3" {
   #resource_prefix     = "${var.stack_name}-${terraform.workspace}"
   bucket_name = var.cloudfront_distribution_bucket_name
   stack_name = var.stack_name
-  create_bucket_acl = var.create_bucket_acl
+  #create_bucket_acl = var.create_bucket_acl
   env = terraform.workspace
   tags = var.tags
   s3_force_destroy = var.s3_force_destroy
