@@ -134,7 +134,7 @@ resource "random_password" "rds_password" {
 }
 
 # Secrets
-module "deepmerge" {
+/*module "deepmerge" {
   source = "Invicton-Labs/deepmerge/null"
   maps = [
     local.dynamic_secrets,
@@ -142,7 +142,7 @@ module "deepmerge" {
   ]
 }
 
-/*module "secrets" {
+module "secrets" {
   source        = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/secrets?ref=v1.19"
   app           = var.project
   #secret_values = module.deepmerge.merged
