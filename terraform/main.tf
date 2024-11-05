@@ -1,6 +1,6 @@
 # ALB
 module "alb" {
-  source              = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/loadbalancer?ref=v1.9"
+  source              = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/loadbalancer?ref=v1.19"
   resource_prefix     = "${var.program}-${terraform.workspace}-${var.project}"
   vpc_id              = var.vpc_id
   env                 = terraform.workspace
@@ -33,7 +33,7 @@ module "cloudfront" {
 
 # ECS
 module "ecs" {
-  source                    = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/ecs?ref=v1.9"
+  source                    = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/ecs?ref=v1.19"
   stack_name                = var.project
   resource_prefix           = "${var.program}-${terraform.workspace}-${var.project}"
   tags                      = var.tags
@@ -51,7 +51,7 @@ module "ecs" {
 
 # Monitoring
 module "monitoring" {
-  source               = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/monitoring?ref=v1.9"
+  source               = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/monitoring?ref=v1.19"
   app                  = var.project
   tags                 = var.tags
   sumologic_access_id  = var.sumologic_access_id
@@ -67,7 +67,7 @@ module "monitoring" {
 # Newrelic
 module "new_relic_metric_pipeline" {
   count                    = var.create_newrelic_pipeline ? 1 : 0
-  source                   = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/firehose-metrics?ref=v1.9"
+  source                   = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/firehose-metrics?ref=v1.19"
   account_id               = data.aws_caller_identity.current.account_id
   app                      = var.project
   http_endpoint_access_key = var.newrelic_api_key
@@ -82,7 +82,7 @@ module "new_relic_metric_pipeline" {
 # Opensearch
 module "opensearch" {
   count                             = var.create_opensearch_cluster ? 1 : 0
-  source                            = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/opensearch?ref=v1.9"
+  source                            = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/opensearch?ref=v1.19"
   stack_name                        = var.project
   resource_prefix                   = "${var.program}-${terraform.workspace}-${var.project}"
   tags                              = var.tags
@@ -142,14 +142,14 @@ module "deepmerge" {
 }
 
 module "secrets" {
-  source        = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/secrets?ref=main"
+  source        = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/secrets?ref=v1.19"
   app           = var.project
   secret_values = module.deepmerge.merged
   #secret_values = var.secret_values
 }
 
 #S3 bucket for storing OpenSearch Snapshots
-module "s3" {
+module "s3_openseach" {
   count  = terraform.workspace == "stage" ? 1 : 0
   source = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/s3?ref=main"
   bucket_name = local.s3_snapshot_bucket_name
@@ -169,6 +169,21 @@ module "s3_neo4jdump" {
   source = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/s3?ref=main"
   bucket_name = local.s3_neo4j_bucket_name
   resource_prefix = "${var.program}-${terraform.workspace}-${var.project}"
+  env = terraform.workspace
+  tags = var.tags
+  s3_force_destroy = var.s3_force_destroy
+  days_for_archive_tiering = 125
+  days_for_deep_archive_tiering = 180
+  s3_enable_access_logging = false
+  s3_access_log_bucket_id = ""
+}
+
+module "s3" {
+  source = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/s3?ref=lifecycle_s3"
+  #resource_prefix     = "${var.stack_name}-${terraform.workspace}"
+  bucket_name = var.cloudfront_distribution_bucket_name
+  stack_name = var.stack_name
+  create_bucket_acl = var.create_bucket_acl
   env = terraform.workspace
   tags = var.tags
   s3_force_destroy = var.s3_force_destroy
