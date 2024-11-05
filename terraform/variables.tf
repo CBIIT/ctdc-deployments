@@ -411,3 +411,16 @@ variable "stack_name" {
   description = "name of the project"
   type = string
 }
+
+variable "cluster_tshirt_size" {
+  type        = string
+  description = "Size of the OS cluster"
+  default     = "xs"
+}
+
+variable "create_snapshot_role" {
+  type        = bool
+  description = "Whether to allow the opensearch module to create the snapshot role for the OpenSearch domain"
+  default     = false
+  sensitive   = false
+}
