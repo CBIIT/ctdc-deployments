@@ -178,12 +178,12 @@ module "s3_neo4jdump" {
   s3_access_log_bucket_id = ""
 }
 
+#s3 for CloudFront Dedicated bucket
 module "s3" {
-  source = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/s3?ref=lifecycle_s3"
-  #resource_prefix     = "${var.stack_name}-${terraform.workspace}"
+  count = var.create_cloudfront ? 1 : 0
+  source = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/s3?ref=v1.19"
+  resource_prefix     = local.s3_cloudfront_bucket_name
   bucket_name = var.cloudfront_distribution_bucket_name
-  stack_name = var.stack_name
-  #create_bucket_acl = var.create_bucket_acl
   env = terraform.workspace
   tags = var.tags
   s3_force_destroy = var.s3_force_destroy
