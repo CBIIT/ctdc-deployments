@@ -38,6 +38,7 @@ locals {
 
   s3_snapshot_bucket_name = "opensearch-snapshot-bucket"
   s3_neo4j_bucket_name = "neo4j-data-dump"
+  s3_cloudfront_bucket_name    = terraform.workspace == "prod" || terraform.workspace == "stage" ? "ctdc-prod" : "ctdc-dev"
   # Secrets
   dynamic_secrets = {
     app = {
