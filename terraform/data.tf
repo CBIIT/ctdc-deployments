@@ -415,8 +415,7 @@ resource "aws_iam_policy" "opensearch_snapshot_policy" {
       "${module.opensearch[0].opensearch_arn}/*"
     ]
   }
-}
-*/
+}*/
 data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {
   count     = terraform.workspace == "dev" ? 1 : 0
   statement {
