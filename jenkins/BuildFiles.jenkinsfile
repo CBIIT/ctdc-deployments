@@ -1,12 +1,19 @@
 @Library('datacommons-jenkins-shared-library@v1.1') _
 
+def getLabelForEnvironment(environment) {
+	if (environment == "stage" || environment == "prod"){
+		return "slave-ncias-p3181-c"
+	}else {
+		return "slave-ncias-d2947-c"
+	}
+}
+
 pipeline {
 	agent {
 		node {
-			label 'ctdc-deploy-agent'
+			label getLabelForEnvironment(params.Environment)
 		}
 	}
-
 	parameters {
 
         extendedChoice(
