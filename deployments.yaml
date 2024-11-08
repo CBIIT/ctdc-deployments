@@ -10,9 +10,9 @@ services:
     image: 1.1.0.273
     buildNumber: '273'
   files:
-    version: ip-address_fix.84
-    image: ip-address_fix.84
-    buildNumber: '84'
+    version: 1.1.0.87
+    image: 1.1.0.87
+    buildNumber: '87'
   authn:
     version: 1.0.0.41
     image: 1.0.0.41
