@@ -127,7 +127,7 @@
                 },
                 {
                     "name": "CLOUDFRONT_PRIVATE_KEY",
-                    "valueFrom": "{{arn | b64decode}} arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:cloudfront_private_key::"
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:cloudfront_private_key::"
                 },
                 {
                     "name": "CLOUDFRONT_DOMAIN",
