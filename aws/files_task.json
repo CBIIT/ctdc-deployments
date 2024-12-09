@@ -162,6 +162,22 @@
                 {
                     "name": "FAKE",
                     "value": "false"
+                },
+                {
+                    "name": "CLOUDFRONT_ORIGIN_ID",
+                    "value": "{% if tier == 'prod' %}{{ lookup('amazon.aws.aws_secret', 'cloudfront.origin_id', nested=true, region='us-east-1' ) }}{% elif tier == 'stage' %}{{ lookup('amazon.aws.aws_secret', 'cloudfront_files.origin_id', nested=true, region='us-east-1' ) }}{% else %}''{% endif %}"
+                },
+                {
+                    "name": "CLOUDFRONT_DOMAIN_NAME",
+                    "value": "{% if tier == 'prod' %}{{ lookup('amazon.aws.aws_secret', 'cloudfront.domain_name', nested=true, region='us-east-1' ) }}{% elif tier == 'stage' %}{{ lookup('amazon.aws.aws_secret', 'cloudfront_files.domain_name', nested=true, region='us-east-1' ) }}{% else %}''{% endif %}"
+                },
+                {
+                    "name": "CLOUDFRONT_KEY_PAIR_ID",
+                    "value": "{% if tier == 'prod' %}{{ lookup('amazon.aws.aws_secret', 'cloudfront.CF_key_pair_id', nested=true, region='us-east-1' ) }}{% elif tier == 'stage' %}{{ lookup('amazon.aws.aws_secret', 'cloudfront_files.CF_key_pair_id', nested=true, region='us-east-1' ) }}{% else %}''{% endif %}"
+                },
+                {
+                    "name": "CLOUDFRONT_PRIVATE_KEY",
+                    "value": "{% if tier == 'prod' %}{{ lookup('amazon.aws.aws_secret', 'cloudfront.privatekey', nested=true, region='us-east-1' ) | b64decode }}{% elif tier == 'stage' %}{{ lookup('amazon.aws.aws_secret', 'cloudfront_files.privatekey', nested=true, region='us-east-1' ) | b64decode }}{% else %}''{% endif %}"
                 }
             ],
             "mountPoints": [],
