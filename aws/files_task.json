@@ -164,20 +164,20 @@
                     "value": "false"
                 },
                 {
-                    "name": "CLOUDFRONT_ORIGIN_ID",
-                    "value": "{% if tier == 'prod' %}{{ lookup('amazon.aws.aws_secret', 'cloudfront.origin_id', nested=true, region='us-east-1' ) }}{% elif tier == 'stage' %}{{ lookup('amazon.aws.aws_secret', 'cloudfront_files.origin_id', nested=true, region='us-east-1' ) }}{% else %}''{% endif %}"
-                },
-                {
-                    "name": "CLOUDFRONT_DOMAIN_NAME",
-                    "value": "{% if tier == 'prod' %}{{ lookup('amazon.aws.aws_secret', 'cloudfront.domain_name', nested=true, region='us-east-1' ) }}{% elif tier == 'stage' %}{{ lookup('amazon.aws.aws_secret', 'cloudfront_files.domain_name', nested=true, region='us-east-1' ) }}{% else %}''{% endif %}"
+                    "name": "FILE_MANIFEST_BUCKET_NAME",
+                    "value": "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.file_manifest_bucket_name', nested=true, region='us-east-1') }}"
                 },
                 {
                     "name": "CLOUDFRONT_KEY_PAIR_ID",
-                    "value": "{% if tier == 'prod' %}{{ lookup('amazon.aws.aws_secret', 'cloudfront.CF_key_pair_id', nested=true, region='us-east-1' ) }}{% elif tier == 'stage' %}{{ lookup('amazon.aws.aws_secret', 'cloudfront_files.CF_key_pair_id', nested=true, region='us-east-1' ) }}{% else %}''{% endif %}"
+                    "value": "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.cloudfront_key_pair_id', nested=true, region='us-east-1') }}"
                 },
                 {
                     "name": "CLOUDFRONT_PRIVATE_KEY",
-                    "value": "{% if tier == 'prod' %}{{ lookup('amazon.aws.aws_secret', 'cloudfront.privatekey', nested=true, region='us-east-1' ) | b64decode }}{% elif tier == 'stage' %}{{ lookup('amazon.aws.aws_secret', 'cloudfront_files.privatekey', nested=true, region='us-east-1' ) | b64decode }}{% else %}''{% endif %}"
+                    "value": "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.cloudfront_private_key', nested=true, region='us-east-1') | b64decode }}"
+                },
+                {
+                    "name": "CLOUDFRONT_DOMAIN",
+                    "value": "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.cloudfront_domain', nested=true, region='us-east-1') }}"
                 }
             ],
             "mountPoints": [],
