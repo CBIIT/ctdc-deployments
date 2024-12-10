@@ -10,9 +10,9 @@ services:
     image: 1.1.0.278
     buildNumber: '278'
   files:
-    version: CTDC-1572.94
-    image: CTDC-1572.94
-    buildNumber: '94'
+    version: CTDC-1572.95
+    image: CTDC-1572.95
+    buildNumber: '95'
   authn:
     version: 1.0.0.41
     image: 1.0.0.41
