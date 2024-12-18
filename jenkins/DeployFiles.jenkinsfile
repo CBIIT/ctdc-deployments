@@ -167,7 +167,7 @@ pipeline {
 				sed -i "s|{{sumo_collector_endpoint}}|$SUMO_COLLECTOR_ENDPOINT|" $TEMPLATE_FILE
 				sed -i "s|{{sumo_collector_token}}|$SUMO_COLLECTOR_TOKEN|" $TEMPLATE_FILE
 				sed -i "s|{{date}}|$DATE|" $TEMPLATE_FILE
-				#sed -i "s|{{cf_private_key}}|$CF_PRIVATE_KEY|" $TEMPLATE_FILE
+				sed -i "s|{{cf_private_key}}|$CF_PRIVATE_KEY|" $TEMPLATE_FILE
 
 				aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE
 
