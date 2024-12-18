@@ -70,6 +70,10 @@
                 {
                     "name": "NRIA_OVERRIDE_HOST_ROOT",
                     "value": ""
+                },
+                {
+                    "name": "CLOUDFRONT_PRIVATE_KEY",
+                    "valueFrom": "{{cf_private_key}}"
                 }
             ],
             "mountPoints": [],
@@ -130,7 +134,7 @@
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:cloudfront_key_pair_id::"
                 },
                 {
-                    "name": "CLOUDFRONT_PRIVATE_KEY",
+                    "name": "CLOUDFRONT_PRIVATE_KEY_BASE64",
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:cloudfront_private_key::"
                 },
                 {
