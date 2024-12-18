@@ -167,6 +167,10 @@
                     "value": "{{project}}-{{environment}}-files"
                 },
                 {
+                    "name": "CLOUDFRONT_PRIVATE_KEY",
+                    "value": "{{cf_private_key}}"
+                },
+                {
                     "name": "MYSQL_PORT",
                     "value": "3306"
                 },
@@ -177,10 +181,6 @@
                 {
                     "name": "FAKE",
                     "value": "false"
-                },
-                {
-                    "name": "CLOUDFRONT_PRIVATE_KEY",
-                    "value": "{{cf_private_key}}"
                 }
             ],
             "mountPoints": [],
