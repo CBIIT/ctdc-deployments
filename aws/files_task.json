@@ -91,11 +91,6 @@
                 }
             ],
             "essential": true,
-            // "entryPoint": [
-            //     "/bin/sh",
-            //     "-c",
-            //     "echo $CLOUDFRONT_PRIVATE_KEY | base64 -d > /tmp/cloudfront_private_key.pem && node ./bin/www"
-            // ],
             "secrets": [
                 {
                     "name": "INDEXD_URL",
