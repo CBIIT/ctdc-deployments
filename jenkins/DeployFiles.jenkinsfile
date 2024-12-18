@@ -107,6 +107,7 @@ pipeline {
 				// set clouidfront private key
 				env.ENCODED_KEY = sh(label: 'Get key', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.cloudfront_private_key'").trim()
 				env.CF_PRIVATE_KEY = sh(label: 'decode key', returnStdout: true, script: "echo -n $ENCODED_KEY | base64 -d").trim()
+				TEST = sh(label: 'test', returnStdout: true, script: "which base64").trim()
 
 			}
 
@@ -151,6 +152,9 @@ pipeline {
 				ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 				IMAGE_ID="$REPO_URL:$IMAGE_TAG"
 				DATE=$(date '+%m/%d/%Y')
+
+				echo $CF_PRIVATE_KEY
+				echo -n $ENCODED_KEY | base64 -d
 
 				sed -i "s|{{account_id}}|$ACCOUNT_ID|" $TEMPLATE_FILE
 				sed -i "s|{{image_id}}|$IMAGE_ID|" $TEMPLATE_FILE
