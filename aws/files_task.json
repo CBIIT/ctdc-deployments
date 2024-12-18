@@ -70,10 +70,6 @@
                 {
                     "name": "NRIA_OVERRIDE_HOST_ROOT",
                     "value": ""
-                },
-                {
-                    "name": "CLOUDFRONT_PRIVATE_KEY",
-                    "valueFrom": "{{cf_private_key}}"
                 }
             ],
             "mountPoints": [],
@@ -181,6 +177,10 @@
                 {
                     "name": "FAKE",
                     "value": "false"
+                },
+                {
+                    "name": "CLOUDFRONT_PRIVATE_KEY",
+                    "value": "{{cf_private_key}}"
                 }
             ],
             "mountPoints": [],
