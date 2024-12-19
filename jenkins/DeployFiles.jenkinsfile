@@ -157,19 +157,24 @@ pipeline {
 				#echo $CF_PRIVATE_KEY
 				#echo -n $ENCODED_KEY | base64 -d
 
-				sed -i "s|{{account_id}}|$ACCOUNT_ID|" $TEMPLATE_FILE
-				sed -i "s|{{image_id}}|$IMAGE_ID|" $TEMPLATE_FILE
-				sed -i "s|{{image_tag}}|$IMAGE_TAG|" $TEMPLATE_FILE
-				sed -i "s|{{environment}}|$ENV|" $TEMPLATE_FILE
-				sed -i "s|{{program}}|$PROGRAM|" $TEMPLATE_FILE
-				sed -i "s|{{project}}|$PROJECT|" $TEMPLATE_FILE
-				sed -i "s|{{domain_name}}|$DOMAIN_NAME|" $TEMPLATE_FILE
-				sed -i "s|{{sumo_collector_endpoint}}|$SUMO_COLLECTOR_ENDPOINT|" $TEMPLATE_FILE
-				sed -i "s|{{sumo_collector_token}}|$SUMO_COLLECTOR_TOKEN|" $TEMPLATE_FILE
-				sed -i "s|{{date}}|$DATE|" $TEMPLATE_FILE
-				sed -i "s|{{cf_private_key}}|$CF_PRIVATE_KEY|" $TEMPLATE_FILE
+				# Update and register task definition
+				envsubst < $TEMPLATE_FILE > $TEMPLATE_FILE.updated
 
-				aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE
+				aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE.updated
+
+				#sed -i "s|{{account_id}}|$ACCOUNT_ID|" $TEMPLATE_FILE
+				#sed -i "s|{{image_id}}|$IMAGE_ID|" $TEMPLATE_FILE
+				#sed -i "s|{{image_tag}}|$IMAGE_TAG|" $TEMPLATE_FILE
+				#sed -i "s|{{environment}}|$ENV|" $TEMPLATE_FILE
+				#sed -i "s|{{program}}|$PROGRAM|" $TEMPLATE_FILE
+				#sed -i "s|{{project}}|$PROJECT|" $TEMPLATE_FILE
+				#sed -i "s|{{domain_name}}|$DOMAIN_NAME|" $TEMPLATE_FILE
+				#sed -i "s|{{sumo_collector_endpoint}}|$SUMO_COLLECTOR_ENDPOINT|" $TEMPLATE_FILE
+				#sed -i "s|{{sumo_collector_token}}|$SUMO_COLLECTOR_TOKEN|" $TEMPLATE_FILE
+				#sed -i "s|{{date}}|$DATE|" $TEMPLATE_FILE
+				#sed -i "s|{{cf_private_key}}|$CF_PRIVATE_KEY|" $TEMPLATE_FILE
+
+				#aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE
 
 				'''
 
