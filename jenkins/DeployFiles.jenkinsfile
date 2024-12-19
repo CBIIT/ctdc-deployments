@@ -102,7 +102,8 @@ pipeline {
 				env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
 
 				// set template file name
-				env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task.json"
+				// env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task.json"
+				env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task_cloudwatch.json"
 
 				// set clouidfront private key
 				// env.ENCODED_KEY = sh(label: 'Get key', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.cloudfront_private_key'").trim()
@@ -160,7 +161,7 @@ pipeline {
 				# Update and register task definition
 				envsubst < $TEMPLATE_FILE > $TEMPLATE_FILE.updated
 
-				cat $TEMPLATE_FILE.updated
+				#cat $TEMPLATE_FILE.updated
 
 				aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE.updated
 
