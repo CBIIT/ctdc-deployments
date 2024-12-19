@@ -102,8 +102,8 @@ pipeline {
 				env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
 
 				// set template file name
-				// env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task.json"
-				env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task_cloudwatch.json"
+				env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task.json"
+				// env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task_cloudwatch.json"
 
 				// set clouidfront private key
 				// env.ENCODED_KEY = sh(label: 'Get key', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.cloudfront_private_key'").trim()
