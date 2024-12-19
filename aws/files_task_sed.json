@@ -1,7 +1,7 @@
 {
-    "family": "$PROGRAM-$ENV-$PROJECT-files",
-    "taskRoleArn": "arn:aws:iam::$ACCOUNT_ID:role/power-user-$PROGRAM-$ENV-$PROJECT-ecs-task-role",
-    "executionRoleArn": "arn:aws:iam::$ACCOUNT_ID:role/power-user-$PROGRAM-$ENV-$PROJECT-ecs-task-execution-role",
+    "family": "{{program}}-{{environment}}-{{project}}-files",
+    "taskRoleArn": "arn:aws:iam::{{account_id}}:role/power-user-{{program}}-{{environment}}-{{project}}-ecs-task-role",
+    "executionRoleArn": "arn:aws:iam::{{account_id}}:role/power-user-{{program}}-{{environment}}-{{project}}-ecs-task-execution-role",
     "requiresCompatibilities": [
         "FARGATE"
     ],
@@ -35,7 +35,7 @@
             "secrets": [
                 {
                     "name": "NRIA_LICENSE_KEY",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:monitoring/newrelic:api_key::"
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:monitoring/newrelic:api_key::"
                 }
             ],
             "environment": [
@@ -45,7 +45,7 @@
                 },
                 {
                     "name": "NEW_RELIC_APP_NAME",
-                    "value": "$PROGRAM-$ENV-$PROJECT-files"
+                    "value": "{{program}}-{{environment}}-{{project}}-files"
                 },
                 {
                     "name": "NRIA_IS_FORWARD_ONLY",
@@ -77,7 +77,7 @@
         },
         {
             "name": "files",
-            "image": "$IMAGE_ID",
+            "image": "{{image_id}}",
             "cpu": 0,
             "portMappings": [
                 {
@@ -90,61 +90,61 @@
             "secrets": [
                 {
                     "name": "INDEXD_URL",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:indexd_url::"
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:indexd_url::"
                 },
                 {
                     "name": "NEW_RELIC_LICENSE_KEY",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:monitoring/newrelic:api_key::"
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:monitoring/newrelic:api_key::"
                 },
                 {
                     "name": "MYSQL_HOST",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:rds_host::"
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:rds_host::"
                 },
                 {
                     "name": "MYSQL_USER",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:rds_username::"
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:rds_username::"
                 },
                 {
                     "name": "MYSQL_PASSWORD",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:rds_password::"
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:rds_password::"
                 },
                 {
                     "name": "DCF_BASE_URL",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:dcf_base_url::"
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_base_url::"
                 },
                 {
                     "name": "DCF_FILE_URL",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:dcf_file_url::"
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:dcf_file_url::"
                 },
                 {
                     "name": "FILE_MANIFEST_BUCKET_NAME",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:file_manifest_bucket_name::"
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:file_manifest_bucket_name::"
                 },
                 {
                     "name": "CLOUDFRONT_KEY_PAIR_ID",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:cloudfront_key_pair_id::"
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:cloudfront_key_pair_id::"
                 },
                 {
                     "name": "CLOUDFRONT_PRIVATE_KEY_BASE64",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:cloudfront_private_key::"
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:cloudfront_private_key::"
                 },
                 {
                     "name": "CLOUDFRONT_DOMAIN",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:cloudfront_domain::"
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:cloudfront_domain::"
                 }
             ],
             "environment": [
                 {
                     "name": "PROJECT",
-                    "value": "$PROJECT"
+                    "value": "{{project}}"
                 },
                 {
                     "name": "VERSION",
-                    "value": "$IMAGE_TAG"
+                    "value": "{{image_tag}}"
                 },
                 {
                     "name": "BACKEND_URL",
-                    "value": "https://$DOMAIN_NAME/v1/graphql/"
+                    "value": "https://{{domain_name}}/v1/graphql/"
                 },
                 {
                     "name": "AUTHORIZATION_ENABLED",
@@ -152,7 +152,7 @@
                 },
                 {
                     "name": "DATE",
-                    "value": "$DATE"
+                    "value": "{{date}}"
                 },
                 {
                     "name": "URL_SRC",
@@ -160,15 +160,15 @@
                 },
                 {
                     "name": "NEW_RELIC_LABELS",
-                    "value": "Project:$PROJECT;Environment:$ENV"
+                    "value": "Project:{{project}};Environment:{{environment}}"
                 },
                 {
                     "name": "NEW_RELIC_APP_NAME",
-                    "value": "$PROJECT-$ENV-files"
+                    "value": "{{project}}-{{environment}}-files"
                 },
                 {
                     "name": "CLOUDFRONT_PRIVATE_KEY",
-                    "value": "$CF_PRIVATE_KEY"
+                    "value": "{{cf_private_key}}"
                 },
                 {
                     "name": "MYSQL_PORT",
@@ -189,11 +189,11 @@
                 "logDriver": "awsfirelens",
                 "options": {
                     "Format": "json_lines",
-                    "Host": "$SUMO_COLLECTOR_ENDPOINT",
+                    "Host": "{{sumo_collector_endpoint}}",
                     "Name": "http",
                     "Port": "443",
                     "Retry_Limit": "2",
-                    "URI": "/receiver/v1/http/$SUMO_COLLECTOR_TOKEN",
+                    "URI": "/receiver/v1/http/{{sumo_collector_token}}",
                     "tls": "on",
                     "tls.verify": "off"
                 }
