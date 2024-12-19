@@ -160,6 +160,8 @@ pipeline {
 				# Update and register task definition
 				envsubst < $TEMPLATE_FILE > $TEMPLATE_FILE.updated
 
+				cat $TEMPLATE_FILE.updated
+
 				aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE.updated
 
 				#sed -i "s|{{account_id}}|$ACCOUNT_ID|" $TEMPLATE_FILE
