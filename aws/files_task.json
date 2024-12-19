@@ -125,7 +125,7 @@
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:cloudfront_key_pair_id::"
                 },
                 {
-                    "name": "CLOUDFRONT_PRIVATE_KEY_BASE64",
+                    "name": "CLOUDFRONT_PRIVATE_KEY",
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:cloudfront_private_key::"
                 },
                 {
@@ -167,7 +167,7 @@
                     "value": "$PROJECT-$ENV-files"
                 },
                 {
-                    "name": "CLOUDFRONT_PRIVATE_KEY",
+                    "name": "CLOUDFRONT_PRIVATE_KEY_TEST",
                     "value": "$CF_PRIVATE_KEY"
                 },
                 {
