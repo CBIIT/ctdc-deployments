@@ -131,6 +131,14 @@
                 {
                     "name": "CLOUDFRONT_DOMAIN",
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:cloudfront_domain::"
+                },
+                {
+                    "name": "S3_ACCESS_KEY_ID",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:s3_access_key_id::"
+                },
+                {
+                    "name": "S3_SECRET_ACCESS_KEY",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:s3_secret_access_key::"
                 }
             ],
             "environment": [
@@ -181,6 +189,14 @@
                 {
                     "name": "FAKE",
                     "value": "false"
+                },
+                {
+                    "name": "AWS_REGION",
+                    "value": "us-east-1"
+                },
+                {
+                    "name": "SIGNED_URL_EXPIRY_SECONDS",
+                    "value": "86400"
                 }
             ],
             "mountPoints": [],
