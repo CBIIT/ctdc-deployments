@@ -34,16 +34,25 @@
         ## versions
         image_version: "{{ lookup('env','FILES_VERSION') }}"
         ## cloudfront
-        #cloudfront_key_group_name: "{% if tier == 'prod' or tier == 'stage' %}{{ lookup('amazon.aws.aws_secret', 'cloudfront.key_group_name', nested=true, region='us-east-1' ) }}{% else %}''{% endif %}"
-        #cloudfront_origin_id: "{% if tier == 'prod' or tier == 'stage' %}{{ lookup('amazon.aws.aws_secret', 'cloudfront.origin_id', nested=true, region='us-east-1' ) }}{% else %}''{% endif %}"
-        #cloudfront_domain_name: "{% if tier == 'prod' or tier == 'stage' %}{{ lookup('amazon.aws.aws_secret', 'cloudfront.domain_name', nested=true, region='us-east-1' ) }}{% else %}''{% endif %}"
-        #cloudfront_key_group_id: "{% if tier == 'prod' or tier == 'stage' %}{{ lookup('amazon.aws.aws_secret', 'cloudfront.key_group_id', nested=true, region='us-east-1' ) }}{% else %}''{% endif %}"
-        #cloudfront_private_key: "{% if tier == 'prod' or tier == 'stage' %}{{ lookup('amazon.aws.aws_secret', 'cloudfront.privatekey', nested=true, region='us-east-1' ) }}{% else %}''{% endif %}"
+        redis_host: "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.neo4j_ip', nested=true, region='us-east-1' ) }}"
+        s3_access_key_id: "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.s3_access_key_id', nested=true, region='us-east-1') }}"
+        s3_secret_access_key: "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.s3_secret_access_key', nested=true, region='us-east-1') }}"
+        file_manifest_bucket_name: "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.file_manifest_bucket_name', nested=true, region='us-east-1') }}"
+        cloudfront_key_pair_id: "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.cloudfront_key_pair_id', nested=true, region='us-east-1') }}"
+        cloudfront_private_key: "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.cloudfront_private_key', nested=true, region='us-east-1') | b64decode }}"
+        cloudfront_domain: "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.cloudfront_domain', nested=true, region='us-east-1') }}"
         url_src: "{% if tier == 'prod' or tier == 'stage' %}CLOUD_FRONT{% else %}indexd{% endif %}"
         indexd_url: "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.indexd_url', nested=true, region='us-east-1') }}"
         ## roles
         execution_role: "{% if iam_prefix is defined and iam_prefix != '' %}{{ iam_prefix }}-{{ project_name }}-{{ tier }}-ecs-task-execution-role{% else %}{{ project_name }}-{{ tier }}-task-execution-role{% endif %}"
         task_role: "{% if iam_prefix is defined and iam_prefix != '' %}{{ iam_prefix }}-{{ project_name }}-{{ tier }}-ecs-task-role{% else %}{{ project_name }}-{{ tier }}-task-role{% endif %}"
+        ## mysql
+        mysql_host: "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.rds_host', nested=true, region='us-east-1') }}"
+        mysql_user: "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.rds_username', nested=true, region='us-east-1') }}"
+        mysql_password: "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.rds_password', nested=true, region='us-east-1') }}"
+        ### dcf
+        dcf_base_url: "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.dcf_base_url', nested=true, region='us-east-1') }}" 
+        dcf_file_url: "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.dcf_file_url', nested=true, region='us-east-1') }}" 
         ## sumologic
         sumo_collector_endpoint: "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.sumo_collector_endpoint', nested=true, region='us-east-1') }}"
         sumo_collector_token: "{{ lookup('amazon.aws.aws_secret', 'bento/{{ project_name }}/{{ tier }}.sumo_collector_token_files', nested=true, region='us-east-1') }}"
@@ -77,3 +86,30 @@
           value: "{{ project_name }}-{{ tier }}-files-{{ ansible_hostname }}"
         - name: NEW_RELIC_LABELS
           value: "Project:{{ project_name }};Environment:{{ tier }}"
+        ## CloudFront & S3
+        - name: S3_ACCESS_KEY_ID
+          value: "{{ s3_access_key_id }}"
+        - name: S3_SECRET_ACCESS_KEY
+          value: "{{ s3_secret_access_key }}"
+        - name: FILE_MANIFEST_BUCKET_NAME
+          value: "{{ file_manifest_bucket_name }}"
+        - name: CLOUDFRONT_KEY_PAIR_ID
+          value: "{{ cloudfront_key_pair_id }}"
+        - name: CLOUDFRONT_PRIVATE_KEY
+          value: "{{ cloudfront_private_key }}"
+        - name: CLOUDFRONT_DOMAIN
+          value: "https://{{ cloudfront_domain }}"
+        - name: SIGNED_URL_EXPIRY_SECONDS
+          value: "86400"
+       # - name: AWS_REGION
+          #value: "us-east-1"
+        - name: MYSQL_HOST
+          value: "{{ mysql_host }}"
+        - name: MYSQL_USER
+          value: "{{ mysql_user }}"
+        - name: MYSQL_PASSWORD
+          value: "{{ mysql_password }}"
+        - name: DCF_BASE_URL
+          value: "{{ dcf_base_url }}"
+        - name: DCF_FILE_URL
+          value: "{{ dcf_file_url }}"
