@@ -2,8 +2,8 @@ family: "$PROGRAM-$ENV-$PROJECT-files"
 networkMode: awsvpc
 cpu: "256"
 memory: "512"
-executionRoleArn: "arn:aws:iam::$AWS_ACCOUNT_ID:role/power-user-$PROJECT-$ENV-ecs-task-execution-role"
-taskRoleArn: "arn:aws:iam::$AWS_ACCOUNT_ID:role/power-user-$PROJECT-$ENV-ecs-task-role"
+executionRoleArn: "arn:aws:iam::$ACCOUNT_ID:role/power-user-$PROJECT-$ENV-ecs-task-execution-role"
+taskRoleArn: "arn:aws:iam::$ACCOUNT_ID:role/power-user-$PROJECT-$ENV-ecs-task-role"
 requiresCompatibilities:
 - FARGATE
 containerDefinitions:
