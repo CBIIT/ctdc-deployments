@@ -38,7 +38,7 @@ containerDefinitions:
     value: ""
   secrets:
   - name: "NRIA_LICENSE_KEY"
-    valueFrom: "arn:aws:secretsmanager:$REGION:$AWS_ACCOUNT_ID:secret:monitoring/newrelic:api_key::"
+    valueFrom: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:monitoring/newrelic:api_key::"
 
 - name: files
   image: "$IMAGE_ID"
@@ -115,4 +115,4 @@ containerDefinitions:
       tls.verify: "off"
     secretOptions:
       - name: "Host"
-        valueFrom: "arn:aws:secretsmanager:us-east-1:$AWS_ACCOUNT_ID:secret:bento/$PROJECT/$ENV:sumo_collector_endpoint::"
+        valueFrom: "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:sumo_collector_endpoint::"
