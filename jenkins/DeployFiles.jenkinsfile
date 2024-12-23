@@ -107,9 +107,9 @@ pipeline {
 				// env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task_cloudwatch.json"
 
 				// set clouidfront private key
-				// env.ENCODED_KEY = sh(label: 'Get key', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.cloudfront_private_key'").trim()
-				env.CF_PRIVATE_KEY = sh(label: 'Get key', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.cloudfront_private_key'").trim()
-				// env.CF_PRIVATE_KEY = sh(label: 'decode key', returnStdout: true, script: "echo -n $ENCODED_KEY | base64 -d").trim()
+				env.ENCODED_KEY = sh(label: 'Get key', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.cloudfront_private_key'").trim()
+				// env.CF_PRIVATE_KEY = sh(label: 'Get key', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.cloudfront_private_key'").trim()
+				env.CF_PRIVATE_KEY = sh(label: 'decode key', returnStdout: true, script: "echo -n $ENCODED_KEY | base64 -d").trim()
 				//env.CF_PRIVATE_KEY = "CF_PRIVATE_KEY_VAlUE"
 
 			}
@@ -156,15 +156,15 @@ pipeline {
 				export IMAGE_ID="$REPO_URL:$IMAGE_TAG"
 				export DATE=$(date '+%m/%d/%Y')
 
-				#echo $CF_PRIVATE_KEY
-				#echo -n $ENCODED_KEY | base64 -d
+				echo $CF_PRIVATE_KEY
+				echo -n $ENCODED_KEY | base64 -d
 
 				# Update and register task definition
 				envsubst < $TEMPLATE_FILE > $TEMPLATE_FILE.updated
 
-				#cat $TEMPLATE_FILE.updated
+				cat $TEMPLATE_FILE.updated
 
-				aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE.updated
+				aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE.updated
 
 				#sed -i "s|{{account_id}}|$ACCOUNT_ID|" $TEMPLATE_FILE
 				#sed -i "s|{{image_id}}|$IMAGE_ID|" $TEMPLATE_FILE
