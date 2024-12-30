@@ -103,14 +103,6 @@ pipeline {
 
 				// set template file name
 				env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task.yml"
-				// env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task.json"
-				// env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task_cloudwatch.json"
-
-				// set clouidfront private key
-				env.ENCODED_KEY = sh(label: 'Get key', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.cloudfront_private_key'").trim()
-				// env.CF_PRIVATE_KEY = sh(label: 'Get key', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.cloudfront_private_key'").trim()
-				// env.CF_PRIVATE_KEY = sh(label: 'decode key', returnStdout: true, script: "echo -n $ENCODED_KEY | base64 -d").trim()
-				//env.CF_PRIVATE_KEY = "CF_PRIVATE_KEY_VAlUE"
 
 			}
 
@@ -156,30 +148,10 @@ pipeline {
 				export IMAGE_ID="$REPO_URL:$IMAGE_TAG"
 				export DATE=$(date '+%m/%d/%Y')
 
-
-				export CF_PRIVATE_KEY=$(echo -n $ENCODED_KEY | base64 -d)
-				echo $CF_PRIVATE_KEY
-
 				# Update and register task definition
 				envsubst < $TEMPLATE_FILE > $TEMPLATE_FILE.updated
 
-				cat $TEMPLATE_FILE.updated
-
 				aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE.updated
-
-				#sed -i "s|{{account_id}}|$ACCOUNT_ID|" $TEMPLATE_FILE
-				#sed -i "s|{{image_id}}|$IMAGE_ID|" $TEMPLATE_FILE
-				#sed -i "s|{{image_tag}}|$IMAGE_TAG|" $TEMPLATE_FILE
-				#sed -i "s|{{environment}}|$ENV|" $TEMPLATE_FILE
-				#sed -i "s|{{program}}|$PROGRAM|" $TEMPLATE_FILE
-				#sed -i "s|{{project}}|$PROJECT|" $TEMPLATE_FILE
-				#sed -i "s|{{domain_name}}|$DOMAIN_NAME|" $TEMPLATE_FILE
-				#sed -i "s|{{sumo_collector_endpoint}}|$SUMO_COLLECTOR_ENDPOINT|" $TEMPLATE_FILE
-				#sed -i "s|{{sumo_collector_token}}|$SUMO_COLLECTOR_TOKEN|" $TEMPLATE_FILE
-				#sed -i "s|{{date}}|$DATE|" $TEMPLATE_FILE
-				#sed -i "s|{{cf_private_key}}|$CF_PRIVATE_KEY|" $TEMPLATE_FILE
-
-				#aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE
 
 				'''
 
