@@ -65,7 +65,8 @@
         container_port: "8081"
         container_memory: "512"
         container_cpu: "256"
-        container_image_url: "{{ ecr_repo }}/{{ service_name }}"
+        #container_image_url: "{{ ecr_repo }}/{{ service_name }}"
+        container_image_url: crdc-{{ project_name }}-{{ container_name }}
         auth_enabled: "false"
         container_env:
         - name: VERSION
