@@ -94,7 +94,8 @@ pipeline {
 						iam_prefix: "power-user",
 						subdomain: "trialcommons",
 						domain_name: "cancer.gov",
-						auth_enabled: false
+						auth_enabled: false,
+						ansible_python_interpreter: "/usr/bin/python3"
 						],
                     colorized: true)
  			}
