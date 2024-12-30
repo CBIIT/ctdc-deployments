@@ -61,6 +61,7 @@
         ## cluster
         #ecs_cluster_name: "{{ project_name }}-{{ tier }}-ecs"
         ecs_cluster_name: "crdc-{{ tier }}-{{ project_name }}-ecs"
+        service_name: "crdc-{{ tier }}-{{ project_name }}-{{ container_name }}"
         container_port: "8081"
         container_memory: "512"
         container_cpu: "256"
