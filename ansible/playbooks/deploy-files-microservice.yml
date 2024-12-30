@@ -8,9 +8,9 @@
     - name: install aws collection
       shell: "ansible-galaxy collection install {{ item | quote }} --force"
       loop:
-        #- community.docker:<=3.4.3
-        #- amazon.aws:<=5.4.0
-        #- community.aws:<=3.2.0
+        - community.docker:<=3.4.3
+        - amazon.aws:<=5.4.0
+        - community.aws:<=3.2.0
         #- git+https://github.com/CBIIT/datacommons-devops.git#/ansible/collections/bento/common/,main
         - git+https://github.com/CBIIT/datacommons-devops.git#/ansible/collections/bento/common/,ctdc
 
@@ -59,7 +59,8 @@
         ## newrelic_license_key
         newrelic_license_key: "{{ lookup('amazon.aws.aws_secret', 'monitoring/newrelic.api_key', nested=true, region='us-east-1') }}"
         ## cluster
-        ecs_cluster_name: "{{ project_name }}-{{ tier }}-ecs"
+        #ecs_cluster_name: "{{ project_name }}-{{ tier }}-ecs"
+        ecs_cluster_name: "crdc-{{ tier }}-{{ project_name }}-ecs"
         container_port: "8081"
         container_memory: "512"
         container_cpu: "256"
