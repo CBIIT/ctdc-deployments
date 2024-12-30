@@ -46,7 +46,7 @@ pipeline {
   		steps {
 
   		checkout([$class: 'GitSCM',
-			#branches: [[name: '*/main']],
+			//branches: [[name: '*/main']],
 			branches: [[name: '*/ansible']],
 			extensions: [[$class: 'SubmoduleOption', 
 			recursiveSubmodules: true],
