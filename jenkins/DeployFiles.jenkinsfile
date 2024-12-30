@@ -60,8 +60,7 @@ pipeline {
   		steps {
 
   		checkout([$class: 'GitSCM',
-			//branches: [[name: '*/main']],
-			branches: [[name: '*/decode']],
+			branches: [[name: '*/main']],
 			extensions: [[$class: 'SubmoduleOption', 
 			recursiveSubmodules: true],
 			[$class: 'RelativeTargetDirectory',
