@@ -1,6 +1,5 @@
 - name: deploy files microservice
-  #hosts: all
-  hosts: cicd
+  hosts: all
   connection: local
   gather_facts: true
 
