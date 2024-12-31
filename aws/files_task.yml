@@ -1,0 +1,114 @@
+family: "$PROGRAM-$ENV-$PROJECT-files"
+networkMode: awsvpc
+cpu: "256"
+memory: "512"
+executionRoleArn: "arn:aws:iam::$ACCOUNT_ID:role/power-user-$PROGRAM-$ENV-$PROJECT-ecs-task-execution-role"
+taskRoleArn: "arn:aws:iam::$ACCOUNT_ID:role/power-user-$PROGRAM-$ENV-$PROJECT-ecs-task-role"
+requiresCompatibilities:
+- FARGATE
+containerDefinitions:
+
+- name: sumologic-firelens
+  image: public.ecr.aws/aws-observability/aws-for-fluent-bit:stable
+  essential: true
+  firelensConfiguration:
+    type: fluentbit
+    options:
+      enable-ecs-log-metadata: "true"
+
+- name: newrelic-infra
+  image: newrelic/nri-ecs:1.9.2
+  essential: true
+  environment:
+  - name: "FARGATE"
+    value: "true"
+  - name: "NRIA_IS_FORWARD_ONLY"
+    value: "true"
+  - name: "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED"
+    value: "true"
+  - name: "NRIA_PASSTHROUGH_ENVIRONMENT"
+    value: "ECS_CONTAINER_METADATA_URI,ECS_CONTAINER_METADATA_URI_V4,FARGATE"
+  - name: "NEW_RELIC_HOST"
+    value: "gov-collector.newrelic.com"
+  - name: "NRIA_CUSTOM_ATTRIBUTES"
+    value: "{\"nrDeployMethod\":\"downloadPage\"}"
+  - name: "NEW_RELIC_APP_NAME"
+    value: "$SERVICE"
+  - name: "NRIA_OVERRIDE_HOST_ROOT"
+    value: ""
+  secrets:
+  - name: "NRIA_LICENSE_KEY"
+    valueFrom: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:monitoring/newrelic:api_key::"
+
+- name: files
+  image: "$IMAGE_ID"
+  portMappings:
+  - protocol: tcp
+    containerPort: 8081
+    hostPort: 8081
+  essential: true
+  environment:
+  - name: "PROJECT"
+    value: "$PROJECT"
+  - name: "VERSION"
+    value: "$IMAGE_TAG"
+  - name: "BACKEND_URL"
+    value: "https://$DOMAIN_NAME/v1/graphql/"
+  - name: "AUTH_ENABLED"
+    value: "false"
+  - name: "DATE"
+    value: "$DATE"
+  - name: "URL_SRC"
+    value: "SIGNED_S3"
+  - name: "NEW_RELIC_LABELS"
+    value: "Project:$PROJECT;Environment:$ENV"
+  - name: "NEW_RELIC_APP_NAME"
+    value: "$PROJECT-$ENV-files"
+  - name: "MYSQL_PORT"
+    value: "3306"
+  - name: "MYSQL_DATABASE"
+    value: "ctdc"
+  - name: "AWS_REGION"
+    value: "$REGION"
+  - name: "SIGNED_URL_EXPIRY_SECONDS"
+    value: "86400"
+  - name: "SESSION_TIMEOUT"
+    value: "1200"
+  secrets:
+  - name: "NEW_RELIC_LICENSE_KEY"
+    valueFrom: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:monitoring/newrelic:api_key::"
+  - name: "MYSQL_HOST"
+    valueFrom: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:rds_host::"
+  - name: "MYSQL_USER"
+    valueFrom: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:rds_username::"
+  - name: "MYSQL_PASSWORD"
+    valueFrom: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:rds_password::"
+  - name: "DCF_FILE_URL"
+    valueFrom: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:dcf_file_url::"
+  - name: "FILE_MANIFEST_BUCKET_NAME"
+    valueFrom: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:file_manifest_bucket_name::"
+  - name: "CLOUDFRONT_KEY_PAIR_ID"
+    valueFrom: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:cloudfront_key_pair_id::"
+  - name: "CLOUDFRONT_PRIVATE_KEY"
+    valueFrom: "arn:aws:ssm:$REGION:$ACCOUNT_ID:parameter/cloudfront_private_key"
+  - name: "CLOUDFRONT_DOMAIN"
+    valueFrom: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:cloudfront_domain::"
+  - name: "S3_ACCESS_KEY_ID"
+    valueFrom: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:s3_access_key_id::"
+  - name: "S3_SECRET_ACCESS_KEY"
+    valueFrom: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:s3_secret_access_key::"
+  - name: "COOKIE_SECRET"
+    valueFrom: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:cookie_secret::"
+  logConfiguration:
+    logDriver: awsfirelens
+    options:
+      Format: json_lines
+      Name: http
+      Port: "443"
+      URI: "/receiver/v1/http/$SUMO_COLLECTOR_TOKEN"
+      Retry_Limit: "2"
+      tls: "on"
+      tls.verify: "off"
+    secretOptions:
+      - name: "Host"
+        valueFrom: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:sumo_collector_endpoint::"
