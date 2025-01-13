@@ -15,7 +15,7 @@ provider "aws" {
       EnvironmentTier = terraform.workspace
       Customer        = "nci od cbiit ods"
       DevLead         = "yizhen chen"
-      CreatedBy       = "venkatasaikiran kotepalli"
+      CreatedBy       = "Charles Ngu"
       ResourceName    = "NCI-ctdc-${terraform.workspace}"
       FISMA           = "moderate"
       ManagedBy       = "terraform"
