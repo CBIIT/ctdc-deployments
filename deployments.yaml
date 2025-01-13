@@ -10,10 +10,14 @@ services:
     image: 1.1.0.284
     buildNumber: '284'
   files:
-    version: main.2
-    image: main.2
-    buildNumber: '2'
+    version: 1.1.0.104
+    image: 1.1.0.104
+    buildNumber: '104'
   authn:
     version: 1.1.0.44
     image: 1.1.0.44
     buildNumber: '44'
+interoperation:
+    version: main.2
+    image: main.2
+    buildNumber: '2'
