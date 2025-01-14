@@ -56,7 +56,7 @@ pipeline {
       PROGRAM      = "crdc"
 	  PROJECT      = "ctdc"
 	  APP          = "interoperation"
-	  DEPLOY_JOB   = "DeployFiles"
+	  DEPLOY_JOB   = "DeployInteroperation"
 	  SLACK_SECRET = "ctdc_slack_url"
 	  CODE_REPO    = "crdc-ctdc-interoperation"
 	  JOB_PATH     = "_default/_lower/CTDC/_jobs"
