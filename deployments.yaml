@@ -17,6 +17,10 @@ services:
     version: 1.1.0.45
     image: 1.1.0.45
     buildNumber: '45'
+  interoperation:
+    version: main.8
+    image: main.8
+    buildNumber: '8'
 interoperation:
   version: main.2
   image: main.2
