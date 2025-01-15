@@ -50,13 +50,14 @@ containerDefinitions:
   environment:
   - name: "PROJECT"
     value: "$PROJECT"
+  - name: "ENV"
+    value: "$ENV"  
   - name: "VERSION"
     value: "$IMAGE_TAG"
   - name: VERSION
     value: "{{ lookup('env','INTEROPERATION_VERSION') }}"
   - name: BENTO_BACKEND_GRAPHQL_URI
-    value: "{% if tier == 'prod' and project_name == 'bento' %}https://{{domain_name}}/v1/graphql/{% elif tier == 'prod' %}https://{{subdomain}}.{{domain_name}}/v1/graphql/{% else %}https://{{subdomain}}-{{tier}}.{{domain_name}}/v1/graphql/{% endif %}"
-    #value: "https://{{subdomain}}-qa2.{{domain_name}}/v1/graphql/"
+    value: "{% if ENV == 'dev' %}https://clinical-dev.datacommons.cancer.gov/v1/graphql/{% elif ENV == 'qa' %}https://clinical-qa.datacommons.cancer.gov/v1/graphql/{% elif ENV == 'stage' %}https://clinical-stage.datacommons.cancer.gov/v1/graphql/{% elif ENV == 'prod' %}https://clinical.datacommons.cancer.gov/v1/graphql/{% endif %}"
   #- name: "BACKEND_URL"
     #value: "https://$DOMAIN_NAME/v1/graphql/"
   - name: REDIS_AUTH_ENABLED
@@ -65,12 +66,6 @@ containerDefinitions:
     value: "false"
   - name: "DATE"
     value: "$DATE"
-  - name: "TIER"
-    value: "$ENV"
-  - name: "DOMAIN_NAME"
-    value: "data.commons.cancer.gov"
-  - name: "SUBDOMAIN"
-    value: "clinical"
   - name: "URL_SRC"
     value: "SIGNED_S3"
   - name: "NEW_RELIC_LABELS"
