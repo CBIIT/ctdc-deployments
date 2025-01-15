@@ -18,9 +18,9 @@ services:
     image: 1.1.0.45
     buildNumber: '45'
   interoperation:
-    version: CTDC-interoperation.13
-    image: CTDC-interoperation.13
-    buildNumber: '13'
+    version: CTDC-interoperation.14
+    image: CTDC-interoperation.14
+    buildNumber: '14'
 interoperation:
   version: main.2
   image: main.2
