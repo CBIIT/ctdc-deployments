@@ -135,6 +135,10 @@ pipeline {
 
   	stage('Update Task Definition'){
 
+		environment {
+            INTEROPERATION_VERSION = "${params.ImageTag}"
+        }
+
  		steps {
 
 			script {
