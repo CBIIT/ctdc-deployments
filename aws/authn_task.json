@@ -94,14 +94,6 @@
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:monitoring/newrelic:api_key::"
                 },
                 {
-                    "name": "NEO4J_USER",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:neo4j_user::"
-                },
-                {
-                    "name": "NEO4J_PASSWORD",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:neo4j_password::"
-                },
-                {
                     "name": "DATABASE_TYPE",
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:database_type::"
                 },
@@ -169,11 +161,11 @@
                 },
                 {
                     "name": "MYSQL_PORT",
-                    "value": "{{mysql_database_port}}"
+                    "value": "3306"
                 },
                 {
                     "name": "MYSQL_DATABASE",
-                    "value": "{{mysql_database_name}}"
+                    "value": "ctdc"
                 },
                 {
                     "name": "NEO4J_URI",
