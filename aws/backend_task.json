@@ -93,14 +93,14 @@
                 "wget \"https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic-java.zip\" -O newrelic-java.zip && rm -rf newrelic && unzip -o newrelic-java.zip && bin/catalina.sh run"
             ],
             "secrets": [
-                {
+                /*{
                     "name": "NEO4J_USER",
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:neo4j_user::"
                 },
                 {
                     "name": "NEO4J_PASSWORD",
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:neo4j_password::"
-                },
+                },*/
                 {
                     "name": "ES_HOST",
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:es_host::"
@@ -119,14 +119,14 @@
                     "name": "BENTO_API_VERSION",
                     "value": "{{image_tag}}"
                 },
-                {
+                /*{
                     "name": "NEO4J_URL",
                     "value": "bolt://{{neo4j_host}}:7687"
                 },                
                 {
                     "name": "NEO4J_GRAPHQL_ENDPOINT",
                     "value": "http://{{neo4j_host}}:7474/graphql/"
-                },
+                },*/
                 {
                     "name": "ES_FILTER_ENABLED",
                     "value": "true"

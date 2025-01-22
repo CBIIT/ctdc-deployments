@@ -19,7 +19,7 @@ from aws_cdk import aws_cloudfront_origins as origins
 from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_ssm as ssm
 
-from services import frontend, backend, files, authn, authz
+from services import frontend, backend, files, authn, interoperation
 
 class Stack(Stack):
     def __init__(self, scope: Construct, **kwargs) -> None:
@@ -107,7 +107,7 @@ class Stack(Stack):
         
         ### Secrets
         self.secret = secretsmanager.Secret(self, "Secret",
-            secret_name="{}/{}/{}".format(config['main']['resource_prefix'], config['main']['tier'], "test"),
+            secret_name="{}/{}/{}".format(config['main']['secret_prefix'], config['main']['tier'], "ctdc"),
             secret_object_value={
                 "neo4j_user": SecretValue.unsafe_plain_text(config['db']['neo4j_user']),
                 "neo4j_password": SecretValue.unsafe_plain_text(config['db']['neo4j_password']),
@@ -195,3 +195,6 @@ class Stack(Stack):
 
         # Files Service
         files.filesService.createService(self, config)
+
+        # Interoperation Service
+        interoperation.interoperationService.createService(self, config)

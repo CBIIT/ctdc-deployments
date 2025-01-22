@@ -1,15 +1,13 @@
-from aws_cdk import Duration
-
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_ecr as ecr
 from aws_cdk import aws_secretsmanager as secretsmanager
 
-class authzService:
+class interoperationService:
   def createService(self, config):
 
-    ### AuthZ Service ###############################################################################################################
-    service = "authz"
+    ### Files Service ###############################################################################################################
+    service = "interoperation"
 
     # Set container configs
     if config.has_option(service, 'command'):
@@ -18,32 +16,35 @@ class authzService:
         command = None
 
     environment={
-            # "NEW_RELIC_APP_NAME":"bento-perf-authZ",
-            "EMAIL_SMTP_HOST":"email-smtp.us-east-1.amazonaws.com",
-            "EMAIL_SMTP_PORT":"465",
-            "EMAILS_ENABLED":"true",
-            "MYSQL_PORT":"3306",
-            "MYSQL_SESSION_ENABLED":"true",
-            "NEO4J_URI":"bolt://{}:7687".format(config['db']['neo4j_ip']),
-            "SEED_DATA_FILE":"yaml/seed-data-gmb.yaml",
-            "SERVER_HOST":self.app_url,
-            "SESSION_TIMEOUT":"1800",
+            # "NEW_RELIC_APP_NAME":"bento-cdk-interoperation",
+            "AUTH_ENABLED":"false",
+            "REDIS_AUTH_ENABLED":"false",
+            "AUTH_URL":"/api/auth/authenticated",
+            "AUTHORIZATION_ENABLED":"true",
+            "BACKEND_URL":"/v1/graphql/",
+            "DATE":"2024-07-09",
+            #"MYSQL_PORT":"3306",
+            #"MYSQL_SESSION_ENABLED":"true",
+            #"NEO4J_URI":"bolt://{}:7687".format(config['db']['neo4j_ip']),
+            "PROJECT":"BENTO",
+            "URL_SRC":"CLOUD_FRONT",
             "VERSION":config[service]['image'],
         }
 
     secrets={
-            # "NEW_RELIC_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "be_newrelic", secret_name='monitoring/newrelic'), 'api_key'),
-            "NEO4J_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_password'),
-            "NEO4J_USER":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_user'),
+            # "NEW_RELIC_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "interoperation_newrelic", secret_name='monitoring/newrelic'), 'api_key'),
+            #"NEO4J_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_password'),
+            #"NEO4J_USER":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_user'),
+            "CF_PRIVATE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "files_cf_key", secret_name="ec2-ssh-key/{}/private".format(self.cfKeys.key_pair_name)), ''),
+            "CF_KEY_PAIR_ID":ecs.Secret.from_secrets_manager(self.secret, 'cf_key_pair_id'),
+            "CF_URL":ecs.Secret.from_secrets_manager(self.secret, 'cf_url'),
             "TOKEN_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'token_secret'),
             "COOKIE_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'cookie_secret'),
-            "EMAIL_USER":ecs.Secret.from_secrets_manager(self.secret, 'email_user'),
-            "EMAIL_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'email_password'),
 
-            "MYSQL_DATABASE":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'dbname'),
-            "MYSQL_HOST":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'host'),
-            "MYSQL_PASSWORD":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'password'),
-            "MYSQL_USER":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'username'),
+            #"MYSQL_DATABASE":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'dbname'),
+            #"MYSQL_HOST":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'host'),
+            #"MYSQL_PASSWORD":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'password'),
+            #"MYSQL_USER":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'username'),
         }
     
     taskDefinition = ecs.FargateTaskDefinition(self,
@@ -87,9 +88,7 @@ class authzService:
         port=int(config[service]['port']),
         protocol=elbv2.ApplicationProtocol.HTTP,
         health_check = elbv2.HealthCheck(
-            path=config[service]['health_check_path'],
-            timeout=Duration.seconds(config.getint(service, 'health_check_timeout')),
-            interval=Duration.seconds(config.getint(service, 'health_check_interval')),),
+            path=config[service]['health_check_path']),
         targets=[ecsService],)
 
     elbv2.ApplicationListenerRule(self, id="alb-{}-rule".format(service),

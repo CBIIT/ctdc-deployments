@@ -24,7 +24,7 @@ class filesService:
             "DATE":"2024-07-09",
             "MYSQL_PORT":"3306",
             "MYSQL_SESSION_ENABLED":"true",
-            "NEO4J_URI":"bolt://{}:7687".format(config['db']['neo4j_ip']),
+            #"NEO4J_URI":"bolt://{}:7687".format(config['db']['neo4j_ip']),
             "PROJECT":"BENTO",
             "URL_SRC":"CLOUD_FRONT",
             "VERSION":config[service]['image'],
@@ -32,8 +32,8 @@ class filesService:
 
     secrets={
             # "NEW_RELIC_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "files_newrelic", secret_name='monitoring/newrelic'), 'api_key'),
-            "NEO4J_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_password'),
-            "NEO4J_USER":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_user'),
+            #"NEO4J_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_password'),
+            #"NEO4J_USER":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_user'),
             "CF_PRIVATE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "files_cf_key", secret_name="ec2-ssh-key/{}/private".format(self.cfKeys.key_pair_name)), ''),
             "CF_KEY_PAIR_ID":ecs.Secret.from_secrets_manager(self.secret, 'cf_key_pair_id'),
             "CF_URL":ecs.Secret.from_secrets_manager(self.secret, 'cf_url'),
