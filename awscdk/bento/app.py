@@ -60,8 +60,8 @@ if __name__=="__main__":
     stack_name="{}-{}".format(config['main']['resource_prefix'], config['main']['tier']),
     synthesizer=synthesizer,
     env=cdk.Environment(
-      account=os.environ.get["AWS_DEFAULT_ACCOUNT", "default_account_id"],
-      region=os.environ.get["AWS_DEFAULT_REGION", "us-east-1"],
+      account=os.environ["AWS_DEFAULT_ACCOUNT"],
+      region=os.environ["AWS_DEFAULT_REGION"],
     ),
   )
 
