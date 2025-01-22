@@ -191,7 +191,7 @@ class Stack(Stack):
         authn.authnService.createService(self, config)
 
         # AuthZ Service
-        authz.authzService.createService(self, config)
+        #authz.authzService.createService(self, config)
 
         # Files Service
         files.filesService.createService(self, config)
