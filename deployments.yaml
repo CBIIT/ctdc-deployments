@@ -14,9 +14,9 @@ services:
     image: 1.1.0.104
     buildNumber: '104'
   authn:
-    version: 1.1.0.46
-    image: 1.1.0.46
-    buildNumber: '46'
+    version: 1.1.0.47
+    image: 1.1.0.47
+    buildNumber: '47'
   interoperation:
     version: 1.0.0.17
     image: 1.0.0.17
