@@ -10,9 +10,9 @@ services:
     image: 1.1.0.284
     buildNumber: '284'
   files:
-    version: 1.1.0.104
-    image: 1.1.0.104
-    buildNumber: '104'
+    version: 1.1.0.105
+    image: 1.1.0.105
+    buildNumber: '105'
   authn:
     version: 1.1.0.47
     image: 1.1.0.47
