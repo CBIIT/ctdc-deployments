@@ -15,5 +15,6 @@ class MyAspect:
         if isinstance(node, iam.CfnRole):
             if config.has_option('iam', 'role_prefix'):
                 resolvedLogicalId = cdk.Stack.of(node).resolve(node.logical_id)
-                roleName = config['iam']['role_prefix'] + '-' + config['main']['resource_prefix'] + '-' + resolvedLogicalId
+                #roleName = config['iam']['role_prefix'] + '-' + config['main']['resource_prefix'] + '-' + resolvedLogicalId
+                roleName = config['iam']['role_prefix'] + '-' + resolvedLogicalId
                 node.role_name = roleName

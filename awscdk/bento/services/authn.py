@@ -1,5 +1,5 @@
 from aws_cdk import Duration
-
+from aws_cdk import aws_iam as iam
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_ecr as ecr
@@ -56,10 +56,15 @@ class authnService:
             "NIH_CLIENT_ID":ecs.Secret.from_secrets_manager(self.secret, 'nih_client_id'),
             "NIH_CLIENT_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'nih_client_secret'),\
             
-            "MYSQL_DATABASE":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'dbname'),
-            "MYSQL_HOST":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'host'),
-            "MYSQL_PASSWORD":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'password'),
-            "MYSQL_USER":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'username'),
+            #  "MYSQL_DATABASE":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'dbname'),
+            #  "MYSQL_HOST":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'host'),
+            #  "MYSQL_PASSWORD":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'password'),
+            #  "MYSQL_USER":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'username'),
+
+            "MYSQL_DATABASE": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'dbname'),
+            "MYSQL_HOST": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'host'),
+            "MYSQL_PASSWORD": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'password'),
+            "MYSQL_USER": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'username'),
         }
     
     taskDefinition = ecs.FargateTaskDefinition(self,
@@ -67,6 +72,35 @@ class authnService:
         cpu=config.getint(service, 'cpu'),
         memory_limit_mib=config.getint(service, 'memory')
     )
+
+    # Grant ECR access
+    taskDefinition.add_to_execution_role_policy(
+            iam.PolicyStatement(
+                actions=[
+                    "ecr:UploadLayerPart",
+                    "ecr:PutImage",
+                    "ecr:ListTagsForResource",
+                    "ecr:InitiateLayerUpload",
+                    "ecr:GetRepositoryPolicy",
+                    "ecr:GetLifecyclePolicy",
+                    "ecr:GetDownloadUrlForLayer",
+                    "ecr:DescribeRepositories",
+                    "ecr:CompleteLayerUpload",
+                    "ecr:BatchGetImage",
+                    "ecr:BatchCheckLayerAvailability"
+                ],
+                effect=iam.Effect.ALLOW,
+                resources=["arn:aws:ecr:us-east-1:986019062625:repository/*"]
+            )
+        )
+
+    taskDefinition.add_to_execution_role_policy(
+            iam.PolicyStatement(
+                actions=["ecr:GetAuthorizationToken"],
+                effect=iam.Effect.ALLOW,
+                resources=["*"]
+            )
+        )
     
     ecr_repo = ecr.Repository.from_repository_arn(self, "{}_repo".format(service), repository_arn=config[service]['repo'])
     
@@ -97,7 +131,7 @@ class authnService:
             rollback=True
         ),
     )
-    ecsService.connections.allow_to_default_port(self.auroraCluster)
+    #ecsService.connections.allow_to_default_port(self.auroraCluster)
 
     ecsTarget = self.listener.add_targets("ECS-{}-Target".format(service),
         port=int(config[service]['port']),

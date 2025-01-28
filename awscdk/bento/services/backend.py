@@ -1,5 +1,5 @@
 from aws_cdk import Duration
-
+from aws_cdk import aws_iam as iam
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_ecr as ecr
@@ -49,6 +49,35 @@ class backendService:
         cpu=config.getint(service, 'cpu'),
         memory_limit_mib=config.getint(service, 'memory')
     )
+
+    # Grant ECR access
+    taskDefinition.add_to_execution_role_policy(
+            iam.PolicyStatement(
+                actions=[
+                    "ecr:UploadLayerPart",
+                    "ecr:PutImage",
+                    "ecr:ListTagsForResource",
+                    "ecr:InitiateLayerUpload",
+                    "ecr:GetRepositoryPolicy",
+                    "ecr:GetLifecyclePolicy",
+                    "ecr:GetDownloadUrlForLayer",
+                    "ecr:DescribeRepositories",
+                    "ecr:CompleteLayerUpload",
+                    "ecr:BatchGetImage",
+                    "ecr:BatchCheckLayerAvailability"
+                ],
+                effect=iam.Effect.ALLOW,
+                resources=["arn:aws:ecr:us-east-1:986019062625:repository/*"]
+            )
+        )
+
+    taskDefinition.add_to_execution_role_policy(
+            iam.PolicyStatement(
+                actions=["ecr:GetAuthorizationToken"],
+                effect=iam.Effect.ALLOW,
+                resources=["*"]
+            )
+        )
     
     ecr_repo = ecr.Repository.from_repository_arn(self, "{}_repo".format(service), repository_arn=config[service]['repo'])
     
