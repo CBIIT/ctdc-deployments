@@ -1,4 +1,5 @@
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
+from aws_cdk import aws_iam as iam
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_ecr as ecr
 from aws_cdk import aws_secretsmanager as secretsmanager
@@ -34,16 +35,21 @@ class filesService:
             # "NEW_RELIC_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "files_newrelic", secret_name='monitoring/newrelic'), 'api_key'),
             #"NEO4J_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_password'),
             #"NEO4J_USER":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_user'),
-            "CF_PRIVATE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "files_cf_key", secret_name="ec2-ssh-key/{}/private".format(self.cfKeys.key_pair_name)), ''),
-            "CF_KEY_PAIR_ID":ecs.Secret.from_secrets_manager(self.secret, 'cf_key_pair_id'),
-            "CF_URL":ecs.Secret.from_secrets_manager(self.secret, 'cf_url'),
+            #"CF_PRIVATE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "files_cf_key", secret_name="ec2-ssh-key/{}/private".format(self.cfKeys.key_pair_name)), ''),
+            #"CF_KEY_PAIR_ID":ecs.Secret.from_secrets_manager(self.secret, 'cf_key_pair_id'),
+            #"CF_URL":ecs.Secret.from_secrets_manager(self.secret, 'cf_url'),
             "TOKEN_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'token_secret'),
             "COOKIE_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'cookie_secret'),
 
-            "MYSQL_DATABASE":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'dbname'),
-            "MYSQL_HOST":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'host'),
-            "MYSQL_PASSWORD":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'password'),
-            "MYSQL_USER":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'username'),
+            # "MYSQL_DATABASE":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'dbname'),
+            # "MYSQL_HOST":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'host'),
+            # "MYSQL_PASSWORD":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'password'),
+            # "MYSQL_USER":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'username'),
+
+            "MYSQL_DATABASE": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'dbname'),
+            "MYSQL_HOST": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'host'),
+            "MYSQL_PASSWORD": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'password'),
+            "MYSQL_USER": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'username'),
         }
     
     taskDefinition = ecs.FargateTaskDefinition(self,
@@ -51,6 +57,35 @@ class filesService:
         cpu=config.getint(service, 'cpu'),
         memory_limit_mib=config.getint(service, 'memory')
     )
+
+    # Grant ECR access
+    taskDefinition.add_to_execution_role_policy(
+            iam.PolicyStatement(
+                actions=[
+                    "ecr:UploadLayerPart",
+                    "ecr:PutImage",
+                    "ecr:ListTagsForResource",
+                    "ecr:InitiateLayerUpload",
+                    "ecr:GetRepositoryPolicy",
+                    "ecr:GetLifecyclePolicy",
+                    "ecr:GetDownloadUrlForLayer",
+                    "ecr:DescribeRepositories",
+                    "ecr:CompleteLayerUpload",
+                    "ecr:BatchGetImage",
+                    "ecr:BatchCheckLayerAvailability"
+                ],
+                effect=iam.Effect.ALLOW,
+                resources=["arn:aws:ecr:us-east-1:986019062625:repository/*"]
+            )
+        )
+
+    taskDefinition.add_to_execution_role_policy(
+            iam.PolicyStatement(
+                actions=["ecr:GetAuthorizationToken"],
+                effect=iam.Effect.ALLOW,
+                resources=["*"]
+            )
+        )
     
     ecr_repo = ecr.Repository.from_repository_arn(self, "{}_repo".format(service), repository_arn=config[service]['repo'])
     
@@ -81,7 +116,7 @@ class filesService:
             rollback=True
         ),
     )
-    ecsService.connections.allow_to_default_port(self.auroraCluster)
+    #ecsService.connections.allow_to_default_port(self.auroraCluster)
 
     ecsTarget = self.listener.add_targets("ECS-{}-Target".format(service),
         port=int(config[service]['port']),

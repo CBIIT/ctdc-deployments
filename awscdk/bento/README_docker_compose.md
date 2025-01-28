@@ -14,6 +14,7 @@ Once the repo has been cloned a dev container can be started from the cdk/awscdk
 
 ```bash
 docker-compose run aws-cdk sh
+docker compose run aws-cdk sh
 ```
 
 This will start a container with all required applications installed and map the awscdk/bento folder as its workspace.

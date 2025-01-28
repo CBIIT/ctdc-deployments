@@ -3,9 +3,7 @@ from configparser import ConfigParser
 from constructs import Construct
 from cdk_ec2_key_pair import KeyPair, PublicKeyFormat
 
-from aws_cdk import Stack
-from aws_cdk import RemovalPolicy
-from aws_cdk import SecretValue
+from aws_cdk import Stack, RemovalPolicy, SecretValue, Duration
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecs as ecs
@@ -25,7 +23,7 @@ class Stack(Stack):
     def __init__(self, scope: Construct, **kwargs) -> None:
         super().__init__(scope, **kwargs)
 
-        ### Read config
+        # Read config
         config = ConfigParser()
         config.read('config.ini')
         
@@ -36,40 +34,33 @@ class Stack(Stack):
         else:
             self.app_url = "https://{}".format(config['main']['domain'])
         
-        ### Import VPC
+        # Import VPC
         self.VPC = ec2.Vpc.from_lookup(self, "VPC",
-            vpc_id = config['main']['vpc_id']
+            vpc_id=config['main']['vpc_id']
         )
 
-        ### Opensearch Cluster
+        # Opensearch Cluster
         if config['os']['endpoint_type'] == 'vpc':
             vpc = self.VPC
-            vpc_subnets=[{
-                'subnets': [self.VPC.private_subnets[0]],
-            }]
+            vpc_subnets = [{'subnets': [self.VPC.private_subnets[0]]}]
         else:
             vpc = None
-            vpc_subnets=[{}]
+            vpc_subnets = [{}]
 
         self.osDomain = opensearch.Domain(self,
             "opensearch",
             version=opensearch.EngineVersion.open_search(config['os']['version']),
             vpc=vpc,
-            #access_policies=[self.osPolicyStatement],
-            
-            zone_awareness=opensearch.ZoneAwarenessConfig(
-                enabled=False
-            ),
+            zone_awareness=opensearch.ZoneAwarenessConfig(enabled=False),
             capacity=opensearch.CapacityConfig(
                 data_node_instance_type=config['os']['data_node_instance_type'],
                 multi_az_with_standby_enabled=False
             ),
             vpc_subnets=vpc_subnets,
             removal_policy=RemovalPolicy.DESTROY,
-            #advanced_options={"override_main_response_version" : "true"}
         )
 
-        ### Cloudfront
+        # Cloudfront
         self.cfOrigin = s3.Bucket(self, "CFBucket",
             removal_policy=RemovalPolicy.DESTROY
         )
@@ -80,10 +71,10 @@ class Stack(Stack):
             public_key_format=PublicKeyFormat.PEM
         )
 
-        CFPublicKey = cloudfront.PublicKey(self, "CFPublicKey",
+        CFPublicKey = cloudfront.PublicKey(self, "CFPublicKey-{}".format(config['main']['tier']),
             encoded_key=self.cfKeys.public_key_value
         )
-        CFKeyGroup = cloudfront.KeyGroup(self, "CFKeyGroup",
+        CFKeyGroup = cloudfront.KeyGroup(self, "CFKeyGroup-{}".format(config['main']['tier']),
             items=[CFPublicKey]
         )
         
@@ -91,31 +82,37 @@ class Stack(Stack):
             default_behavior=cloudfront.BehaviorOptions(
                 origin=origins.S3Origin(self.cfOrigin),
                 allowed_methods=cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
-                trusted_key_groups=[CFKeyGroup
-                ]
+                trusted_key_groups=[CFKeyGroup]
             )
         )
         
-        ### RDS
-        # Create the serverless cluster
-        self.auroraCluster = rds.ServerlessCluster(self, "AuroraCluster",
-            engine=rds.DatabaseClusterEngine.AURORA_MYSQL,
+        # RDS Instance
+        self.auroraInstance = rds.DatabaseInstance(self, "AuroraInstance",
+            engine=rds.DatabaseInstanceEngine.mysql(
+                version=rds.MysqlEngineVersion.VER_8_0_30
+            ),
+            instance_type=ec2.InstanceType.of(
+                ec2.InstanceClass.BURSTABLE2,
+                ec2.InstanceSize.MEDIUM
+            ),
             vpc=vpc,
             credentials=rds.Credentials.from_username(config['db']['mysql_user']),
-            default_database_name=config['db']['mysql_database']
+            database_name=config['db']['mysql_database'],
+            allocated_storage=100,
+            backup_retention=Duration.days(7),
+            deletion_protection=False,
+            publicly_accessible=False
         )
-        
-        ### Secrets
+
+        # Secrets
         self.secret = secretsmanager.Secret(self, "Secret",
             secret_name="{}/{}/{}".format(config['main']['secret_prefix'], config['main']['tier'], "ctdc"),
             secret_object_value={
                 "neo4j_user": SecretValue.unsafe_plain_text(config['db']['neo4j_user']),
                 "neo4j_password": SecretValue.unsafe_plain_text(config['db']['neo4j_password']),
                 "es_host": SecretValue.unsafe_plain_text(self.osDomain.domain_endpoint),
- 
                 "cf_key_pair_id": SecretValue.unsafe_plain_text(CFPublicKey.public_key_id),
                 "cf_url": SecretValue.unsafe_plain_text("https://{}".format(self.cfDistribution.distribution_domain_name)),
-                
                 "cookie_secret": SecretValue.unsafe_plain_text(config['secrets']['cookie_secret']),
                 "token_secret": SecretValue.unsafe_plain_text(config['secrets']['token_secret']),
                 "email_user": SecretValue.unsafe_plain_text(config['secrets']['email_user']),
@@ -124,32 +121,35 @@ class Stack(Stack):
                 "google_client_secret": SecretValue.unsafe_plain_text(config['secrets']['google_client_secret']),
                 "nih_client_id": SecretValue.unsafe_plain_text(config['secrets']['nih_client_id']),
                 "nih_client_secret": SecretValue.unsafe_plain_text(config['secrets']['nih_client_secret']),
-
-                # MySQL secrets will be taken from the secret entry created by the cluster creation
-
             }
         )
 
-        ### ALB
+        # ALB
+        if config.getboolean('alb', 'internet_facing'):
+            subnets = ec2.SubnetSelection(
+                subnets=vpc.select_subnets(one_per_az=True, subnet_type=ec2.SubnetType.PUBLIC).subnets
+            )
+        else:
+            subnets = ec2.SubnetSelection(
+                subnets=vpc.select_subnets(one_per_az=True, subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS).subnets
+            )
+    
         self.ALB = elbv2.ApplicationLoadBalancer(self,
             "alb",
             vpc=self.VPC,
-            internet_facing=config.getboolean('alb', 'internet_facing')
+            internet_facing=config.getboolean('alb', 'internet_facing'),
+            vpc_subnets=subnets
         )
 
         self.ALB.add_redirect(
             source_protocol=elbv2.ApplicationProtocol.HTTP,
             source_port=80,
             target_protocol=elbv2.ApplicationProtocol.HTTPS,
-            target_port=443)
-
-        # Get certificate ARN for specified domain name
-        client = boto3.client('acm')
-        response = client.list_certificates(
-            CertificateStatuses=[
-                'ISSUED',
-            ],
+            target_port=443
         )
+
+        client = boto3.client('acm')
+        response = client.list_certificates(CertificateStatuses=['ISSUED'])
 
         for cert in response["CertificateSummaryList"]:
             if ('*.{}'.format(config['main']['domain']) in cert.values()):
@@ -159,17 +159,16 @@ class Stack(Stack):
             certificate_arn=certARN)
         
         self.listener = self.ALB.add_listener("PublicListener",
-            certificates=[
-                alb_cert
-            ],
-            port=443)
+            certificates=[alb_cert],
+            port=443
+        )
 
-        # Add a fixed error message when browsing an invalid URL
         self.listener.add_action("ECS-Content-Not-Found",
             action=elbv2.ListenerAction.fixed_response(200,
-                message_body="The requested resource is not available"))
+                message_body="The requested resource is not available")
+        )
 
-        ### ECS Cluster
+        # ECS Cluster
         self.kmsKey = kms.Key(self, "ECSExecKey")
 
         self.ECSCluster = ecs.Cluster(self,
@@ -179,6 +178,13 @@ class Stack(Stack):
                 kms_key=self.kmsKey
             ),
         )
+
+        # Fargate Services
+        frontend.frontendService.createService(self, config)
+        backend.backendService.createService(self, config)
+        authn.authnService.createService(self, config)
+        files.filesService.createService(self, config)
+        interoperation.interoperationService.createService(self, config)
 
         ### Fargate
         # Frontend Service
