@@ -86,23 +86,23 @@ class Stack(Stack):
             )
         )
         
-        # RDS Instance
-        self.auroraInstance = rds.DatabaseInstance(self, "AuroraInstance",
-            engine=rds.DatabaseInstanceEngine.mysql(
-                version=rds.MysqlEngineVersion.VER_8_0_30
-            ),
-            instance_type=ec2.InstanceType.of(
-                ec2.InstanceClass.BURSTABLE2,
-                ec2.InstanceSize.MEDIUM
-            ),
-            vpc=vpc,
-            credentials=rds.Credentials.from_username(config['db']['mysql_user']),
-            database_name=config['db']['mysql_database'],
-            allocated_storage=100,
-            backup_retention=Duration.days(7),
-            deletion_protection=False,
-            publicly_accessible=False
-        )
+        # # RDS Instance
+        # self.auroraInstance = rds.DatabaseInstance(self, "AuroraInstance",
+        #     engine=rds.DatabaseInstanceEngine.mysql(
+        #         version=rds.MysqlEngineVersion.VER_8_0_30
+        #     ),
+        #     instance_type=ec2.InstanceType.of(
+        #         ec2.InstanceClass.BURSTABLE2,
+        #         ec2.InstanceSize.MEDIUM
+        #     ),
+        #     vpc=vpc,
+        #     credentials=rds.Credentials.from_username(config['db']['mysql_user']),
+        #     database_name=config['db']['mysql_database'],
+        #     allocated_storage=100,
+        #     backup_retention=Duration.days(7),
+        #     deletion_protection=False,
+        #     publicly_accessible=False
+        # )
 
         # Secrets
         self.secret = secretsmanager.Secret(self, "Secret",
@@ -114,13 +114,18 @@ class Stack(Stack):
                 "cf_key_pair_id": SecretValue.unsafe_plain_text(CFPublicKey.public_key_id),
                 "cf_url": SecretValue.unsafe_plain_text("https://{}".format(self.cfDistribution.distribution_domain_name)),
                 "cookie_secret": SecretValue.unsafe_plain_text(config['secrets']['cookie_secret']),
-                "token_secret": SecretValue.unsafe_plain_text(config['secrets']['token_secret']),
-                "email_user": SecretValue.unsafe_plain_text(config['secrets']['email_user']),
-                "email_password": SecretValue.unsafe_plain_text(config['secrets']['email_password']),
-                "google_client_id": SecretValue.unsafe_plain_text(config['secrets']['google_client_id']),
-                "google_client_secret": SecretValue.unsafe_plain_text(config['secrets']['google_client_secret']),
-                "nih_client_id": SecretValue.unsafe_plain_text(config['secrets']['nih_client_id']),
-                "nih_client_secret": SecretValue.unsafe_plain_text(config['secrets']['nih_client_secret']),
+                "dcf_client_id": SecretValue.unsafe_plain_text(config['secrets']['dcf_client_id']),
+                "dcf_client_secret": SecretValue.unsafe_plain_text(config['secrets']['dcf_client_secret']),
+                "dcf_base_url": SecretValue.unsafe_plain_text(config['secrets']['dcf_base_url']),
+                "dcf_redirect_url": SecretValue.unsafe_plain_text(config['secrets']['dcf_redirect_url']),
+                "dcf_userinfo_url": SecretValue.unsafe_plain_text(config['secrets']['dcf_userinfo_url']),
+                "dcf_authorize_url": SecretValue.unsafe_plain_text(config['secrets']['dcf_authorize_url']),
+                "dcf_token_url": SecretValue.unsafe_plain_text(config['secrets']['dcf_token_url']),
+                "dcf_logout_url": SecretValue.unsafe_plain_text(config['secrets']['dcf_logout_url']),
+                "dcf_scope": SecretValue.unsafe_plain_text(config['secrets']['dcf_scope']),
+                "dcf_prompt": SecretValue.unsafe_plain_text(config['secrets']['dcf_prompt']),
+                "dcf_file_url": SecretValue.unsafe_plain_text(config['secrets']['dcf_file_url']),
+                "google_id": SecretValue.unsafe_plain_text(config['secrets']['google_id']),
             }
         )
 
@@ -178,13 +183,6 @@ class Stack(Stack):
                 kms_key=self.kmsKey
             ),
         )
-
-        # Fargate Services
-        frontend.frontendService.createService(self, config)
-        backend.backendService.createService(self, config)
-        authn.authnService.createService(self, config)
-        files.filesService.createService(self, config)
-        interoperation.interoperationService.createService(self, config)
 
         ### Fargate
         # Frontend Service

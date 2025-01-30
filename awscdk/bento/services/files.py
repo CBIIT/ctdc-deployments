@@ -17,39 +17,47 @@ class filesService:
         command = None
 
     environment={
-            # "NEW_RELIC_APP_NAME":"bento-cdk-files",
+            "NEW_RELIC_APP_NAME":"crdc-dev-ctdc-files",
+            "NEW_RELIC_HOST":"gov-collector.newrelic.com",
+            "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED":"true",
+            "NEW_RELIC_LABELS":"Project:{};Environment:{}".format('ctdc', config['main']['tier']),
+            "NRIA_PASSTHROUGH_ENVIRONMENT":"ECS_CONTAINER_METADATA_URI,ECS_CONTAINER_METADATA_URI_V4,FARGATE",
             "AUTH_ENABLED":"false",
+            "NRIA_IS_FORWARD_ONLY":"true",
+            "NRIA_CUSTOM_ATTRIBUTES":"{\"nrDeployMethod\":\"downloadPage\"}",
+            "NRIA_OVERRIDE_HOST_ROOT":"",
             "AUTH_URL":"/api/auth/authenticated",
             "AUTHORIZATION_ENABLED":"true",
             "BACKEND_URL":"/v1/graphql/",
             "DATE":"2024-07-09",
-            "MYSQL_PORT":"3306",
-            "MYSQL_SESSION_ENABLED":"true",
+            # "MYSQL_PORT":"3306",
+            # "MYSQL_SESSION_ENABLED":"true",
             #"NEO4J_URI":"bolt://{}:7687".format(config['db']['neo4j_ip']),
-            "PROJECT":"BENTO",
+            "PROJECT":"CTDC",
             "URL_SRC":"CLOUD_FRONT",
             "VERSION":config[service]['image'],
         }
 
     secrets={
-            # "NEW_RELIC_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "files_newrelic", secret_name='monitoring/newrelic'), 'api_key'),
+            "NEW_RELIC_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "files_newrelic", secret_name='monitoring/newrelic'), 'api_key'),
             #"NEO4J_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_password'),
             #"NEO4J_USER":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_user'),
             #"CF_PRIVATE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "files_cf_key", secret_name="ec2-ssh-key/{}/private".format(self.cfKeys.key_pair_name)), ''),
             #"CF_KEY_PAIR_ID":ecs.Secret.from_secrets_manager(self.secret, 'cf_key_pair_id'),
             #"CF_URL":ecs.Secret.from_secrets_manager(self.secret, 'cf_url'),
-            "TOKEN_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'token_secret'),
+            #"TOKEN_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'token_secret'),
             "COOKIE_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'cookie_secret'),
+            "DCF_FILE_URL":ecs.Secret.from_secrets_manager(self.secret, 'dcf_file_url'),
 
             # "MYSQL_DATABASE":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'dbname'),
             # "MYSQL_HOST":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'host'),
             # "MYSQL_PASSWORD":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'password'),
             # "MYSQL_USER":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'username'),
 
-            "MYSQL_DATABASE": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'dbname'),
-            "MYSQL_HOST": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'host'),
-            "MYSQL_PASSWORD": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'password'),
-            "MYSQL_USER": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'username'),
+            # "MYSQL_DATABASE": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'dbname'),
+            # "MYSQL_HOST": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'host'),
+            # "MYSQL_PASSWORD": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'password'),
+            # "MYSQL_USER": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'username'),
         }
     
     taskDefinition = ecs.FargateTaskDefinition(self,

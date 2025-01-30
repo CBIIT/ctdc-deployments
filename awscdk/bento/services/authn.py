@@ -18,7 +18,8 @@ class authnService:
         command = None
 
     environment={
-            # "NEW_RELIC_APP_NAME":"bento-perf-authN",
+            "NEW_RELIC_APP_NAME":"crdc-dev-ctdc-authn",
+            "NEW_RELIC_LABELS":"Project:{};Environment:{}".format('ctdc', config['main']['tier']),
             "AUTHORIZATION_ENABLED":"true",
             "AUTHORIZATION_URL":"/api/users/graphql",
             "DATE":"2024-05-21",
@@ -28,8 +29,9 @@ class authnService:
             "EMAILS_ENABLED":"true",
             "GOOGLE_REDIRECT_URL":self.app_url,
             "IDP":"google",
-            "MYSQL_PORT":"3306",
-            "MYSQL_SESSION_ENABLED":"true",
+            # "MYSQL_PORT":"3306",
+            # "MYSQL_SESSION_ENABLED":"true",
+            #"DATABASE_TYPE":"mysql",
             "NEO4J_URI":"bolt://{}:7687".format(config['db']['neo4j_ip']),
             "NIH_AUTHORIZE_URL":"https://stsstg.nih.gov/auth/oauth/v2/authorize",
             "NIH_BASE_URL":"https://stsstg.nih.gov",
@@ -44,27 +46,29 @@ class authnService:
         }
 
     secrets={
-            # "NEW_RELIC_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "be_newrelic", secret_name='monitoring/newrelic'), 'api_key'),
-            "NEO4J_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_password'),
-            "NEO4J_USER":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_user'),
-            "TOKEN_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'token_secret'),
-            "COOKIE_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'cookie_secret'),
-            "EMAIL_USER":ecs.Secret.from_secrets_manager(self.secret, 'email_user'),
-            "EMAIL_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'email_password'),
-            "GOOGLE_CLIENT_ID":ecs.Secret.from_secrets_manager(self.secret, 'google_client_id'),
-            "GOOGLE_CLIENT_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'google_client_secret'),
-            "NIH_CLIENT_ID":ecs.Secret.from_secrets_manager(self.secret, 'nih_client_id'),
-            "NIH_CLIENT_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'nih_client_secret'),\
+            "NEW_RELIC_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "auth_newrelic", secret_name='monitoring/newrelic'), 'api_key'),
+            "COOKIE_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'cookie_secret'),\
+            
+            "DCF_CLIENT_ID":ecs.Secret.from_secrets_manager(self.secret, 'dcf_client_id'),
+            "DCF_CLIENT_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'dcf_client_secret'),
+            "DCF_BASE_URL":ecs.Secret.from_secrets_manager(self.secret, 'dcf_base_url'),
+            "DCF_REDIRECT_URL":ecs.Secret.from_secrets_manager(self.secret, 'dcf_redirect_url'),
+            "DCF_USERINFO_URL":ecs.Secret.from_secrets_manager(self.secret, 'dcf_userinfo_url'),
+            "DCF_AUTHORIZE_URL":ecs.Secret.from_secrets_manager(self.secret, 'dcf_authorize_url'),
+            "DCF_TOKEN_URL":ecs.Secret.from_secrets_manager(self.secret, 'dcf_token_url'),
+            "DCF_LOGOUT_UR":ecs.Secret.from_secrets_manager(self.secret, 'dcf_logout_url'),
+            "DCF_SCOPE":ecs.Secret.from_secrets_manager(self.secret, 'dcf_scope'),
+            "DCF_PROMPT":ecs.Secret.from_secrets_manager(self.secret, 'dcf_prompt'),
             
             #  "MYSQL_DATABASE":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'dbname'),
             #  "MYSQL_HOST":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'host'),
             #  "MYSQL_PASSWORD":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'password'),
             #  "MYSQL_USER":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'username'),
 
-            "MYSQL_DATABASE": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'dbname'),
-            "MYSQL_HOST": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'host'),
-            "MYSQL_PASSWORD": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'password'),
-            "MYSQL_USER": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'username'),
+            # "MYSQL_DATABASE": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'dbname'),
+            # "MYSQL_HOST": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'host'),
+            # "MYSQL_PASSWORD": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'password'),
+            # "MYSQL_USER": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'username'),
         }
     
     taskDefinition = ecs.FargateTaskDefinition(self,

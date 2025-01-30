@@ -17,7 +17,8 @@ class interoperationService:
         command = None
 
     environment={
-            # "NEW_RELIC_APP_NAME":"bento-cdk-interoperation",
+            "NEW_RELIC_APP_NAME":"crdc-dev-ctdc-interoperation",
+            "NEW_RELIC_LABELS":"Project:{};Environment:{}".format('ctdc', config['main']['tier']),
             "AUTH_ENABLED":"false",
             "REDIS_AUTH_ENABLED":"false",
             "AUTH_URL":"/api/auth/authenticated",
@@ -33,13 +34,13 @@ class interoperationService:
         }
 
     secrets={
-            # "NEW_RELIC_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "interoperation_newrelic", secret_name='monitoring/newrelic'), 'api_key'),
+            "NEW_RELIC_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "interoperation_newrelic", secret_name='monitoring/newrelic'), 'api_key'),
             #"NEO4J_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_password'),
             #"NEO4J_USER":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_user'),
             "CF_PRIVATE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "files_cf_key", secret_name="ec2-ssh-key/{}/private".format(self.cfKeys.key_pair_name)), ''),
             "CF_KEY_PAIR_ID":ecs.Secret.from_secrets_manager(self.secret, 'cf_key_pair_id'),
             "CF_URL":ecs.Secret.from_secrets_manager(self.secret, 'cf_url'),
-            "TOKEN_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'token_secret'),
+            #"TOKEN_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'token_secret'),
             "COOKIE_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'cookie_secret'),
 
             #"MYSQL_DATABASE":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'dbname'),
