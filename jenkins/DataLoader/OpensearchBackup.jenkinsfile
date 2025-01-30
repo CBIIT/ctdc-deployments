@@ -1,101 +1,114 @@
 @Library('datacommons-jenkins-shared-library@v1.1') _
 import groovy.json.JsonOutput
 
+def getLabelForEnvironment(environment) {
+	if (environment == "stage" || environment == "prod"){
+		return "slave-ncias-p3181-c"
+	}else {
+		return "slave-ncias-d2947-c"
+	}
+}
+
+
 pipeline {
-  agent {
-    node {
-      label 'ctdc-deploy-agent'
-    }
-  }
+	agent {
+		node {
+			label getLabelForEnvironment(params.Environment)
+		}
+	}
+
 	parameters {
     extendedChoice( 
         name: 'Environment', 
+        description: 'The environment to back up from.', 
         defaultValue: 'dev', 
-        description: 'Choose the environment to build', 
         type: 'PT_SINGLE_SELECT',
-        value: 'dev,qa,stage,prod' )
-    string(defaultValue: "ctdc",
-        description: 'snapshot repository name',
-        name: 'PROJECT_NAME')
-    string(defaultValue: "ctdc",
-        description: 'snapshot repository name',
-        name: 'SNAPSHOT_REPO')
-    string(defaultValue: "v_1_0",
-        description: 'Snapshot name used for restore operation',
-        name: 'SNAPSHOT_VALUE')
-    string(defaultValue: "crdc-stage-ctdc-opensearch-snapshot-bucket",
-        description: 'S3 bucket which has the snapshot to restore',
-        name: 'S3_BUCKET')
-    string(defaultValue: "es-backup",
-        description: 'sub folder in S3 bucket where the snapshot is present',
-        name: 'BASE_PATH')
+        value: 'dev,dev2,qa,qa2,stage,prod' )
+
+    string(name: 'SNAPSHOT_NAME',
+        description: 'Snapshot name used for backup/restore operation.')
+
+    string(name: 'INDICES',
+        description: 'Indices to be backed up from Opensearch. Values should comma seperated. If left blank all indices will be selected.')
+
+    string(name: 'S3_BUCKET',
+        description: 'S3 bucket which holds the snapshot.',
+        defaultValue: "crdc-stage-ctdc-opensearch-snapshot-bucket")
   }
+
   options {
   	ansiColor('xterm')
   }
-  tools {
-  	maven 'Default' 
-    jdk 'Default' 
-  }
+
   environment {
-      PROGRAM      = "crdc"
-	  PROJECT      = "ctdc"
-	  SLACK_SECRET = "ctdc_slack_url"
-	  ENV          = "${params.Environment}"
-	  REGION       = "us-east-1"
-	  DEPLOY_REPO  = "${env.PROJECT}-deployments"
+    PROGRAM       = "crdc"
+	  PROJECT       = "ctdc"
+	  SLACK_SECRET  = "ctdc_slack_url"
+	  ENV           = "${params.Environment}"
+    SNAPSHOT_NAME = "${params.SNAPSHOT_NAME}"
+    INDICES       = "${params.INDICES}"
+    S3_BUCKET     = "${params.S3_BUCKET}"
+    REGION        = "us-east-1"
+	  DEPLOY_REPO   = "ctdc-deployments"
   }
   stages{
       stage('checkout'){
       steps {
 
         checkout( poll: false, 
-        changelog:false,
-        scm: [$class: 'GitSCM', 
-        branches: [[name: '*/main']], 
-        doGenerateSubmoduleConfigurations: false, 
-        extensions: [[$class: 'DisableRemotePoll'],
-        [$class: 'PathRestriction', excludedRegions: '*'], 
-        [$class: 'RelativeTargetDirectory', 
-        relativeTargetDir: "${env.PROJECT}-deployments"]],
-        submoduleCfg: [], 
-	    userRemoteConfigs:
-		[[url: "https://github.com/CBIIT/${env.DEPLOY_REPO}"]]])
+          changelog:false,
+          scm: [$class: 'GitSCM', 
+          branches: [[name: '*/main']], 
+          doGenerateSubmoduleConfigurations: false, 
+          extensions: [[$class: 'DisableRemotePoll'],
+          [$class: 'PathRestriction', excludedRegions: '*'], 
+          [$class: 'RelativeTargetDirectory', 
+          relativeTargetDir: "ctdc-deployments"]],
+          submoduleCfg: [], 
+          userRemoteConfigs:
+          [[url: "https://github.com/CBIIT/${env.DEPLOY_REPO}"]]])
 
         }
  
     }
+
+    stage('Set Environment Variables'){
+
+ 		steps {
+
+ 			script {
+
+				// set account number
+				env.AWS_ACCOUNT = sh(label: 'Get account number', returnStdout: true, script: "aws sts get-caller-identity --query \"Account\" --output text").trim()
+
+			}
+
+ 		}
+
+  	}
+
   	stage('opensearch_backup'){
-      environment {
-        TIER = "${params.Environment}"
-      }
-      // agent {
-      //       docker {
-      //           image 'cbiitssrepo/cicd-ansible_4.0'
-      //           args '--net=host -u root -v /var/run/docker.sock:/var/run/docker.sock'
-      //           reuseNode true
-      //       }
-      // }
  		  steps{
         wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]){
              ansiblePlaybook( 
                 playbook: '${WORKSPACE}/ctdc-deployments/ansible/playbooks/dataloader/opensearchbackup.yml',
                 inventory: '${WORKSPACE}/ctdc-deployments/ansible/playbooks/hosts',
                 extraVars: [
-                    tier: "${ENV}",
-                    project_name: "${PROJECT}",
-                    snapshot_repo: "${params.SNAPSHOT_REPO}", 
-                    snapshot_value: "${params.SNAPSHOT_VALUE}",
-                    base_path: "${params.BASE_PATH}",
-                    s3_bucket: "${params.S3_BUCKET}",
-                    project: "${PROJECT}",
-                    role_arn: "arn:aws:iam::265135454114:role/power-user-crdc-dev-ctdc-opensearch-snapshot"
+                    role_arn: "arn:aws:iam::${AWS_ACCOUNT}:role/power-user-crdc-dev-ctdc-opensearch-snapshot"
                     ],
                   hostKeyChecking: false,
-                  colorized: true,
-                  extras: '-vvv') 
+                  colorized: true)
         }
       }
     }
+  }
+  post {
+
+    cleanup {
+
+        cleanWs()
+
+    }
+
   }
 }
