@@ -18,30 +18,33 @@ class backendService:
         command = None
 
     environment={
-            # "NEW_RELIC_APP_NAME":"{}-{}-{}".format(self.namingPrefix, config['main']['tier'], service),
-            # "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED":"true",
-            # "NEW_RELIC_HOST":"gov-collector.newrelic.com",
-            # "NEW_RELIC_LABELS":"Project:{};Environment:{}".format('bento', config['main']['tier']),
-            # "NEW_RELIC_LOG_FILE_NAME":"STDOUT",
+            "NEW_RELIC_APP_NAME":"crdc-dev-ctdc-backend",
+            "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED":"true",
+            "NEW_RELIC_HOST":"gov-collector.newrelic.com",
+            "NEW_RELIC_LABELS":"Project:{};Environment:{}".format('ctdc', config['main']['tier']),
+            "NEW_RELIC_LOG_FILE_NAME":"STDOUT",
             # "JAVA_OPTS": "-javaagent:/usr/local/tomcat/newrelic/newrelic.jar",
             "AUTH_ENABLED":"false",
             "AUTH_ENDPOINT":"/api/auth/",
             "BENTO_API_VERSION":config[service]['image'],
-            "MYSQL_SESSION_ENABLED":"true",
-            "NEO4J_URL":"bolt://{}:7687".format(config['db']['neo4j_ip']),
+            "ES_FILTER_ENABLED":"true",
+            "ES_SCHEMA":"es-schema-ctdc.graphql",
+            # "MYSQL_SESSION_ENABLED":"true",
+            #"NEO4J_URL":"bolt://{}:7687".format(config['db']['neo4j_ip']),
             "REDIS_ENABLE":"false",
             "REDIS_FILTER_ENABLE":"false",
             "REDIS_HOST":"localhost",
             "REDIS_PORT":"6379",
             "REDIS_USE_CLUSTER":"true",
+            "JAVA_OPTS":"-javaagent:/usr/local/tomcat/newrelic/newrelic.jar",
         }
 
     secrets={
-            # "NEW_RELIC_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "be_newrelic", secret_name='monitoring/newrelic'), 'api_key'),
-            "NEO4J_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_password'),
-            "NEO4J_USER":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_user'),
-            "ES_HOST":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "es_host_{}".format(service), secret_name='bento/bento/perf'), 'es_host'),
-            # "ES_HOST":ecs.Secret.from_secrets_manager(self.secret, 'es_host'),
+            "NEW_RELIC_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "be_newrelic", secret_name='monitoring/newrelic'), 'api_key'),
+            #"NEO4J_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_password'),
+            #"NEO4J_USER":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_user'),
+            #"ES_HOST":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "es_host_{}".format(service), secret_name='bento/ctdc/dev'), 'es_host'),
+            "ES_HOST":ecs.Secret.from_secrets_manager(self.secret, 'es_host'),
         }
     
     taskDefinition = ecs.FargateTaskDefinition(self,
