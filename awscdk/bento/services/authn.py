@@ -29,9 +29,9 @@ class authnService:
             "EMAILS_ENABLED":"true",
             "GOOGLE_REDIRECT_URL":self.app_url,
             "IDP":"google",
-            # "MYSQL_PORT":"3306",
-            # "MYSQL_SESSION_ENABLED":"true",
-            #"DATABASE_TYPE":"mysql",
+            "MYSQL_PORT":"3306",
+            "MYSQL_SESSION_ENABLED":"true",
+            "DATABASE_TYPE":"mysql",
             "NEO4J_URI":"bolt://{}:7687".format(config['db']['neo4j_ip']),
             "NIH_AUTHORIZE_URL":"https://stsstg.nih.gov/auth/oauth/v2/authorize",
             "NIH_BASE_URL":"https://stsstg.nih.gov",
@@ -60,21 +60,16 @@ class authnService:
             "DCF_SCOPE":ecs.Secret.from_secrets_manager(self.secret, 'dcf_scope'),
             "DCF_PROMPT":ecs.Secret.from_secrets_manager(self.secret, 'dcf_prompt'),
             
-            #  "MYSQL_DATABASE":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'dbname'),
-            #  "MYSQL_HOST":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'host'),
-            #  "MYSQL_PASSWORD":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'password'),
-            #  "MYSQL_USER":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'username'),
-
-            # "MYSQL_DATABASE": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'dbname'),
-            # "MYSQL_HOST": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'host'),
-            # "MYSQL_PASSWORD": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'password'),
-            # "MYSQL_USER": ecs.Secret.from_secrets_manager(self.auroraInstance.secret, 'username'),
+            "MYSQL_DATABASE":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'dbname'),
+            "MYSQL_HOST":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'host'),
+            "MYSQL_PASSWORD":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'password'),
+            "MYSQL_USER":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'username'),
         }
     
     taskDefinition = ecs.FargateTaskDefinition(self,
         "{}-{}-taskDef".format(self.namingPrefix, service),
-        cpu=config.getint(service, 'cpu'),
-        memory_limit_mib=config.getint(service, 'memory')
+        cpu=config.getint(service, 'taskcpu'),
+        memory_limit_mib=config.getint(service, 'taskmemory')
     )
 
     # Grant ECR access
@@ -108,7 +103,8 @@ class authnService:
     
     ecr_repo = ecr.Repository.from_repository_arn(self, "{}_repo".format(service), repository_arn=config[service]['repo'])
     
-    taskDefinition.add_container(
+    # Auth Container
+    auth_container = taskDefinition.add_container(
         service,
         #image=ecs.ContainerImage.from_registry("{}:{}".format(config[service]['repo'], config[service]['image'])),
         image=ecs.ContainerImage.from_ecr_repository(repository=ecr_repo, tag=config[service]['image']),
@@ -121,6 +117,34 @@ class authnService:
         logging=ecs.LogDrivers.aws_logs(
             stream_prefix="{}-{}".format(self.namingPrefix, service)
         )
+    )
+
+    # Sumo Logic Container
+    # sumo_logic_container = taskDefinition.add_container(
+    #     "sumologic-firelens",
+    #     image=ecs.ContainerImage.from_registry("public.ecr.aws/aws-observability/aws-for-fluent-bit:stable"),
+    #     cpu=0,
+    #     essential=True,
+    #     firelens_config=ecs.FirelensConfig(type=ecs.FirelensLogRouterType.FLUENTBIT, options={"enable-ecs-log-metadata": "true"})
+    # )
+    
+    # New Relic Container
+    new_relic_container = taskDefinition.add_container(
+        "newrelic-infra",
+        image=ecs.ContainerImage.from_registry("newrelic/nri-ecs:1.9.2"),
+        cpu=0,
+        essential=True,
+        secrets={"NRIA_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "authnr_newrelic", secret_name='monitoring/newrelic'), 'api_key'),},
+        environment={
+            "NEW_RELIC_HOST":"gov-collector.newrelic.com",
+            "NEW_RELIC_APP_NAME":"{}-{}-backend".format(config['main']['project'], config['main']['tier']),
+            "NRIA_IS_FORWARD_ONLY":"true",
+            "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED":"true",
+            "NRIA_PASSTHROUGH_ENVIRONMENT":"ECS_CONTAINER_METADATA_URI,ECS_CONTAINER_METADATA_URI_V4,FARGATE",
+            "FARGATE":"true",
+            "NRIA_CUSTOM_ATTRIBUTES": '{"nrDeployMethod":"downloadPage"}',
+            "NRIA_OVERRIDE_HOST_ROOT": ""
+            },
     )
 
     ecsService = ecs.FargateService(self,

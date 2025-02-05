@@ -56,8 +56,8 @@ class frontendService:
          }
     taskDefinition = ecs.FargateTaskDefinition(self,
         "{}-{}-taskDef".format(self.namingPrefix, service),
-        cpu=config.getint(service, 'cpu'),
-        memory_limit_mib=config.getint(service, 'memory')
+        cpu=config.getint(service, 'taskcpu'),
+        memory_limit_mib=config.getint(service, 'taskmemory')
     )
 
     # Grant ECR access
@@ -91,7 +91,8 @@ class frontendService:
     
     ecr_repo = ecr.Repository.from_repository_arn(self, "{}_repo".format(service), repository_arn=config[service]['repo'])
     
-    taskDefinition.add_container(
+    # Frontend Container
+    frontend_container = taskDefinition.add_container(
         service,
         #image=ecs.ContainerImage.from_registry("{}:{}".format(fe_repo.repository_uri, config[service]['image'])),
         image=ecs.ContainerImage.from_ecr_repository(repository=ecr_repo, tag=config[service]['image']),
@@ -105,6 +106,35 @@ class frontendService:
             stream_prefix="{}-{}".format(self.namingPrefix, service)
         )
     )
+
+    # Sumo Logic Container
+    # sumo_logic_container = taskDefinition.add_container(
+    #     "sumologic-firelens",
+    #     image=ecs.ContainerImage.from_registry("public.ecr.aws/aws-observability/aws-for-fluent-bit:stable"),
+    #     cpu=0,
+    #     essential=True,
+    #     firelens_config=ecs.FirelensConfig(type=ecs.FirelensLogRouterType.FLUENTBIT, options={"enable-ecs-log-metadata": "true"})
+    # )
+    
+    # New Relic Container
+    new_relic_container = taskDefinition.add_container(
+        "newrelic-infra",
+        image=ecs.ContainerImage.from_registry("newrelic/nri-ecs:1.9.2"),
+        cpu=0,
+        essential=True,
+        secrets={"NRIA_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "fenr_newrelic", secret_name='monitoring/newrelic'), 'api_key'),},
+        environment={
+            "NEW_RELIC_HOST":"gov-collector.newrelic.com",
+            "NEW_RELIC_APP_NAME":"{}-{}-backend".format(config['main']['project'], config['main']['tier']),
+            "NRIA_IS_FORWARD_ONLY":"true",
+            "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED":"true",
+            "NRIA_PASSTHROUGH_ENVIRONMENT":"ECS_CONTAINER_METADATA_URI,ECS_CONTAINER_METADATA_URI_V4,FARGATE",
+            "FARGATE":"true",
+            "NRIA_CUSTOM_ATTRIBUTES": '{"nrDeployMethod":"downloadPage"}',
+            "NRIA_OVERRIDE_HOST_ROOT": ""
+            },
+    )
+
 
     ecsService = ecs.FargateService(self,
         "{}-{}-service".format(self.namingPrefix, service),

@@ -18,6 +18,7 @@ from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_ssm as ssm
 
 from services import frontend, backend, files, authn, interoperation
+#from services import frontend, files, authn
 
 class Stack(Stack):
     def __init__(self, scope: Construct, **kwargs) -> None:
@@ -61,8 +62,12 @@ class Stack(Stack):
         )
 
         # Cloudfront
-        self.cfOrigin = s3.Bucket(self, "CFBucket",
-            removal_policy=RemovalPolicy.DESTROY
+        # self.cfOrigin = s3.Bucket(self, "CFBucket",
+        #     removal_policy=RemovalPolicy.DESTROY
+        # )
+
+        self.cfOrigin = s3.Bucket.from_bucket_name(self, "CFBucket",
+            bucket_name=config['s3']['file_manifest_bucket_name']
         )
 
         self.cfKeys = KeyPair(self, "CFKeyPair",
@@ -86,23 +91,15 @@ class Stack(Stack):
             )
         )
         
-        # # RDS Instance
-        # self.auroraInstance = rds.DatabaseInstance(self, "AuroraInstance",
-        #     engine=rds.DatabaseInstanceEngine.mysql(
-        #         version=rds.MysqlEngineVersion.VER_8_0_30
-        #     ),
-        #     instance_type=ec2.InstanceType.of(
-        #         ec2.InstanceClass.BURSTABLE2,
-        #         ec2.InstanceSize.MEDIUM
-        #     ),
-        #     vpc=vpc,
-        #     credentials=rds.Credentials.from_username(config['db']['mysql_user']),
-        #     database_name=config['db']['mysql_database'],
-        #     allocated_storage=100,
-        #     backup_retention=Duration.days(7),
-        #     deletion_protection=False,
-        #     publicly_accessible=False
-        # )
+        # # RDS
+        self.auroraCluster = rds.DatabaseCluster(self, "Aurora",
+            engine=rds.DatabaseClusterEngine.aurora_mysql(version=rds.AuroraMysqlEngineVersion.VER_3_05_2),
+            writer=rds.ClusterInstance.provisioned("writer",
+            ),
+            vpc=vpc,
+            storage_encrypted=True,
+            default_database_name=config['db']['mysql_database']
+        )
 
         # Secrets
         self.secret = secretsmanager.Secret(self, "Secret",
@@ -110,6 +107,7 @@ class Stack(Stack):
             secret_object_value={
                 "neo4j_user": SecretValue.unsafe_plain_text(config['db']['neo4j_user']),
                 "neo4j_password": SecretValue.unsafe_plain_text(config['db']['neo4j_password']),
+                "file_manifest_bucket_name": SecretValue.unsafe_plain_text(config['s3']['file_manifest_bucket_name']),
                 "es_host": SecretValue.unsafe_plain_text(self.osDomain.domain_endpoint),
                 "cf_key_pair_id": SecretValue.unsafe_plain_text(CFPublicKey.public_key_id),
                 "cf_url": SecretValue.unsafe_plain_text("https://{}".format(self.cfDistribution.distribution_domain_name)),
@@ -126,6 +124,8 @@ class Stack(Stack):
                 "dcf_prompt": SecretValue.unsafe_plain_text(config['secrets']['dcf_prompt']),
                 "dcf_file_url": SecretValue.unsafe_plain_text(config['secrets']['dcf_file_url']),
                 "google_id": SecretValue.unsafe_plain_text(config['secrets']['google_id']),
+                "s3_access_key_id": SecretValue.unsafe_plain_text(config['secrets']['s3_access_key_id']),
+                "s3_secret_access_key": SecretValue.unsafe_plain_text(config['secrets']['s3_secret_access_key']),
             }
         )
 
