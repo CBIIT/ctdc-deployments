@@ -14,9 +14,9 @@ services:
     image: Remove_SBG.108
     buildNumber: '108'
   authn:
-    version: 1.1.0-with-logs.49
-    image: 1.1.0-with-logs.49
-    buildNumber: '49'
+    version: 1.1.0-with-logs.50
+    image: 1.1.0-with-logs.50
+    buildNumber: '50'
   interoperation:
     version: 1.0.0.17
     image: 1.0.0.17
