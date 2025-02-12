@@ -101,7 +101,7 @@ pipeline {
 
   	}
 
-	/*stage('Add Production Tag'){
+	stage('Add Production Tag'){
  		when {
 	        expression {
                 ENV == 'prod'
@@ -123,7 +123,7 @@ pipeline {
                 echo "updated image tag: $IMAGE_TAG"
 			}
  		}
-  	}*/
+  	}
 
   	stage('Update Task Definition'){
 
