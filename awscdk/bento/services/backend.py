@@ -12,10 +12,10 @@ class backendService:
     service = "backend"
 
     # Set container configs
-    if config.has_option(service, 'command'):
-        command = [config[service]['command']]
-    else:
-        command = None
+    # if config.has_option(service, 'command'):
+    #     command = [config[service]['command']]
+    # else:
+    #     command = None
 
     environment={
             "JAVA_OPTS": "-javaagent:/usr/local/tomcat/newrelic/newrelic.jar",
@@ -92,7 +92,12 @@ class backendService:
         cpu=config.getint(service, 'cpu'),
         memory_limit_mib=config.getint(service, 'memory'),
         port_mappings=[ecs.PortMapping(app_protocol=ecs.AppProtocol.http, container_port=config.getint(service, 'port'), name=service)],
-        command=command,
+        #entry_point=command,
+        entry_point=["sh", "-c"],
+        command=[
+            "wget https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic-java.zip -O newrelic-java.zip && "
+            "rm -rf newrelic && unzip -o newrelic-java.zip && bin/catalina.sh run"
+        ],
         environment=environment,
         secrets=secrets,
         logging=ecs.LogDrivers.aws_logs(
