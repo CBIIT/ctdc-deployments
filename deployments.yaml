@@ -18,9 +18,9 @@ services:
     image: 1.1.0-with-logs.50
     buildNumber: '50'
   interoperation:
-    version: CTDC-interoperation-inprogress.20
-    image: CTDC-interoperation-inprogress.20
-    buildNumber: '20'
+    version: CTDC-interoperation-inprogress.21
+    image: CTDC-interoperation-inprogress.21
+    buildNumber: '21'
 interoperation:
   version: main.2
   image: main.2
