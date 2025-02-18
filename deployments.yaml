@@ -6,9 +6,9 @@ services:
     image: 1.1.0.190
     buildNumber: '190'
   frontend:
-    version: 1.1.0.294
-    image: 1.1.0.294
-    buildNumber: '294'
+    version: 1.1.0.295
+    image: 1.1.0.295
+    buildNumber: '295'
   files:
     version: Remove_SBG.108
     image: Remove_SBG.108
