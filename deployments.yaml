@@ -14,9 +14,9 @@ services:
     image: Remove_SBG.108
     buildNumber: '108'
   authn:
-    version: 1.1.0-with-logs.56
-    image: 1.1.0-with-logs.56
-    buildNumber: '56'
+    version: 1.1.0-with-logs.57
+    image: 1.1.0-with-logs.57
+    buildNumber: '57'
   interoperation:
     version: CTDC-interoperation-inprogress.21
     image: CTDC-interoperation-inprogress.21
