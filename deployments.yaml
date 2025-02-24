@@ -14,9 +14,9 @@ services:
     image: Remove_SBG.108
     buildNumber: '108'
   authn:
-    version: 1.1.0-with-logs-yizhen.63
-    image: 1.1.0-with-logs-yizhen.63
-    buildNumber: '63'
+    version: 1.1.0-with-logs-yizhen.65
+    image: 1.1.0-with-logs-yizhen.65
+    buildNumber: '65'
   interoperation:
     version: CTDC-interoperation-inprogress.21
     image: CTDC-interoperation-inprogress.21
