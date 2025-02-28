@@ -60,6 +60,22 @@ class Stack(Stack):
             vpc_subnets=vpc_subnets,
             removal_policy=RemovalPolicy.DESTROY,
         )
+        # Policy to allow access for dataloader instances
+        os_policy = iam.PolicyStatement(
+            actions=[
+                "es:ESHttpGet",
+                "es:ESHttpPut",
+                "es:ESHttpPost",
+                "es:ESHttpPatch",
+                "es:ESHttpHead",
+                "es:ESHttpGet",
+                "es:ESHttpDelete",
+            ],
+            resources=["{}/*".format(self.osDomain.domain_arn)],
+            principals=[iam.AnyPrincipal()],
+        )
+        self.osDomain.add_access_policies(os_policy)
+        self.osDomain.connections.allow_from(ec2.Peer.ipv4("172.16.0.219/32"), ec2.Port.HTTPS)
 
         # Cloudfront
         # self.cfOrigin = s3.Bucket(self, "CFBucket",
