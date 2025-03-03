@@ -138,7 +138,7 @@ pipeline {
 
                 } else {
 
-                    env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task.json"
+                    env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task.yml"
                 }
 
 			}
