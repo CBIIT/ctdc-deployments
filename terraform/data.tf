@@ -375,7 +375,8 @@ resource "aws_iam_policy" "opensearch_snapshot_policy" {
   count       = terraform.workspace == "dev" || terraform.workspace == "stage" ? 1 : 0
   name        = "power-user-${var.program}-${terraform.workspace}-${var.project}-opensearch-snapshot"
   description = "role that allows the opensearch service to create snapshots stored in s3"
-  policy      = data.aws_iam_policy_document.opensearch_snapshot_policy_document[0].json
+  #policy      = data.aws_iam_policy_document.opensearch_snapshot_policy_document[0].json
+  policy      = data.aws_iam_policy_document.opensearch_snapshot_policy_document.json
 }
 
 /*data "aws_iam_policy_document" "opensearch_snapshot_policy_document" {

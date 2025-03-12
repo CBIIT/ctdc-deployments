@@ -137,8 +137,8 @@ module "deepmerge" {
 module "secrets" {
   source        = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/secrets?ref=v1.19"
   app           = var.project
-  secret_values = module.deepmerge.merged
-  #secret_values = var.secret_values
+  #secret_values = module.deepmerge.merged
+  secret_values = var.secret_values
 }
 
 #S3 bucket for storing OpenSearch Snapshots
