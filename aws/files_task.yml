@@ -85,8 +85,8 @@ containerDefinitions:
     valueFrom: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:rds_password::"
   - name: "DCF_FILE_URL"
     valueFrom: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:dcf_file_url::"
-  - name: "COOKIE_SECRET"
-    valueFrom: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:cookie_secret::"
+  # - name: "COOKIE_SECRET"
+  #   valueFrom: "arn:aws:secretsmanager:$REGION:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:cookie_secret::"
   logConfiguration:
     logDriver: awsfirelens
     options:
