@@ -45,7 +45,7 @@ locals {
       secretKey   = ""
       description = ""
       secretValue = {
-        es_host                       = module.opensearch.endpoint
+        #es_host                       = module.opensearch.endpoint
         sumo_collector_token_frontend = module.monitoring.sumo_source_urls.frontend[0]
         sumo_collector_token_backend  = module.monitoring.sumo_source_urls.backend[0]
       }
