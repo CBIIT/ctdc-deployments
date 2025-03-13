@@ -259,11 +259,11 @@ variable "program" {
    type        = bool
  }
 
- variable "create_os_service_role" {
-   type        = bool
-   default     = false
-   description = "change this value to true if running this script for the first time"
- }
+#  variable "create_os_service_role" {
+#    type        = bool
+#    default     = false
+#    description = "change this value to true if running this script for the first time"
+#  }
 
 variable "multi_az_enabled" {
   description = "set to true to enable multi-az deployment"
