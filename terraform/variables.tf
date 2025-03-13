@@ -246,24 +246,24 @@ variable "program" {
   default     = "crdc"
 }
 
-# Opensearch
-# variable "automated_snapshot_start_hour" {
-#   description = "hour when automated snapshot to be taken"
-#   type        = number
-#   default     = 23
-# }
+ #Opensearch
+ variable "automated_snapshot_start_hour" {
+  description = "hour when automated snapshot to be taken"
+   type        = number
+   default     = 23
+ }
 
-# variable "create_cloudwatch_log_policy" {
-#   description = "Due cloudwatch log policy limits, this should be option, we can use an existing policy"
-#   default     = false
-#   type        = bool
-# }
+ variable "create_cloudwatch_log_policy" {
+   description = "Due cloudwatch log policy limits, this should be option, we can use an existing policy"
+   default     = false
+   type        = bool
+ }
 
-# variable "create_os_service_role" {
-#   type        = bool
-#   default     = false
-#   description = "change this value to true if running this script for the first time"
-# }
+ variable "create_os_service_role" {
+   type        = bool
+   default     = false
+   description = "change this value to true if running this script for the first time"
+ }
 
 variable "multi_az_enabled" {
   description = "set to true to enable multi-az deployment"
@@ -289,11 +289,11 @@ variable "opensearch_instance_type" {
   default     = "t3.medium.elasticsearch"
 }
 
-# variable "opensearch_version" {
-#   type        = string
-#   description = "specify es version"
-#   default     = "OpenSearch_1.1"
-# }
+ variable "opensearch_version" {
+   type        = string
+   description = "specify es version"
+   default     = "OpenSearch_1.1"
+ }
 
 # S3
 variable "aws_account_id" {
@@ -412,15 +412,15 @@ variable "stack_name" {
   type = string
 }
 
-# variable "cluster_tshirt_size" {
-#   type        = string
-#   description = "Size of the OS cluster"
-#   default     = "xs"
-# }
+ variable "cluster_tshirt_size" {
+   type        = string
+   description = "Size of the OS cluster"
+   default     = "xs"
+ }
 
-# variable "create_snapshot_role" {
-#   type        = bool
-#   description = "Whether to allow the opensearch module to create the snapshot role for the OpenSearch domain"
-#   default     = false
-#   sensitive   = false
-# }
+ variable "create_snapshot_role" {
+   type        = bool
+   description = "Whether to allow the opensearch module to create the snapshot role for the OpenSearch domain"
+   default     = false
+   sensitive   = false
+ }
