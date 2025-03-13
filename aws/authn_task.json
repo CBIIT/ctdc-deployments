@@ -98,6 +98,12 @@
                     "name": "MYSQL_HOST",
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:rds_host::"
                 },
+                
+                {
+                    "name": "DATABASE_TYPE",
+                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:database_type::"
+                },
+
                 {
                     "name": "MYSQL_USER",
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:rds_username::"
