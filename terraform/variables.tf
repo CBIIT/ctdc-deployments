@@ -424,3 +424,8 @@ variable "stack_name" {
    default     = false
    sensitive   = false
  }
+
+variable "alb_subnet_ids" {
+  description = "Provide list of alb subnets to use in this VPC. Example 10.0.1.0/24,10.0.2.0/24"
+  type = list(string)
+}
