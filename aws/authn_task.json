@@ -93,10 +93,10 @@
                     "name": "NEW_RELIC_LICENSE_KEY",
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:monitoring/newrelic:api_key::"
                 },
-                {
-                    "name": "DATABASE_TYPE",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:database_type::"
-                },
+                // {
+                //     "name": "DATABASE_TYPE",
+                //     "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:database_type::"
+                // },
                 {
                     "name": "MYSQL_HOST",
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:{{account_id}}:secret:bento/{{project}}/{{environment}}:rds_host::"
