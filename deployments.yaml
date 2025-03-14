@@ -14,9 +14,9 @@ services:
     image: 1.1.0.109
     buildNumber: '109'
   authn:
-    version: 1.1.0.68
-    image: 1.1.0.68
-    buildNumber: '68'
+    version: 1.1.0.69
+    image: 1.1.0.69
+    buildNumber: '69'
   interoperation:
     version: CTDC-interoperation-inprogress.21
     image: CTDC-interoperation-inprogress.21
