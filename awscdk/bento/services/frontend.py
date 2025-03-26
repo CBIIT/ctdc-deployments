@@ -17,7 +17,7 @@ class frontendService:
         command = None
     
     environment={
-            "NEW_RELIC_APP_NAME":"crdc-dev-ctdc-frontend",
+            "NEW_RELIC_APP_NAME":"crdc-qa-ctdc-frontend",
             "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED":"true",
             "NEW_RELIC_LABELS":"Project:{};Environment:{}".format('ctdc', config['main']['tier']),
             "NRIA_IS_FORWARD_ONLY":"true",
@@ -50,7 +50,7 @@ class frontendService:
             #  "REACT_APP_NIH_CLIENT_ID":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "fe_provider_id", secret_name='auth/provider/nih'), 'nih_client_id'),
             #  "REACT_APP_NIH_AUTH_URL":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "fe_provider_url", secret_name='auth/provider/nih'), 'nih_client_url'),
             #  "REACT_APP_GOOGLE_CLIENT_ID":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "fe_google", secret_name='auth/provider/google'), 'idp_client_id'),
-            #"REACT_APP_GA_TRACKING_ID":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "fe_google", secret_name='bento/ctdc/dev'), 'google_id'),
+            #"REACT_APP_GA_TRACKING_ID":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "fe_google", secret_name='bento/ctdc/qa'), 'google_id'),
             "REACT_APP_GA_TRACKING_ID":ecs.Secret.from_secrets_manager(self.secret, 'google_id'),
         
          }

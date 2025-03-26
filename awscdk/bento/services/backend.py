@@ -43,7 +43,7 @@ class backendService:
             "NEW_RELIC_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "be_newrelic", secret_name='monitoring/newrelic'), 'api_key'),
             #"NEO4J_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_password'),
             #"NEO4J_USER":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_user'),
-            #"ES_HOST":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "es_host_{}".format(service), secret_name='bento/ctdc/dev'), 'es_host'),
+            #"ES_HOST":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "es_host_{}".format(service), secret_name='bento/ctdc/qa'), 'es_host'),
             "ES_HOST":ecs.Secret.from_secrets_manager(self.secret, 'es_host'),
         }
     

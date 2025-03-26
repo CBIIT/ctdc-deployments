@@ -17,7 +17,7 @@ class filesService:
         command = None
 
     environment={
-            "NEW_RELIC_APP_NAME":"crdc-dev-ctdc-files",
+            "NEW_RELIC_APP_NAME":"crdc-qa-ctdc-files",
             "NEW_RELIC_HOST":"gov-collector.newrelic.com",
             "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED":"true",
             "NEW_RELIC_LABELS":"Project:{};Environment:{}".format('ctdc', config['main']['tier']),

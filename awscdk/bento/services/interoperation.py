@@ -17,7 +17,7 @@ class interoperationService:
         command = None
 
     environment={
-            "NEW_RELIC_APP_NAME":"crdc-dev-ctdc-interoperation",
+            "NEW_RELIC_APP_NAME":"crdc-qa-ctdc-interoperation",
             "NEW_RELIC_LABELS":"Project:{};Environment:{}".format('ctdc', config['main']['tier']),
             "AUTH_ENABLED":"false",
             "REDIS_AUTH_ENABLED":"false",
@@ -25,7 +25,7 @@ class interoperationService:
             "AUTHORIZATION_ENABLED":"true",
             "BACKEND_URL":"/v1/graphql/",
             "DATE":"2024-07-09",
-            "BENTO_BACKEND_GRAPHQL_URI":"https://clinical-dev.datacommons.cancer.gov/v1/graphql/",
+            "BENTO_BACKEND_GRAPHQL_URI":"https://clinical-qa.datacommons.cancer.gov/v1/graphql/",
             #"MYSQL_PORT":"3306",
             #"MYSQL_SESSION_ENABLED":"true",
             #"NEO4J_URI":"bolt://{}:7687".format(config['db']['neo4j_ip']),
