@@ -18,7 +18,7 @@ class authnService:
         command = None
 
     environment={
-            "NEW_RELIC_APP_NAME":"crdc-dev-ctdc-authn",
+            "NEW_RELIC_APP_NAME":"crdc-qa-ctdc-authn",
             "NEW_RELIC_LABELS":"Project:{};Environment:{}".format('ctdc', config['main']['tier']),
             "AUTHORIZATION_ENABLED":"true",
             "AUTHORIZATION_URL":"/api/users/graphql",

@@ -16,9 +16,10 @@ from aws_cdk import aws_cloudfront as cloudfront
 from aws_cdk import aws_cloudfront_origins as origins
 from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_ssm as ssm
+from aws_cdk import aws_iam as iam
 
 #from services import frontend, backend, files, authn, interoperation
-from services import frontend, files, authn, backend
+from services import frontend, authn, backend
 
 class Stack(Stack):
     def __init__(self, scope: Construct, **kwargs) -> None:
@@ -214,7 +215,7 @@ class Stack(Stack):
         #authz.authzService.createService(self, config)
 
         # Files Service
-        files.filesService.createService(self, config)
+        #files.filesService.createService(self, config)
 
         # Interoperation Service
         #interoperation.interoperationService.createService(self, config)
