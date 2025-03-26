@@ -18,9 +18,9 @@ services:
     image: 1.1.0.69
     buildNumber: '69'
   interoperation:
-    version: CTDC-interoperation-inprogress.21
-    image: CTDC-interoperation-inprogress.21
-    buildNumber: '21'
+    version: 1.0.0.23
+    image: 1.0.0.23
+    buildNumber: '23'
 interoperation:
   version: main.2
   image: main.2
