@@ -80,19 +80,19 @@ module "new_relic_metric_pipeline" {
   resource_prefix          = "${var.program}-${var.project}-${var.account_level}"
 }
 
- module "opensearch" {
-   source                        = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/opensearch?ref=v1.19"
-   tags                          = var.tags
-   cluster_tshirt_size           = var.cluster_tshirt_size
-   subnet_ids                    = var.private_subnet_ids
-   engine_version                = var.opensearch_version
-   automated_snapshot_start_hour = var.automated_snapshot_start_hour
-   vpc_id                        = var.vpc_id
-   create_cloudwatch_log_policy  = var.create_cloudwatch_log_policy
-   create_snapshot_role          = var.create_snapshot_role
-   #create_os_service_role        = var.create_os_service_role
-   resource_prefix               = "${var.program}-${terraform.workspace}-${var.project}"
- }
+#  module "opensearch" {
+#    source                        = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/opensearch?ref=v1.19"
+#    tags                          = var.tags
+#    cluster_tshirt_size           = var.cluster_tshirt_size
+#    subnet_ids                    = var.private_subnet_ids
+#    engine_version                = var.opensearch_version
+#    automated_snapshot_start_hour = var.automated_snapshot_start_hour
+#    vpc_id                        = var.vpc_id
+#    create_cloudwatch_log_policy  = var.create_cloudwatch_log_policy
+#    create_snapshot_role          = var.create_snapshot_role
+#    #create_os_service_role        = var.create_os_service_role
+#    resource_prefix               = "${var.program}-${terraform.workspace}-${var.project}"
+#  }
 
 #mysql
 module "rds_mysql" {

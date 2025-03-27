@@ -247,11 +247,11 @@ variable "program" {
 }
 
  #Opensearch
- variable "automated_snapshot_start_hour" {
-  description = "hour when automated snapshot to be taken"
-   type        = number
-   default     = 23
- }
+#  variable "automated_snapshot_start_hour" {
+#   description = "hour when automated snapshot to be taken"
+#    type        = number
+#    default     = 23
+#  }
 
  variable "create_cloudwatch_log_policy" {
    description = "Due cloudwatch log policy limits, this should be option, we can use an existing policy"
@@ -277,23 +277,23 @@ variable "opensearch_ebs_volume_size" {
   default     = 200
 }
 
-variable "opensearch_instance_count" {
-  description = "the number of data nodes to provision for each instance in the cluster"
-  type        = number
-  default     = 1
-}
+# variable "opensearch_instance_count" {
+#   description = "the number of data nodes to provision for each instance in the cluster"
+#   type        = number
+#   default     = 1
+# }
 
-variable "opensearch_instance_type" {
-  description = "type of instance to be used to create the elasticsearch cluster"
-  type        = string
-  default     = "t3.medium.elasticsearch"
-}
+# variable "opensearch_instance_type" {
+#   description = "type of instance to be used to create the elasticsearch cluster"
+#   type        = string
+#   default     = "t3.medium.elasticsearch"
+# }
 
- variable "opensearch_version" {
-   type        = string
-   description = "specify es version"
-   default     = "OpenSearch_1.1"
- }
+#  variable "opensearch_version" {
+#    type        = string
+#    description = "specify es version"
+#    default     = "OpenSearch_1.1"
+#  }
 
 # S3
 variable "aws_account_id" {
@@ -412,18 +412,18 @@ variable "stack_name" {
   type = string
 }
 
- variable "cluster_tshirt_size" {
-   type        = string
-   description = "Size of the OS cluster"
-   default     = "xs"
- }
+#  variable "cluster_tshirt_size" {
+#    type        = string
+#    description = "Size of the OS cluster"
+#    default     = "xs"
+#  }
 
- variable "create_snapshot_role" {
-   type        = bool
-   description = "Whether to allow the opensearch module to create the snapshot role for the OpenSearch domain"
-   default     = false
-   sensitive   = false
- }
+#  variable "create_snapshot_role" {
+#    type        = bool
+#    description = "Whether to allow the opensearch module to create the snapshot role for the OpenSearch domain"
+#    default     = false
+#    sensitive   = false
+#  }
 
 variable "alb_subnet_ids" {
   description = "Provide list of alb subnets to use in this VPC. Example 10.0.1.0/24,10.0.2.0/24"
