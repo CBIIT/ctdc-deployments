@@ -253,11 +253,11 @@ variable "program" {
 #    default     = 23
 #  }
 
- variable "create_cloudwatch_log_policy" {
-   description = "Due cloudwatch log policy limits, this should be option, we can use an existing policy"
-   default     = false
-   type        = bool
- }
+#  variable "create_cloudwatch_log_policy" {
+#    description = "Due cloudwatch log policy limits, this should be option, we can use an existing policy"
+#    default     = false
+#    type        = bool
+#  }
 
 #  variable "create_os_service_role" {
 #    type        = bool
