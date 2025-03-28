@@ -6,9 +6,9 @@ services:
     image: 1.1.0.191
     buildNumber: '191'
   frontend:
-    version: 1.1.0.301
-    image: 1.1.0.301
-    buildNumber: '301'
+    version: CTDC-1547_fix.302
+    image: CTDC-1547_fix.302
+    buildNumber: '302'
   files:
     version: 1.1.0.109
     image: 1.1.0.109
