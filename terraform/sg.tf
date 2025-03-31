@@ -54,8 +54,8 @@ resource "aws_security_group_rule" "app_inbound" {
     from_port         = local.https_port
     protocol          = local.tcp_protocol
     to_port           = local.https_port
-    #security_group_id = module.opensearch.security_group_id
-    security_group_id = module.opensearch[count.index].opensearch_security_group_id
+    security_group_id = module.opensearch.security_group_id
+    #security_group_id = module.opensearch[count.index].opensearch_security_group_id
     type              = "ingress"
     cidr_blocks       = local.nih_cidrs
  }

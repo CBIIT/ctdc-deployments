@@ -81,7 +81,7 @@ module "new_relic_metric_pipeline" {
 }
 
   module "opensearch" {
-    count = var.create_opensearch_cluster ? 1: 0
+    #count = var.create_opensearch_cluster ? 1: 0
     source                        = "git::https://github.com/CBIIT/datacommons-devops.git//terraform/modules/opensearch?ref=v1.19"
     tags                          = var.tags
     cluster_tshirt_size           = var.cluster_tshirt_size
