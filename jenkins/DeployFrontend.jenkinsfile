@@ -129,23 +129,15 @@ pipeline {
                 }
 
                // Inject README file path
-                switch(env.ENV) {
-					case "dev":
-						env.REACT_APP_FILE_CENTRIC_CART_README = "https://raw.githubusercontent.com/CBIIT/ctdc-readMe-content/refs/heads/dev/My_Files_Cart_Page_README.md"
-						break
-					case "qa":
-						env.REACT_APP_FILE_CENTRIC_CART_README = "https://raw.githubusercontent.com/CBIIT/ctdc-readMe-content/refs/heads/qa/My_Files_Cart_Page_README.md"
-						break
-					case "stage":
-						env.REACT_APP_FILE_CENTRIC_CART_README = "https://raw.githubusercontent.com/CBIIT/ctdc-readMe-content/refs/heads/stage/My_Files_Cart_Page_README.md"
-						break
-					case "prod":
-						env.REACT_APP_FILE_CENTRIC_CART_README = "https://raw.githubusercontent.com/CBIIT/ctdc-readMe-content/refs/heads/prod/My_Files_Cart_Page_README.md"
-						break
-						default:
-						env.REACT_APP_FILE_CENTRIC_CART_README = ""
-						break
-				}
+                def readmeMap = [
+                  dev:   "dev",
+                  qa:    "qa",
+                  stage: "stage",
+                  prod:  "prod"
+                ]
+                env.REACT_APP_FILE_CENTRIC_CART_README = readmeMap.containsKey(env.ENV) ?
+                  "https://raw.githubusercontent.com/CBIIT/ctdc-readMe-content/refs/heads/${readmeMap[env.ENV]}/My_Files_Cart_Page_README.md" : ""
+
 
                 // set sumo vars for logging
 				env.SUMO_COLLECTOR_ENDPOINT = sh(label: 'Get Sumo Endpoint', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_endpoint'").trim()
