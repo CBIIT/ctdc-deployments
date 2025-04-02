@@ -157,14 +157,14 @@ pipeline {
 					// env.REACT_APP_BE_VERSION = env.BE_VERSION
 
                     // Inject README file path
-                    def readmeMap = [
-                        dev:   "dev",
-                        qa:    "qa",
-                        stage: "stage",
-                        prod:  "prod"
-                    ]
-                    env.REACT_APP_FILE_CENTRIC_CART_README = readmeMap.containsKey(env.ENV) ?
-                        "https://raw.githubusercontent.com/CBIIT/ctdc-readMe-content/refs/heads/${readmeMap[env.ENV]}/My_Files_Cart_Page_README.md" : ""
+                    // def readmeMap = [
+                    //     dev:   "dev",
+                    //     qa:    "qa",
+                    //     stage: "stage",
+                    //     prod:  "prod"
+                    // ]
+                    // env.REACT_APP_FILE_CENTRIC_CART_README = readmeMap.containsKey(env.ENV) ?
+                    //     "https://raw.githubusercontent.com/CBIIT/ctdc-readMe-content/refs/heads/${readmeMap[env.ENV]}/My_Files_Cart_Page_README.md" : ""
 
                     // set sumo vars for logging
                     env.SUMO_COLLECTOR_ENDPOINT = sh(
