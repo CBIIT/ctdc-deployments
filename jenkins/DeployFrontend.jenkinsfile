@@ -115,6 +115,38 @@ pipeline {
 					env.REDIRECT_URL = "nci-crdc-staging.datacommons.io"					
 			    }
 
+				// Set service version URLs for systems info page
+                if (env.ENV == 'prod') {
+                    env.REACT_APP_FILE_SERVICE_VERSION = "https://${subdomain}.${env.DOMAIN_NAME}/api/files/version"
+                    env.REACT_APP_INTEROP_SERVICE_VERSION = "https://${subdomain}.${env.DOMAIN_NAME}/api/interoperation/version"
+                    env.REACT_APP_BACKEND_VERSION = "https://${subdomain}.${env.DOMAIN_NAME}/version"
+                    env.REACT_APP_AUTH_SERVICE_VERSION = "https://${subdomain}.${env.DOMAIN_NAME}/api/auth/version"
+                } else {
+                    env.REACT_APP_FILE_SERVICE_VERSION = "https://${subdomain}-${env.ENV}.${env.DOMAIN_NAME}/api/files/version"
+                    env.REACT_APP_INTEROP_SERVICE_VERSION = "https://${subdomain}-${env.ENV}.${env.DOMAIN_NAME}/api/interoperation/version"
+                    env.REACT_APP_BACKEND_VERSION = "https://${subdomain}-${env.ENV}.${env.DOMAIN_NAME}/version"
+                    env.REACT_APP_AUTH_SERVICE_VERSION = "https://${subdomain}-${env.ENV}.${env.DOMAIN_NAME}/api/auth/version"
+                }
+
+               // Inject README file path
+                switch(env.ENV) {
+					case "dev":
+						env.REACT_APP_FILE_CENTRIC_CART_README = "https://raw.githubusercontent.com/CBIIT/ctdc-readMe-content/refs/heads/dev/My_Files_Cart_Page_README.md"
+						break
+					case "qa":
+						env.REACT_APP_FILE_CENTRIC_CART_README = "https://raw.githubusercontent.com/CBIIT/ctdc-readMe-content/refs/heads/qa/My_Files_Cart_Page_README.md"
+						break
+					case "stage":
+						env.REACT_APP_FILE_CENTRIC_CART_README = "https://raw.githubusercontent.com/CBIIT/ctdc-readMe-content/refs/heads/stage/My_Files_Cart_Page_README.md"
+						break
+					case "prod":
+						env.REACT_APP_FILE_CENTRIC_CART_README = "https://raw.githubusercontent.com/CBIIT/ctdc-readMe-content/refs/heads/prod/My_Files_Cart_Page_README.md"
+						break
+						default:
+						env.REACT_APP_FILE_CENTRIC_CART_README = ""
+						break
+				}
+
                 // set sumo vars for logging
 				env.SUMO_COLLECTOR_ENDPOINT = sh(label: 'Get Sumo Endpoint', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_endpoint'").trim()
 				env.SUMO_COLLECTOR_TOKEN = sh(label: 'Get Sumo Token', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_token_$APP'").trim()
