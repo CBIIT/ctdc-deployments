@@ -202,7 +202,7 @@ pipeline {
                     if (env.ENV == 'dev-cmb') {
                         env.TEMPLATE_FILE = "ctdc-deployments/aws/${APP}_task_cmb.json"
                     } else {
-                        env.TEMPLATE_FILE = "ctdc-deployments/aws/${APP}_task.yml"
+                        env.TEMPLATE_FILE = "ctdc-deployments/aws/${APP}_task.json"
                     }
                 }
             }
@@ -243,7 +243,7 @@ pipeline {
                     
                     # Update and register task definition
                     envsubst < $TEMPLATE_FILE > $TEMPLATE_FILE.updated
-                    aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE.updated
+                    aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE.updated
                     '''
                 }
             }

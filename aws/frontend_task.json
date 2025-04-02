@@ -110,7 +110,31 @@
                 {
                     "name": "REACT_APP_BE_VERSION",
                     "value": "$BE_VERSION"
-                },            
+                },    
+                {
+                    "name": "REACT_APP_FILE_SERVICE_VERSION",
+                    "value": "$REACT_APP_FILE_SERVICE_VERSION"
+                },  
+                {
+                    "name": "REACT_APP_INTEROP_SERVICE_VERSION",
+                    "value": "$REACT_APP_INTEROP_SERVICE_VERSION"
+                },
+                {
+                    "name": "REACT_APP_BACKEND_VERSION",
+                    "value": "$REACT_APP_BACKEND_VERSION"
+                },  
+                {
+                    "name": "REACT_APP_AUTH_SERVICE_VERSION",
+                    "value": "$REACT_APP_AUTH_SERVICE_VERSION"
+                },  
+                {
+                    "name": "REACT_APP_FILE_CENTRIC_CART_README",
+                    "value": "$REACT_APP_FILE_CENTRIC_CART_README"
+                }, 
+                {
+                    "name": "REACT_APP_ABOUT_CONTENT_URL",
+                    "value": "$REACT_APP_ABOUT_CONTENT_URL"
+                },          
                 {
                     "name": "REACT_APP_BACKEND_API",
                     "value": "https://$DOMAIN_NAME/v1/graphql/"
