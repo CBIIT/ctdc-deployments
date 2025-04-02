@@ -100,18 +100,61 @@ pipeline {
                         env.REDIRECT_URL = "nci-crdc-staging.datacommons.io"
                     }
 
-                    // Set service version URLs for systems info page
-                    if (env.ENV == 'prod') {
-                        env.REACT_APP_FILE_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/files/version"
-                        env.REACT_APP_INTEROP_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/interoperation/version"
-                        env.REACT_APP_BACKEND_VERSION = "https://${env.DOMAIN_NAME}/version"
-                        env.REACT_APP_AUTH_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/auth/version"
-                    } else {
-                        env.REACT_APP_FILE_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/files/version"
-                        env.REACT_APP_INTEROP_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/interoperation/version"
-                        env.REACT_APP_BACKEND_VERSION = "https://${env.DOMAIN_NAME}/version"
-                        env.REACT_APP_AUTH_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/auth/version"
+					// Helper closure to build the endpoint URL.
+                    def serviceEndpoint = { String path ->
+                        return "https://${env.DOMAIN_NAME}${path}"
                     }
+
+                    // Fetch actual version tags from the service endpoints.
+                    env.BE_VERSION = sh(
+                        label: 'Fetch BE Version',
+                        returnStdout: true,
+                        script: "curl -s ${serviceEndpoint('/version')}"
+                    ).trim()
+
+                    env.FILE_SERVICE_VERSION = sh(
+                        label: 'Fetch File Service Version',
+                        returnStdout: true,
+                        script: "curl -s ${serviceEndpoint('/api/files/version')}"
+                    ).trim()
+
+                    env.INTEROP_VERSION = sh(
+                        label: 'Fetch Interop Version',
+                        returnStdout: true,
+                        script: "curl -s ${serviceEndpoint('/api/interoperation/version')}"
+                    ).trim()
+
+                    env.AUTH_SERVICE_VERSION = sh(
+                        label: 'Fetch Auth Service Version',
+                        returnStdout: true,
+                        script: "curl -s ${serviceEndpoint('/api/auth/version')}"
+                    ).trim()
+
+                    // Log the fetched versions for debugging.
+                    echo "Fetched BE_VERSION: ${env.BE_VERSION}"
+                    echo "Fetched FILE_SERVICE_VERSION: ${env.FILE_SERVICE_VERSION}"
+                    echo "Fetched INTEROP_VERSION: ${env.INTEROP_VERSION}"
+                    echo "Fetched AUTH_SERVICE_VERSION: ${env.AUTH_SERVICE_VERSION}"
+
+                    // Pass the fetched versions to React app environment variables.
+                    env.REACT_APP_BACKEND_VERSION = env.BE_VERSION
+                    env.REACT_APP_FILE_SERVICE_VERSION = env.FILE_SERVICE_VERSION
+                    env.REACT_APP_INTEROP_SERVICE_VERSION = env.INTEROP_VERSION
+                    env.REACT_APP_AUTH_SERVICE_VERSION = env.AUTH_SERVICE_VERSION
+
+                    // // Set service version URLs for systems info page
+                    // if (env.ENV == 'prod') {
+                    //     env.REACT_APP_FILE_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/files/version"
+                    //     env.REACT_APP_INTEROP_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/interoperation/version"
+                    //     env.REACT_APP_BACKEND_VERSION = "https://${env.DOMAIN_NAME}/version"
+                    //     env.REACT_APP_AUTH_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/auth/version"
+                    // } else {
+                    //     env.REACT_APP_FILE_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/files/version"
+                    //     env.REACT_APP_INTEROP_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/interoperation/version"
+                    //     env.REACT_APP_BACKEND_VERSION = "https://${env.DOMAIN_NAME}/version"
+                    //     env.REACT_APP_AUTH_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/auth/version"
+                    // }
+					// env.REACT_APP_BE_VERSION = env.BE_VERSION
 
                     // Inject README file path
                     def readmeMap = [
