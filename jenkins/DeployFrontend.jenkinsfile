@@ -1,93 +1,83 @@
 @Library('datacommons-jenkins-shared-library@v1.1') _
 
 def getLabelForEnvironment(environment) {
-	if (environment == "stage" || environment == "prod"){
-		return "slave-ncias-p3181-c"
-	}else {
-		return "slave-ncias-d2947-c"
-	}
+    if (environment == "stage" || environment == "prod") {
+        return "slave-ncias-p3181-c"
+    } else {
+        return "slave-ncias-d2947-c"
+    }
 }
 
 pipeline {
-	agent {
-		node {
-			label getLabelForEnvironment(params.Environment)
-		}
-	}
+    agent {
+        node {
+            label getLabelForEnvironment(params.Environment)
+        }
+    }
 
-	parameters {
-
+    parameters {
         string(
             defaultValue: '',
             description: 'The Image to Deploy',
-            name: 'ImageTag')
+            name: 'ImageTag'
+        )
 
         extendedChoice(
             name: 'Environment',
             defaultValue: 'dev',
             description: 'Choose the environment to deploy to',
             type: 'PT_SINGLE_SELECT',
-            value: 'dev,qa,stage,prod')
+            value: 'dev,qa,stage,prod'
+        )
+    }
 
-  }
+    options {
+        timestamps()
+    }
 
-  options {
+    environment {
+        PROGRAM      = "crdc"
+        PROJECT      = "ctdc"
+        APP          = "frontend"
+        SLACK_SECRET = "ctdc_slack_url"
+        REGION       = "us-east-1"
+        ECR_REPO     = "${env.PROGRAM}-${env.PROJECT}-${env.APP}"
+        DEPLOY_REPO  = "${env.PROJECT}-deployments"
+        IMAGE_TAG    = "${params.ImageTag}"
+        ENV          = "${params.Environment}"
+        CLUSTER      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-ecs"
+        SERVICE      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-${env.APP}"
+    }
 
-	timestamps()
+    stages {
+        stage('checkout') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    extensions: [
+                        [$class: 'SubmoduleOption', recursiveSubmodules: true],
+                        [$class: 'RelativeTargetDirectory', relativeTargetDir: 'ctdc-deployments']
+                    ],
+                    userRemoteConfigs: [[url: "https://github.com/CBIIT/${env.DEPLOY_REPO}"]]
+                ])
 
-  }
-
-  environment {
-
-	PROGRAM      = "crdc"
-	PROJECT      = "ctdc"
-	APP          = "frontend"
-	SLACK_SECRET = "ctdc_slack_url"
-	REGION       = "us-east-1"
-	ECR_REPO     = "${env.PROGRAM}-${env.PROJECT}-${env.APP}"
-	DEPLOY_REPO  = "${env.PROJECT}-deployments"
-	IMAGE_TAG    = "${params.ImageTag}"
-	ENV          = "${params.Environment}"
-	CLUSTER      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-ecs"
-	SERVICE      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-${env.APP}"
-
-  }
-
-  stages{
-
-  	stage('checkout'){
-
-  		steps {
-
-  		checkout([$class: 'GitSCM',
-			branches: [[name: '*/main']],
-			extensions: [[$class: 'SubmoduleOption', 
-			recursiveSubmodules: true],
-			[$class: 'RelativeTargetDirectory',
-			relativeTargetDir: 'ctdc-deployments']],
-			userRemoteConfigs:
-			[[url: "https://github.com/CBIIT/${env.DEPLOY_REPO}"]]])
-
-		checkout([$class: 'GitSCM',
-			branches: [[name: "${env.ENV}"]],
-			extensions: [[$class: 'SubmoduleOption', 
-			recursiveSubmodules: true],
-			[$class: 'RelativeTargetDirectory',
-			relativeTargetDir: "ctdc-deployments-${env.ENV}"]],
-			userRemoteConfigs:
-			[[url: "https://github.com/CBIIT/${env.DEPLOY_REPO}"]]])
-
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: "${env.ENV}"]],
+                    extensions: [
+                        [$class: 'SubmoduleOption', recursiveSubmodules: true],
+                        [$class: 'RelativeTargetDirectory', relativeTargetDir: "ctdc-deployments-${env.ENV}"]
+                    ],
+                    userRemoteConfigs: [[url: "https://github.com/CBIIT/${env.DEPLOY_REPO}"]]
+                ])
+            }
         }
 
-  	}
-
-    stage('Set Environment Variables'){
-
- 		steps {
-
- 			script {
-
-				// Set REACT_APP_ABOUT_CONTENT_URL based on environment
+        stage('Set Environment Variables') {
+            steps {
+                script {
+                    // Set REACT_APP_ABOUT_CONTENT_URL based on environment
                     if (env.ENV == 'dev' || env.ENV == 'dev2') {
                         env.REACT_APP_ABOUT_CONTENT_URL = "https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/develop/aboutPagesContent.yaml"
                     } else if (env.ENV == 'qa' || env.ENV == 'qa2') {
@@ -98,189 +88,159 @@ pipeline {
                         env.REACT_APP_ABOUT_CONTENT_URL = "https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/production/aboutPagesContent.yaml"
                     }
 
-			    // set domain name
-				if (env.ENV == 'prod') {
+                    // set domain name
+                    if (env.ENV == 'prod') {
+                        env.DOMAIN_NAME = "clinical.datacommons.cancer.gov"
+                        env.REDIRECT_URL = "nci-crdc.datacommons.io"
+                    } else if (env.ENV == 'stage') {
+                        env.DOMAIN_NAME = "clinical-${env.ENV}.datacommons.cancer.gov"
+                        env.REDIRECT_URL = "nci-crdc.datacommons.io"
+                    } else {
+                        env.DOMAIN_NAME = "clinical-${env.ENV}.datacommons.cancer.gov"
+                        env.REDIRECT_URL = "nci-crdc-staging.datacommons.io"
+                    }
 
-                    env.DOMAIN_NAME = "clinical.datacommons.cancer.gov"
-					env.REDIRECT_URL = "nci-crdc.datacommons.io"
+                    // Set service version URLs for systems info page
+                    if (env.ENV == 'prod') {
+                        env.REACT_APP_FILE_SERVICE_VERSION = "https://${subdomain}.${env.DOMAIN_NAME}/api/files/version"
+                        env.REACT_APP_INTEROP_SERVICE_VERSION = "https://${subdomain}.${env.DOMAIN_NAME}/api/interoperation/version"
+                        env.REACT_APP_BACKEND_VERSION = "https://${subdomain}.${env.DOMAIN_NAME}/version"
+                        env.REACT_APP_AUTH_SERVICE_VERSION = "https://${subdomain}.${env.DOMAIN_NAME}/api/auth/version"
+                    } else {
+                        env.REACT_APP_FILE_SERVICE_VERSION = "https://${subdomain}-${env.ENV}.${env.DOMAIN_NAME}/api/files/version"
+                        env.REACT_APP_INTEROP_SERVICE_VERSION = "https://${subdomain}-${env.ENV}.${env.DOMAIN_NAME}/api/interoperation/version"
+                        env.REACT_APP_BACKEND_VERSION = "https://${subdomain}-${env.ENV}.${env.DOMAIN_NAME}/version"
+                        env.REACT_APP_AUTH_SERVICE_VERSION = "https://${subdomain}-${env.ENV}.${env.DOMAIN_NAME}/api/auth/version"
+                    }
 
-                } else if(env.ENV == 'stage'){
+                    // Inject README file path
+                    def readmeMap = [
+                        dev:   "dev",
+                        qa:    "qa",
+                        stage: "stage",
+                        prod:  "prod"
+                    ]
+                    env.REACT_APP_FILE_CENTRIC_CART_README = readmeMap.containsKey(env.ENV) ?
+                        "https://raw.githubusercontent.com/CBIIT/ctdc-readMe-content/refs/heads/${readmeMap[env.ENV]}/My_Files_Cart_Page_README.md" : ""
 
-                     env.DOMAIN_NAME = "clinical-${env.ENV}.datacommons.cancer.gov"
-					 env.REDIRECT_URL = "nci-crdc.datacommons.io"
-					 
-				}  else {
+                    // set sumo vars for logging
+                    env.SUMO_COLLECTOR_ENDPOINT = sh(
+                        label: 'Get Sumo Endpoint',
+                        returnStdout: true,
+                        script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_endpoint'"
+                    ).trim()
+                    env.SUMO_COLLECTOR_TOKEN = sh(
+                        label: 'Get Sumo Token',
+                        returnStdout: true,
+                        script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_token_$APP'"
+                    ).trim()
 
-                    env.DOMAIN_NAME = "clinical-${env.ENV}.datacommons.cancer.gov"
-					env.REDIRECT_URL = "nci-crdc-staging.datacommons.io"					
-			    }
+                    // set backend version
+                    env.BE_VERSION = getVersion(service: "backend", deploymentFile: "$PROJECT-deployments-$ENV/deployments.yaml")
 
-				// Set service version URLs for systems info page
-                if (env.ENV == 'prod') {
-                    env.REACT_APP_FILE_SERVICE_VERSION = "https://${subdomain}.${env.DOMAIN_NAME}/api/files/version"
-                    env.REACT_APP_INTEROP_SERVICE_VERSION = "https://${subdomain}.${env.DOMAIN_NAME}/api/interoperation/version"
-                    env.REACT_APP_BACKEND_VERSION = "https://${subdomain}.${env.DOMAIN_NAME}/version"
-                    env.REACT_APP_AUTH_SERVICE_VERSION = "https://${subdomain}.${env.DOMAIN_NAME}/api/auth/version"
-                } else {
-                    env.REACT_APP_FILE_SERVICE_VERSION = "https://${subdomain}-${env.ENV}.${env.DOMAIN_NAME}/api/files/version"
-                    env.REACT_APP_INTEROP_SERVICE_VERSION = "https://${subdomain}-${env.ENV}.${env.DOMAIN_NAME}/api/interoperation/version"
-                    env.REACT_APP_BACKEND_VERSION = "https://${subdomain}-${env.ENV}.${env.DOMAIN_NAME}/version"
-                    env.REACT_APP_AUTH_SERVICE_VERSION = "https://${subdomain}-${env.ENV}.${env.DOMAIN_NAME}/api/auth/version"
+                    // set ECR account number
+                    env.ECR_ACCOUNT = sh(
+                        label: 'Get ECR account',
+                        returnStdout: true,
+                        script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.ecr_account'"
+                    ).trim()
+
+                    // set dcf client id
+                    env.DCF_CLIENT_ID = sh(
+                        label: 'Get ECR account',
+                        returnStdout: true,
+                        script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.dcf_client_id'"
+                    ).trim()
+
+                    // set repo URL
+                    env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
+
+                    // set template file name
+                    if (env.ENV == 'dev-cmb') {
+                        env.TEMPLATE_FILE = "ctdc-deployments/aws/${APP}_task_cmb.json"
+                    } else {
+                        env.TEMPLATE_FILE = "ctdc-deployments/aws/${APP}_task.yml"
+                    }
                 }
-
-               // Inject README file path
-                def readmeMap = [
-                  dev:   "dev",
-                  qa:    "qa",
-                  stage: "stage",
-                  prod:  "prod"
-                ]
-                env.REACT_APP_FILE_CENTRIC_CART_README = readmeMap.containsKey(env.ENV) ?
-                  "https://raw.githubusercontent.com/CBIIT/ctdc-readMe-content/refs/heads/${readmeMap[env.ENV]}/My_Files_Cart_Page_README.md" : ""
-
-
-                // set sumo vars for logging
-				env.SUMO_COLLECTOR_ENDPOINT = sh(label: 'Get Sumo Endpoint', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_endpoint'").trim()
-				env.SUMO_COLLECTOR_TOKEN = sh(label: 'Get Sumo Token', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_token_$APP'").trim()
-
-				// set backend version
-				env.BE_VERSION = getVersion(service: "backend",deploymentFile: "$PROJECT-deployments-$ENV/deployments.yaml")
-
-				// set ECR account number
-				env.ECR_ACCOUNT = sh(label: 'Get ECR account', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.ecr_account'").trim()
-                
-				// set dcf client id
-				env.DCF_CLIENT_ID = sh(label: 'Get ECR account', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.dcf_client_id'").trim()
-
-				// set repo URL
-				env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
-
-				// set template file name
-				if (env.ENV == 'dev-cmb') {
-
-                    env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task_cmb.json"
-
-                } else {
-
-                    env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task.yml"
-                }
-
-			}
-
- 		}
-
-  	}
-
-	stage('Add Production Tag'){
- 		when {
-	        expression {
-                ENV == 'prod'
             }
         }
-		steps {
- 			script {
-			    sh label: 'Docker-Tag', script: '''#!/bin/bash
-				# Tag image as production if deploying to prod tier
-				echo "Tagging Image as Production: $ECR_REPO:$IMAGE_TAG"
-				
-				# login and get manifest
-				docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $REPO_URL
-				docker pull $REPO_URL:$IMAGE_TAG
-				docker tag $REPO_URL:$IMAGE_TAG $REPO_URL:prod-$IMAGE_TAG
-				docker push $REPO_URL:prod-$IMAGE_TAG
-				'''
-                IMAGE_TAG = "prod-$IMAGE_TAG"
-                echo "updated image tag: $IMAGE_TAG"
-			}
- 		}
-  	}
 
-  	stage('Update Task Definition'){
+        stage('Add Production Tag') {
+            when {
+                expression {
+                    ENV == 'prod'
+                }
+            }
+            steps {
+                script {
+                    sh label: 'Docker-Tag', script: '''#!/bin/bash
+                    # Tag image as production if deploying to prod tier
+                    echo "Tagging Image as Production: $ECR_REPO:$IMAGE_TAG"
+                    
+                    # login and get manifest
+                    docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $REPO_URL
+                    docker pull $REPO_URL:$IMAGE_TAG
+                    docker tag $REPO_URL:$IMAGE_TAG $REPO_URL:prod-$IMAGE_TAG
+                    docker push $REPO_URL:prod-$IMAGE_TAG
+                    '''
+                    IMAGE_TAG = "prod-$IMAGE_TAG"
+                    echo "updated image tag: $IMAGE_TAG"
+                }
+            }
+        }
 
- 		steps {
+        stage('Update Task Definition') {
+            steps {
+                script {
+                    sh label: 'Task-Definition-Update', script: '''#!/bin/bash
+                    # create new revision for $PROJECT-$APP Task Definition
+                    echo "Updating Task Defintion to Use: $ECR_REPO:$IMAGE_TAG"
+                    export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+                    export IMAGE_ID="$REPO_URL:$IMAGE_TAG"
+                    
+                    # Update and register task definition
+                    envsubst < $TEMPLATE_FILE > $TEMPLATE_FILE.updated
+                    aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE.updated
+                    '''
+                }
+            }
+        }
 
-			script {
+        stage('Update Service') {
+            steps {
+                script {
+                    sh label: 'Service-Update', script: '''#!/bin/bash
+                    # Redeploy Service Using The Latest Task Definition
+                    echo "Updating Service: $SERVICE"
+                    
+                    TASK_REVISION=$(aws ecs describe-task-definition --task-definition $SERVICE | egrep "revision" | awk '{print $2}' | sed 's/,//')
+                    aws ecs update-service --cluster $CLUSTER --region $REGION --service $SERVICE --task-definition $SERVICE:$TASK_REVISION --desired-count 1
+                    '''
+                }
+            }
+        }
 
-			    sh label: 'Task-Definition-Update', script: '''#!/bin/bash
-
-				# create new revision for $PROJECT-$APP Task Definition
-				echo "Updating Task Defintion to Use: $ECR_REPO:$IMAGE_TAG"
-				export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
-				export IMAGE_ID="$REPO_URL:$IMAGE_TAG"
-
-				# Update and register task definition
-				envsubst < $TEMPLATE_FILE > $TEMPLATE_FILE.updated
-
-				aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE.updated
-
-				'''
-
-			}
-
- 		}
-
-  	}
-
-    stage('Update Service'){
-
- 		steps {
-
- 			script {
-
-			    sh label: 'Service-Update', script: '''#!/bin/bash
-
-				# Redeploy Service Using The Latest Task Definition
-				echo "Updating Service: $SERVICE"
-
-				TASK_REVISION=$(aws ecs describe-task-definition --task-definition $SERVICE | egrep "revision" | awk '{print $2}' | sed 's/,//')
-				aws ecs update-service --cluster $CLUSTER --region $REGION --service $SERVICE --task-definition $SERVICE:$TASK_REVISION --desired-count 1
-
-				'''
-
-			}
-
- 		}
-
-  	}
-
-	stage('verify deployment'){
-
-		steps {
-
- 			script {
-
-			    sh label: 'Verify-Deploy', script: '''#!/bin/bash
-
-                # wait untiil the service is stable
-				aws ecs wait services-stable --cluster $CLUSTER --region $REGION --service $SERVICE
-
-				'''
-
-			}
-
- 		}
-
-  	}
-
-  }
-
-  post {
-
-    always {
-
-        notify(
-            secretPath: "notification/slack",
-            secretName: "${env.SLACK_SECRET}"
-        ) 
-
+        stage('verify deployment') {
+            steps {
+                script {
+                    sh label: 'Verify-Deploy', script: '''#!/bin/bash
+                    # wait until the service is stable
+                    aws ecs wait services-stable --cluster $CLUSTER --region $REGION --service $SERVICE
+                    '''
+                }
+            }
+        }
     }
 
-    cleanup {
-
-        cleanWs()
-
+    post {
+        always {
+            notify(
+                secretPath: "notification/slack",
+                secretName: "${env.SLACK_SECRET}"
+            )
+        }
+        cleanup {
+            cleanWs()
+        }
     }
-
-  }
-
 }
