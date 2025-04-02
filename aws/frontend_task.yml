@@ -1,9 +1,9 @@
-family: "$PROGRAM-$ENV-$PROJECT-frontend"
+family: "${PROGRAM}-${ENV}-${PROJECT}-frontend"
 networkMode: awsvpc
-cpu: "256"
-memory: "512"
-executionRoleArn: "arn:aws:iam::$ACCOUNT_ID:role/power-user-$PROGRAM-$ENV-$PROJECT-ecs-task-execution-role"
-taskRoleArn: "arn:aws:iam::$ACCOUNT_ID:role/power-user-$PROGRAM-$ENV-$PROJECT-ecs-task-role"
+cpu: "256"                # Alternatively, use numeric values: cpu: 256
+memory: "512"             # Alternatively, use numeric values: memory: 512
+executionRoleArn: "arn:aws:iam::${ACCOUNT_ID}:role/power-user-${PROGRAM}-${ENV}-${PROJECT}-ecs-task-execution-role"
+taskRoleArn: "arn:aws:iam::${ACCOUNT_ID}:role/power-user-${PROGRAM}-${ENV}-${PROJECT}-ecs-task-role"
 requiresCompatibilities:
   - FARGATE
 containerDefinitions:
@@ -20,12 +20,12 @@ containerDefinitions:
     essential: true
     secrets:
       - name: NRIA_LICENSE_KEY
-        valueFrom: "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:monitoring/newrelic:api_key::"
+        valueFrom: "arn:aws:secretsmanager:us-east-1:${ACCOUNT_ID}:secret:monitoring/newrelic:api_key::"
     environment:
       - name: NEW_RELIC_HOST
         value: "gov-collector.newrelic.com"
       - name: NEW_RELIC_APP_NAME
-        value: "$PROJECT-$ENV-frontend"
+        value: "${PROJECT}-${ENV}-frontend"
       - name: NRIA_IS_FORWARD_ONLY
         value: "true"
       - name: NEW_RELIC_DISTRIBUTED_TRACING_ENABLED
@@ -40,7 +40,7 @@ containerDefinitions:
         value: ""
 
   - name: frontend
-    image: "$IMAGE_ID"
+    image: "${IMAGE_ID}"
     portMappings:
       - containerPort: 80
         hostPort: 80
@@ -48,20 +48,20 @@ containerDefinitions:
     essential: true
     secrets:
       - name: NEW_RELIC_LICENSE_KEY
-        valueFrom: "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:monitoring/newrelic:api_key::"
+        valueFrom: "arn:aws:secretsmanager:us-east-1:${ACCOUNT_ID}:secret:monitoring/newrelic:api_key::"
       - name: REACT_APP_GA_TRACKING_ID
-        valueFrom: "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:google_id::"
+        valueFrom: "arn:aws:secretsmanager:us-east-1:${ACCOUNT_ID}:secret:bento/${PROJECT}/${ENV}:google_id::"
     environment:
       - name: PROJECT
-        value: "$PROJECT"
+        value: "${PROJECT}"
       - name: REACT_APP_FRONTEND_VERSION
-        value: "$IMAGE_TAG"
+        value: "${IMAGE_TAG}"
       # - name: REACT_APP_BE_VERSION
-      #   value: "$BE_VERSION"
+      #   value: "${BE_VERSION}"
       - name: REACT_APP_BACKEND_API
-        value: "https://$DOMAIN_NAME/v1/graphql/"
+        value: "https://${DOMAIN_NAME}/v1/graphql/"
       - name: REACT_APP_FILE_SERVICE_API
-        value: "https://$DOMAIN_NAME/api/files/"
+        value: "https://${DOMAIN_NAME}/api/files/"
       - name: NEW_RELIC_DISTRIBUTED_TRACING_ENABLED
         value: "true"
       - name: NEW_RELIC_NO_CONFIG_FILE
@@ -69,45 +69,42 @@ containerDefinitions:
       - name: NEW_RELIC_HOST
         value: "gov-collector.newrelic.com"
       - name: NEW_RELIC_LABELS
-        value: "Project:$PROJECT;Environment:$ENV"
+        value: "Project:${PROJECT};Environment:${ENV}"
       - name: NEW_RELIC_APP_NAME
-        value: "$PROJECT-$ENV-frontend"
+        value: "${PROJECT}-${ENV}-frontend"
       - name: REACT_APP_AUTH
         value: "true"
       - name: REACT_APP_ABOUT_CONTENT_URL
-        value: "$REACT_APP_ABOUT_CONTENT_URL"
+        value: "${REACT_APP_ABOUT_CONTENT_URL}"
       - name: REACT_APP_INTEROP_SERVICE_URL
-        value: "https://clinical-$ENV.datacommons.cancer.gov/api/interoperation/"
+        value: "https://clinical-${ENV}.datacommons.cancer.gov/api/interoperation/"
       - name: NODE_LEVEL_ACCESS
         value: "gov-collector.newrelic.com"
       - name: REACT_APP_BACKEND_GETUSERINFO_API
         value: "https://k9dc.essential-dev.com/fence/login/"
       - name: REACT_APP_LOGIN_URL
-        value: "https://$REDIRECT_URL/user/oauth2/authorize?client_id=$DCF_CLIENT_ID&response_type=code&redirect_uri=https://$DOMAIN_NAME/login&scope=openid%20user%20data"
+        value: "https://${REDIRECT_URL}/user/oauth2/authorize?client_id=${DCF_CLIENT_ID}&response_type=code&redirect_uri=https://${DOMAIN_NAME}/login&scope=openid%20user%20data"
       - name: REACT_APP_AUTH_SERVICE_API
-        value: "https://$DOMAIN_NAME/api/auth/"
-      # System Info environment variables
+        value: "https://${DOMAIN_NAME}/api/auth/"
       - name: REACT_APP_FILE_SERVICE_VERSION
-        value: "$REACT_APP_FILE_SERVICE_VERSION"
+        value: "${REACT_APP_FILE_SERVICE_VERSION}"
       - name: REACT_APP_INTEROP_SERVICE_VERSION
-        value: "$REACT_APP_INTEROP_SERVICE_VERSION"
+        value: "${REACT_APP_INTEROP_SERVICE_VERSION}"
       - name: REACT_APP_BACKEND_VERSION
-        value: "$REACT_APP_BACKEND_VERSION"
+        value: "${REACT_APP_BACKEND_VERSION}"
       - name: REACT_APP_AUTH_SERVICE_VERSION
-        value: "$REACT_APP_AUTH_SERVICE_VERSION"
-
-      # React App File Centric Cart Readme
+        value: "${REACT_APP_AUTH_SERVICE_VERSION}"
       - name: REACT_APP_FILE_CENTRIC_CART_README
-        value: "$REACT_APP_FILE_CENTRIC_CART_README"
+        value: "${REACT_APP_FILE_CENTRIC_CART_README}"
 
     logConfiguration:
       logDriver: awsfirelens
       options:
         Format: json_lines
-        Host: "$SUMO_COLLECTOR_ENDPOINT"
+        Host: "${SUMO_COLLECTOR_ENDPOINT}"
         Name: http
         Port: "443"
         Retry_Limit: "2"
-        URI: "/receiver/v1/http/$SUMO_COLLECTOR_TOKEN"
+        URI: "/receiver/v1/http/${SUMO_COLLECTOR_TOKEN}"
         tls: "on"
         tls.verify: "off"
