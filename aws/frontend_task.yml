@@ -88,27 +88,17 @@ containerDefinitions:
         value: "https://$DOMAIN_NAME/api/auth/"
       # System Info environment variables
       - name: REACT_APP_FILE_SERVICE_VERSION
-        value: "{% if $ENV == 'prod' %}https://{{ subdomain }}.{{ domain_name }}/api/files/version{% else %}https://{{ subdomain }}-{{ $ENV }}.{{ domain_name }}/api/files/version{% endif %}"
+        value: "$REACT_APP_FILE_SERVICE_VERSION"
       - name: REACT_APP_INTEROP_SERVICE_VERSION
-        value: "{% if $ENV == 'prod' %}https://{{ subdomain }}.{{ domain_name }}/api/interoperation/version{% else %}https://{{ subdomain }}-{{ $ENV }}.{{ domain_name }}/api/interoperation/version{% endif %}"
+        value: "$REACT_APP_INTEROP_SERVICE_VERSION"
       - name: REACT_APP_BACKEND_VERSION
-        value: "{% if $ENV == 'prod' %}https://{{ subdomain }}.{{ domain_name }}/version{% else %}https://{{ subdomain }}-{{ $ENV }}.{{ domain_name }}/version{% endif %}"
+        value: "$REACT_APP_BACKEND_VERSION"
       - name: REACT_APP_AUTH_SERVICE_VERSION
-        value: "{% if $ENV == 'prod' %}https://{{ subdomain }}.{{ domain_name }}/api/auth/version{% else %}https://{{ subdomain }}-{{ $ENV }}.{{ domain_name }}/api/auth/version{% endif %}"
+        value: "$REACT_APP_AUTH_SERVICE_VERSION"
+
       # React App File Centric Cart Readme
       - name: REACT_APP_FILE_CENTRIC_CART_README
-        value: >-
-          {% if $ENV == "dev" %}
-          https://raw.githubusercontent.com/CBIIT/ctdc-readMe-content/refs/heads/dev/My_Files_Cart_Page_README.md
-          {% elif $ENV == "qa" %}
-          https://raw.githubusercontent.com/CBIIT/ctdc-readMe-content/refs/heads/qa/My_Files_Cart_Page_README.md
-          {% elif $ENV == "stage" %}
-          https://raw.githubusercontent.com/CBIIT/ctdc-readMe-content/refs/heads/stage/My_Files_Cart_Page_README.md
-          {% elif $ENV == "prod" %}
-          https://raw.githubusercontent.com/CBIIT/ctdc-readMe-content/refs/heads/prod/My_Files_Cart_Page_README.md
-          {% else %}
-          ""
-          {% endif %}
+        value: "$REACT_APP_FILE_CENTRIC_CART_README"
 
     logConfiguration:
       logDriver: awsfirelens
