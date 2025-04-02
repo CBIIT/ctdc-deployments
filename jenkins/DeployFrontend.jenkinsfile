@@ -102,15 +102,15 @@ pipeline {
 
                     // Set service version URLs for systems info page
                     if (env.ENV == 'prod') {
-                        env.REACT_APP_FILE_SERVICE_VERSION = "https://${subdomain}.${env.DOMAIN_NAME}/api/files/version"
-                        env.REACT_APP_INTEROP_SERVICE_VERSION = "https://${subdomain}.${env.DOMAIN_NAME}/api/interoperation/version"
-                        env.REACT_APP_BACKEND_VERSION = "https://${subdomain}.${env.DOMAIN_NAME}/version"
-                        env.REACT_APP_AUTH_SERVICE_VERSION = "https://${subdomain}.${env.DOMAIN_NAME}/api/auth/version"
+                        env.REACT_APP_FILE_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/files/version"
+                        env.REACT_APP_INTEROP_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/interoperation/version"
+                        env.REACT_APP_BACKEND_VERSION = "https://${env.DOMAIN_NAME}/version"
+                        env.REACT_APP_AUTH_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/auth/version"
                     } else {
-                        env.REACT_APP_FILE_SERVICE_VERSION = "https://${subdomain}-${env.ENV}.${env.DOMAIN_NAME}/api/files/version"
-                        env.REACT_APP_INTEROP_SERVICE_VERSION = "https://${subdomain}-${env.ENV}.${env.DOMAIN_NAME}/api/interoperation/version"
-                        env.REACT_APP_BACKEND_VERSION = "https://${subdomain}-${env.ENV}.${env.DOMAIN_NAME}/version"
-                        env.REACT_APP_AUTH_SERVICE_VERSION = "https://${subdomain}-${env.ENV}.${env.DOMAIN_NAME}/api/auth/version"
+                        env.REACT_APP_FILE_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/files/version"
+                        env.REACT_APP_INTEROP_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/interoperation/version"
+                        env.REACT_APP_BACKEND_VERSION = "https://${env.DOMAIN_NAME}/version"
+                        env.REACT_APP_AUTH_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/auth/version"
                     }
 
                     // Inject README file path
