@@ -106,7 +106,6 @@ pipeline {
                     }
 
                     // Fetch actual version tags from the service endpoints using jq.
-                    // Assumes that each endpoint returns JSON with a "version" key.
                     env.BE_VERSION = sh(
                         label: 'Fetch BE Version',
                         returnStdout: true,
