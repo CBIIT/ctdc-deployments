@@ -88,7 +88,7 @@ pipeline {
                         env.REACT_APP_ABOUT_CONTENT_URL = "https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/production/aboutPagesContent.yaml"
                     }
 
-                    // set domain name
+                    // Set domain name and redirect URL based on environment
                     if (env.ENV == 'prod') {
                         env.DOMAIN_NAME = "clinical.datacommons.cancer.gov"
                         env.REDIRECT_URL = "nci-crdc.datacommons.io"
@@ -100,34 +100,34 @@ pipeline {
                         env.REDIRECT_URL = "nci-crdc-staging.datacommons.io"
                     }
 
-					// Helper closure to build the endpoint URL.
+                    // Helper closure to build the endpoint URL.
                     def serviceEndpoint = { String path ->
                         return "https://${env.DOMAIN_NAME}${path}"
                     }
 
-                    // Fetch actual version tags from the service endpoints.
+                    // Fetch actual version tags from the service endpoints using jq.
                     env.BE_VERSION = sh(
                         label: 'Fetch BE Version',
                         returnStdout: true,
-                        script: "curl -s ${serviceEndpoint('/version')}"
+                        script: "curl -s ${serviceEndpoint('/version')} | jq -r '.BE_VERSION'"
                     ).trim()
 
                     env.FILE_SERVICE_VERSION = sh(
                         label: 'Fetch File Service Version',
                         returnStdout: true,
-                        script: "curl -s ${serviceEndpoint('/api/files/version')}"
+                        script: "curl -s ${serviceEndpoint('/api/files/version')} | jq -r '.FILE_SERVICE_VERSION'"
                     ).trim()
 
                     env.INTEROP_VERSION = sh(
                         label: 'Fetch Interop Version',
                         returnStdout: true,
-                        script: "curl -s ${serviceEndpoint('/api/interoperation/version')}"
+                        script: "curl -s ${serviceEndpoint('/api/interoperation/version')} | jq -r '.INTEROP_VERSION'"
                     ).trim()
 
                     env.AUTH_SERVICE_VERSION = sh(
                         label: 'Fetch Auth Service Version',
                         returnStdout: true,
-                        script: "curl -s ${serviceEndpoint('/api/auth/version')}"
+                        script: "curl -s ${serviceEndpoint('/api/auth/version')} | jq -r '.AUTH_SERVICE_VERSION'"
                     ).trim()
 
                     // Log the fetched versions for debugging.
@@ -142,21 +142,7 @@ pipeline {
                     env.REACT_APP_INTEROP_SERVICE_VERSION = env.INTEROP_VERSION
                     env.REACT_APP_AUTH_SERVICE_VERSION = env.AUTH_SERVICE_VERSION
 
-                    // // Set service version URLs for systems info page
-                    // if (env.ENV == 'prod') {
-                    //     env.REACT_APP_FILE_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/files/version"
-                    //     env.REACT_APP_INTEROP_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/interoperation/version"
-                    //     env.REACT_APP_BACKEND_VERSION = "https://${env.DOMAIN_NAME}/version"
-                    //     env.REACT_APP_AUTH_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/auth/version"
-                    // } else {
-                    //     env.REACT_APP_FILE_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/files/version"
-                    //     env.REACT_APP_INTEROP_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/interoperation/version"
-                    //     env.REACT_APP_BACKEND_VERSION = "https://${env.DOMAIN_NAME}/version"
-                    //     env.REACT_APP_AUTH_SERVICE_VERSION = "https://${env.DOMAIN_NAME}/api/auth/version"
-                    // }
-					// env.REACT_APP_BE_VERSION = env.BE_VERSION
-
-                    // Inject README file path
+                    // Inject README file path based on environment.
                     def readmeMap = [
                         dev:   "dev",
                         qa:    "qa",
@@ -166,7 +152,7 @@ pipeline {
                     env.REACT_APP_FILE_CENTRIC_CART_README = readmeMap.containsKey(env.ENV) ?
                         "https://raw.githubusercontent.com/CBIIT/ctdc-readMe-content/refs/heads/${readmeMap[env.ENV]}/My_Files_Cart_Page_README.md" : ""
 
-                    // set sumo vars for logging
+                    // Set sumo vars for logging, using jq to extract the secret values.
                     env.SUMO_COLLECTOR_ENDPOINT = sh(
                         label: 'Get Sumo Endpoint',
                         returnStdout: true,
@@ -178,27 +164,27 @@ pipeline {
                         script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_token_$APP'"
                     ).trim()
 
-                    // set backend version
+                    // Optionally update backend version using deployments.yaml (if applicable).
                     env.BE_VERSION = getVersion(service: "backend", deploymentFile: "$PROJECT-deployments-$ENV/deployments.yaml")
 
-                    // set ECR account number
+                    // Set ECR account number using jq.
                     env.ECR_ACCOUNT = sh(
                         label: 'Get ECR account',
                         returnStdout: true,
                         script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.ecr_account'"
                     ).trim()
 
-                    // set dcf client id
+                    // Set dcf client id using jq.
                     env.DCF_CLIENT_ID = sh(
-                        label: 'Get ECR account',
+                        label: 'Get DCF Client ID',
                         returnStdout: true,
                         script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.dcf_client_id'"
                     ).trim()
 
-                    // set repo URL
+                    // Set repo URL.
                     env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
 
-                    // set template file name
+                    // Set template file name.
                     if (env.ENV == 'dev-cmb') {
                         env.TEMPLATE_FILE = "ctdc-deployments/aws/${APP}_task_cmb.json"
                     } else {
@@ -237,7 +223,7 @@ pipeline {
                 script {
                     sh label: 'Task-Definition-Update', script: '''#!/bin/bash
                     # create new revision for $PROJECT-$APP Task Definition
-                    echo "Updating Task Defintion to Use: $ECR_REPO:$IMAGE_TAG"
+                    echo "Updating Task Definition to Use: $ECR_REPO:$IMAGE_TAG"
                     export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
                     export IMAGE_ID="$REPO_URL:$IMAGE_TAG"
                     
