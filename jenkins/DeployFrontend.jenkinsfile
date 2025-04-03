@@ -106,28 +106,29 @@ pipeline {
                     }
 
                     // Fetch actual version tags from the service endpoints using jq.
+                    // Assumes that each endpoint returns JSON with a "version" key.
                     env.BE_VERSION = sh(
                         label: 'Fetch BE Version',
                         returnStdout: true,
-                        script: "curl -s ${serviceEndpoint('/version')} | jq -r '.BE_VERSION'"
+                        script: "curl -s ${serviceEndpoint('/version')} | jq -r '.version'"
                     ).trim()
 
                     env.FILE_SERVICE_VERSION = sh(
                         label: 'Fetch File Service Version',
                         returnStdout: true,
-                        script: "curl -s ${serviceEndpoint('/api/files/version')} | jq -r '.FILE_SERVICE_VERSION'"
+                        script: "curl -s ${serviceEndpoint('/api/files/version')} | jq -r '.version'"
                     ).trim()
 
                     env.INTEROP_VERSION = sh(
                         label: 'Fetch Interop Version',
                         returnStdout: true,
-                        script: "curl -s ${serviceEndpoint('/api/interoperation/version')} | jq -r '.INTEROP_VERSION'"
+                        script: "curl -s ${serviceEndpoint('/api/interoperation/version')} | jq -r '.version'"
                     ).trim()
 
                     env.AUTH_SERVICE_VERSION = sh(
                         label: 'Fetch Auth Service Version',
                         returnStdout: true,
-                        script: "curl -s ${serviceEndpoint('/api/auth/version')} | jq -r '.AUTH_SERVICE_VERSION'"
+                        script: "curl -s ${serviceEndpoint('/api/auth/version')} | jq -r '.version'"
                     ).trim()
 
                     // Log the fetched versions for debugging.
