@@ -141,7 +141,7 @@ pipeline {
                     env.REACT_APP_FILE_SERVICE_VERSION = env.FILE_SERVICE_VERSION
                     env.REACT_APP_INTEROP_SERVICE_VERSION = env.INTEROP_VERSION
                     env.REACT_APP_AUTH_SERVICE_VERSION = env.AUTH_SERVICE_VERSION
-                    
+
                     // Set REACT_APP_FRONTEND_VERSION to IMAGE_TAG
                     env.REACT_APP_FRONTEND_VERSION = env.IMAGE_TAG
 

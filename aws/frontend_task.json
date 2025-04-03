@@ -104,7 +104,7 @@
                     "value": "$PROJECT"
                 },
                 {
-                    "name": "REACT_APP_FE_VERSION",
+                    "name": "REACT_APP_FRONTEND_VERSION",
                     "value": "$IMAGE_TAG"
                 },
                 {
