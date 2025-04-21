@@ -1,224 +1,222 @@
 @Library('datacommons-jenkins-shared-library@v1.1') _
 
 def getLabelForEnvironment(environment) {
-	if (environment == "stage" || environment == "prod"){
-		return "slave-ncias-p3181-c"
-	}else {
-		return "slave-ncias-d2947-c"
-	}
+    if (environment == "stage" || environment == "prod") {
+        return "slave-ncias-p3181-c"
+    } else {
+        return "slave-ncias-d2947-c"
+    }
 }
 
 pipeline {
-	agent {
-		node {
-			label getLabelForEnvironment(params.Environment)
-		}
-	}
+    agent {
+        node {
+            label getLabelForEnvironment(params.Environment)
+        }
+    }
 
-	parameters {
-
+    parameters {
         string(
+            name: 'ImageTag',
             defaultValue: '',
-            description: 'The Image to Deploy',
-            name: 'ImageTag')
-
+            description: 'The Image to Deploy'
+        )
         extendedChoice(
             name: 'Environment',
             defaultValue: 'dev',
             description: 'Choose the environment to deploy to',
             type: 'PT_SINGLE_SELECT',
-            value: 'dev,qa,stage,prod')
+            value: 'dev,qa,stage,prod'
+        )
+    }
 
-  }
+    options {
+        timestamps()
+    }
 
-  options {
+    environment {
+        PROGRAM      = "crdc"
+        PROJECT      = "ctdc"
+        APP          = "backend"
+        SLACK_SECRET = "ctdc_slack_url"
+        REGION       = "us-east-1"
+        ECR_REPO     = "${env.PROGRAM}-${env.PROJECT}-${env.APP}"
+        DEPLOY_REPO  = "${env.PROJECT}-deployments"
+        IMAGE_TAG    = "${params.ImageTag}"
+        ENV          = "${params.Environment}"
+        CLUSTER      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-ecs"
+        SERVICE      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-${env.APP}"
+    }
 
-	timestamps()
-
-  }
-
-  environment {
-
-	PROGRAM      = "crdc"
-	PROJECT      = "ctdc"
-	APP          = "backend"
-	SLACK_SECRET = "ctdc_slack_url"
-	REGION       = "us-east-1"
-	ECR_REPO     = "${env.PROGRAM}-${env.PROJECT}-${env.APP}"
-	DEPLOY_REPO  = "${env.PROJECT}-deployments"
-	IMAGE_TAG    = "${params.ImageTag}"
-	ENV          = "${params.Environment}"
-	CLUSTER      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-ecs"
-	SERVICE      = "${env.PROGRAM}-${env.ENV}-${env.PROJECT}-${env.APP}"
-
-  }
-
-  stages{
-
-  	stage('checkout'){
-
-  		steps {
-
-  		checkout([$class: 'GitSCM',
-			branches: [[name: '*/main']],
-			extensions: [[$class: 'SubmoduleOption', 
-			recursiveSubmodules: true],
-			[$class: 'RelativeTargetDirectory',
-			relativeTargetDir: 'ctdc-deployments']],
-			userRemoteConfigs:
-			[[url: "https://github.com/CBIIT/${env.DEPLOY_REPO}"]]])
-
-        }
-
-  	}
-
-    stage('Set Environment Variables'){
-
- 		steps {
-
- 			script {
-
-			    // set sumo vars for logging
-				env.SUMO_COLLECTOR_ENDPOINT = sh(label: 'Get Sumo Endpoint', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_endpoint'").trim()
-				env.SUMO_COLLECTOR_TOKEN = sh(label: 'Get Sumo Token', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.sumo_collector_token_$APP'").trim()
-
-				// set neo4j vars
-				env.NEO4J_HOST = sh(label: 'Get Neo4j Host', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.neo4j_ip'").trim()
-
-				// set ECR account number
-				env.ECR_ACCOUNT = sh(label: 'Get ECR account', returnStdout: true, script: "aws secretsmanager get-secret-value --region $REGION --secret-id bento/$PROJECT/$ENV --query SecretString --output text | jq -r '.ecr_account'").trim()
-
-				// set repo URL
-				env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
-
-				// set template file name
-				env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task.yml "
-				//env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task_cloudwatch.json"
-
-			}
-
- 		}
-
-  	}
-
-	stage('Add Production Tag'){
- 		when {
-	        expression {
-                ENV == 'prod'
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout([$class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    extensions: [
+                        [$class: 'SubmoduleOption', recursiveSubmodules: true],
+                        [$class: 'RelativeTargetDirectory', relativeTargetDir: 'ctdc-deployments']
+                    ],
+                    userRemoteConfigs: [[url: "https://github.com/CBIIT/${env.DEPLOY_REPO}"]]
+                ])
             }
         }
-		steps {
- 			script {
-			    sh label: 'Docker-Tag', script: '''#!/bin/bash
-				# Tag image as production if deploying to prod tier
-				echo "Tagging Image as Production: $ECR_REPO:$IMAGE_TAG"
-				
-				# login and get manifest
-				docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $REPO_URL
-				docker pull $REPO_URL:$IMAGE_TAG
-				docker tag $REPO_URL:$IMAGE_TAG $REPO_URL:prod-$IMAGE_TAG
-				docker push $REPO_URL:prod-$IMAGE_TAG
-				'''
-                IMAGE_TAG = "prod-$IMAGE_TAG"
-                echo "updated image tag: $IMAGE_TAG"
-			}
- 		}
-  	}
 
-  	stage('Update Task Definition'){
+        stage('Set Environment Variables') {
+            steps {
+                script {
+                    // logging
+                    env.SUMO_COLLECTOR_ENDPOINT = sh(
+                        label: 'Get Sumo Endpoint',
+                        returnStdout: true,
+                        script: """
+                            aws secretsmanager get-secret-value \
+                              --region $REGION \
+                              --secret-id bento/$PROJECT/$ENV \
+                              --query SecretString --output text \
+                            | jq -r '.sumo_collector_endpoint'
+                        """
+                    ).trim()
 
- 		steps {
+                    env.SUMO_COLLECTOR_TOKEN = sh(
+                        label: 'Get Sumo Token',
+                        returnStdout: true,
+                        script: """
+                            aws secretsmanager get-secret-value \
+                              --region $REGION \
+                              --secret-id bento/$PROJECT/$ENV \
+                              --query SecretString --output text \
+                            | jq -r '.sumo_collector_token_$APP'
+                        """
+                    ).trim()
 
-			script {
+                    // Neo4j
+                    env.NEO4J_HOST = sh(
+                        label: 'Get Neo4j Host',
+                        returnStdout: true,
+                        script: """
+                            aws secretsmanager get-secret-value \
+                              --region $REGION \
+                              --secret-id bento/$PROJECT/$ENV \
+                              --query SecretString --output text \
+                            | jq -r '.neo4j_ip'
+                        """
+                    ).trim()
 
-			    sh label: 'Task-Definition-Update', script: '''#!/bin/bash
+                    // ECR account
+                    env.ECR_ACCOUNT = sh(
+                        label: 'Get ECR Account',
+                        returnStdout: true,
+                        script: """
+                            aws secretsmanager get-secret-value \
+                              --region $REGION \
+                              --secret-id bento/$PROJECT/$ENV \
+                              --query SecretString --output text \
+                            | jq -r '.ecr_account'
+                        """
+                    ).trim()
 
-				# create new revision for $PROJECT-$APP Task Definition
-				echo "Updating Task Defintion to Use: $ECR_REPO:$IMAGE_TAG"
-				ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
-				IMAGE_ID="$REPO_URL:$IMAGE_TAG"
+                    env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
 
-				sed -i "s|{{account_id}}|$ACCOUNT_ID|" $TEMPLATE_FILE
-				sed -i "s|{{image_id}}|$IMAGE_ID|" $TEMPLATE_FILE
-				sed -i "s|{{image_tag}}|$IMAGE_TAG|" $TEMPLATE_FILE
-				sed -i "s|{{environment}}|$ENV|" $TEMPLATE_FILE
-				sed -i "s|{{program}}|$PROGRAM|" $TEMPLATE_FILE
-				sed -i "s|{{project}}|$PROJECT|" $TEMPLATE_FILE
-				sed -i "s|{{sumo_collector_endpoint}}|$SUMO_COLLECTOR_ENDPOINT|" $TEMPLATE_FILE
-				sed -i "s|{{sumo_collector_token}}|$SUMO_COLLECTOR_TOKEN|" $TEMPLATE_FILE
-				sed -i "s|{{neo4j_host}}|$NEO4J_HOST|" $TEMPLATE_FILE
+                    // Template file (no trailing space!)
+                    env.TEMPLATE_FILE = "ctdc-deployments/aws/${APP}_task.yml"
+                }
+            }
+        }
 
-				aws ecs register-task-definition --cli-input-yml file://$TEMPLATE_FILE
+        stage('Add Production Tag') {
+            when {
+                expression { ENV == 'prod' }
+            }
+            steps {
+                script {
+                    sh label: 'Docker-Tag', script: '''
+                        #!/bin/bash
+                        echo "Tagging Image as Production: $REPO_URL:$IMAGE_TAG"
+                        docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $REPO_URL
+                        docker pull $REPO_URL:$IMAGE_TAG
+                        docker tag $REPO_URL:$IMAGE_TAG $REPO_URL:prod-$IMAGE_TAG
+                        docker push $REPO_URL:prod-$IMAGE_TAG
+                    '''
+                    IMAGE_TAG = "prod-$IMAGE_TAG"
+                    echo "Updated image tag: $IMAGE_TAG"
+                }
+            }
+        }
 
-				'''
+        stage('Update Task Definition') {
+            steps {
+                script {
+                    sh label: 'Task-Definition-Update', script: '''
+                        #!/bin/bash
+                        echo "Updating Task Definition to Use: $REPO_URL:$IMAGE_TAG"
+                        ACCOUNT_ID=$(aws sts get-caller-identity \
+                            --query "Account" --output text)
+                        IMAGE_ID="$REPO_URL:$IMAGE_TAG"
 
-			}
+                        sed -i "s|{{account_id}}|$ACCOUNT_ID|" $TEMPLATE_FILE
+                        sed -i "s|{{image_id}}|$IMAGE_ID|"      $TEMPLATE_FILE
+                        sed -i "s|{{image_tag}}|$IMAGE_TAG|"    $TEMPLATE_FILE
+                        sed -i "s|{{environment}}|$ENV|"        $TEMPLATE_FILE
+                        sed -i "s|{{program}}|$PROGRAM|"        $TEMPLATE_FILE
+                        sed -i "s|{{project}}|$PROJECT|"        $TEMPLATE_FILE
+                        sed -i "s|{{sumo_collector_endpoint}}|$SUMO_COLLECTOR_ENDPOINT|" $TEMPLATE_FILE
+                        sed -i "s|{{sumo_collector_token}}|$SUMO_COLLECTOR_TOKEN|"       $TEMPLATE_FILE
+                        sed -i "s|{{neo4j_host}}|$NEO4J_HOST|"                           $TEMPLATE_FILE
 
- 		}
+                        aws ecs register-task-definition \
+                          --region $REGION \
+                          --cli-input-yaml file://$TEMPLATE_FILE
+                    '''
+                }
+            }
+        }
 
-  	}
+        stage('Update Service') {
+            steps {
+                script {
+                    sh label: 'Service-Update', script: '''
+                        #!/bin/bash
+                        echo "Updating Service: $SERVICE"
+                        TASK_REVISION=$(aws ecs describe-task-definition \
+                            --task-definition $SERVICE \
+                            --region $REGION \
+                          | jq -r '.taskDefinition.revision')
+                        aws ecs update-service \
+                          --cluster $CLUSTER \
+                          --region $REGION \
+                          --service $SERVICE \
+                          --task-definition $SERVICE:$TASK_REVISION \
+                          --desired-count 1
+                    '''
+                }
+            }
+        }
 
-
-    stage('Update Service'){
-
- 		steps {
-
- 			script {
-
-			    sh label: 'Service-Update', script: '''#!/bin/bash
-
-				# Redeploy Service Using The Latest Task Definition
-				echo "Updating Service: $SERVICE"
-
-				TASK_REVISION=$(aws ecs describe-task-definition --task-definition $SERVICE | egrep "revision" | awk '{print $2}' | sed 's/,//')
-				aws ecs update-service --cluster $CLUSTER --region $REGION --service $SERVICE --task-definition $SERVICE:$TASK_REVISION --desired-count 1
-
-				'''
-
-			}
-
- 		}
-
-  	}
-
-	stage('verify deployment'){
-
-		steps {
-
- 			script {
-
-			    sh label: 'Verify-Deploy', script: '''#!/bin/bash
-
-                # wait untiil the service is stable
-				aws ecs wait services-stable --cluster $CLUSTER --region $REGION --service $SERVICE
-
-				'''
-
-			}
-
- 		}
-
-  	}
-
-  }
-
-  post {
-
-    always {
-
-        notify(
-            secretPath: "notification/slack",
-            secretName: "${env.SLACK_SECRET}"
-        ) 
-
+        stage('Verify Deployment') {
+            steps {
+                script {
+                    sh label: 'Verify-Deploy', script: '''
+                        #!/bin/bash
+                        aws ecs wait services-stable \
+                          --cluster $CLUSTER \
+                          --region $REGION \
+                          --services $SERVICE
+                    '''
+                }
+            }
+        }
     }
 
-    cleanup {
-
-        cleanWs()
-
+    post {
+        always {
+            notify(
+                secretPath: "notification/slack",
+                secretName: "${env.SLACK_SECRET}"
+            )
+        }
+        cleanup {
+            cleanWs()
+        }
     }
-
-  }
-
 }
