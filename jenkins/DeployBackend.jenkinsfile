@@ -111,44 +111,44 @@ pipeline {
         }
 
         stage('Update Task Definition') {
-            steps {
-                script {
-                    // Build a fully-populated JSON using jq
-                    sh label: 'Render Task Definition', script: """
-                        ACCOUNT_ID=\$(aws sts get-caller-identity --query Account --output text)
-                        IMAGE_ID="${env.REPO_URL}:${env.IMAGE_TAG}"
+  steps {
+    script {
+      sh label: 'Render Task Definition', script: """
+        #!/bin/bash
+        ACCOUNT_ID=\$(aws sts get-caller-identity --query Account --output text)
+        IMAGE_ID="${env.REPO_URL}:${env.IMAGE_TAG}"
 
-                        jq \
-                         --arg acct "\$ACCOUNT_ID" \
-                         --arg img "\$IMAGE_ID" \
-                         --arg envv "${env.ENV}" \
-                         --arg prog "${env.PROGRAM}" \
-                         --arg proj "${env.PROJECT}" \
-                         --arg sumo_ep "${env.SUMO_COLLECTOR_ENDPOINT}" \
-                         --arg sumo_tok "${env.SUMO_COLLECTOR_TOKEN}" \
-                         --arg neo "${env.NEO4J_HOST}" \
-                         '.family = "\($prog)-\($proj)-\(env.APP)" |
-                          .containerDefinitions[0].image = $img |
-                          .tags = [{key:"environment",value:$envv}] |
-                          .containerDefinitions[0].environment += [
-                            {name:"SUMO_COLLECTOR_ENDPOINT",value:$sumo_ep},
-                            {name:"SUMO_COLLECTOR_TOKEN",value:$sumo_tok},
-                            {name:"NEO4J_HOST",value:$neo}
-                          ]' \
-                         "${TEMPLATE_FILE}" > rendered-task-def.json
+        jq \\
+          --arg acct "\$ACCOUNT_ID" \\
+          --arg img "\$IMAGE_ID" \\
+          --arg envv "${env.ENV}" \\
+          --arg prog "${env.PROGRAM}" \\
+          --arg proj "${env.PROJECT}" \\
+          --arg app "${env.APP}" \\
+          --arg sumo_ep "${env.SUMO_COLLECTOR_ENDPOINT}" \\
+          --arg sumo_tok "${env.SUMO_COLLECTOR_TOKEN}" \\
+          --arg neo "${env.NEO4J_HOST}" \\
+        '.family = "\\\\($prog)-\\\\($proj)-\\\\($app)" |
+         .containerDefinitions[0].image = $img |
+         .tags = [{key:"environment",value:$envv}] |
+         .containerDefinitions[0].environment += [
+           {name:"SUMO_COLLECTOR_ENDPOINT",value:$sumo_ep},
+           {name:"SUMO_COLLECTOR_TOKEN",value:$sumo_tok},
+           {name:"NEO4J_HOST",value:$neo}
+         ]' \\
+        "${TEMPLATE_FILE}" > rendered-task-def.json
 
-                        echo "----- rendered-task-def.json -----"
-                        cat rendered-task-def.json
-                    """
-                    // Register the new task definition
-                    sh label: 'Register Task Definition', script: """
-                        aws ecs register-task-definition \
-                          --region ${env.REGION} \
-                          --cli-input-json file://rendered-task-def.json
-                    """
-                }
-            }
-        }
+        echo "----- rendered-task-def.json -----"
+        cat rendered-task-def.json
+
+        aws ecs register-task-definition \\
+          --region ${env.REGION} \\
+          --cli-input-json file://rendered-task-def.json
+      """
+    }
+  }
+}
+
 
         stage('Update Service') {
             steps {
