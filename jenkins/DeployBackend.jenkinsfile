@@ -92,7 +92,7 @@ pipeline {
 				env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
 
 				// set template file name
-				env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task.json"
+				env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task.yaml "
 				//env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task_cloudwatch.json"
 
 			}
@@ -148,7 +148,7 @@ pipeline {
 				sed -i "s|{{sumo_collector_token}}|$SUMO_COLLECTOR_TOKEN|" $TEMPLATE_FILE
 				sed -i "s|{{neo4j_host}}|$NEO4J_HOST|" $TEMPLATE_FILE
 
-				aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE
+				aws ecs register-task-definition --cli-input-yaml file://$TEMPLATE_FILE
 
 				'''
 
@@ -157,6 +157,7 @@ pipeline {
  		}
 
   	}
+
 
     stage('Update Service'){
 
