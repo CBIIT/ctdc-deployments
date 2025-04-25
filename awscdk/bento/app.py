@@ -26,7 +26,7 @@ if __name__=="__main__":
   # config.read(filename)
   # #print({section: dict(config[section]) for section in config.sections()})
 
-  config = ConfigParser()
+  config = ConfigParser(interpolation=None)
   config.read('config.ini')
   
   logging.basicConfig(format='%(asctime)s [%(levelname)5s] %(message)s',
