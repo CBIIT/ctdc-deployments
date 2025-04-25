@@ -17,32 +17,32 @@ class frontendService:
         command = None
     
     environment={
-            "NEW_RELIC_APP_NAME":"crdc-qa-ctdc-frontend",
-            "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED":"true",
+            "PROJECT":"ICDC",
+            "NEW_RELIC_APP_NAME":"{}-{}-files".format(config['main']['project'], config['main']['tier']),
             "NEW_RELIC_LABELS":"Project:{};Environment:{}".format('ctdc', config['main']['tier']),
-            "NRIA_IS_FORWARD_ONLY":"true",
-            "NRIA_OVERRIDE_HOST_ROOT":"",
-            "NRIA_PASSTHROUGH_ENVIRONMENT":"ECS_CONTAINER_METADATA_URI,ECS_CONTAINER_METADATA_URI_V4,FARGATE",
-            "NRIA_CUSTOM_ATTRIBUTES":"{\"nrDeployMethod\":\"downloadPage\"}",
-            # "NEW_RELIC_HOST":"gov-collector.newrelic.com",
-            # "NEW_RELIC_NO_CONFIG_FILE":"true",
-            "NEW_RELIC_HOST":"gov-collector.newrelic.com",
-            "NODE_LEVEL":"Study Arm(s)",
+            "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED":"true",
+            "NEW_RELIC_NO_CONFIG_FILE":"true",
+            "NEW_RELIC_HOST":"gov-collector.newrelic.com",            
             "NODE_LEVEL_ACCESS":"gov-collector.newrelic.com",
-            "PUBLIC_ACCESS":"Metadata Only",
-            "REACT_APP_ABOUT_CONTENT_URL":config[service]['about_content_url'],
-            "REACT_APP_AUTH_API":self.app_url,
             "REACT_APP_AUTH":"true",
             "REACT_APP_AUTH_SERVICE_API":"https://{}-{}.{}/api/auth/".format(config['main']['subdomain'], config['main']['tier'], config['main']['domain']),
             "REACT_APP_BACKEND_API":"https://{}-{}.{}/v1/graphql/".format(config['main']['subdomain'], config['main']['tier'], config['main']['domain']),
-            "REACT_APP_BACKEND_PUBLIC_API":"/v1/public-graphql/",
+            "REACT_APP_BE_VERSION":config['backend']['image'],
+            "REACT_APP_FRONTEND_VERSION":config[service]['image'],
+            "REACT_APP_BACKEND_VERSION":config[service]['react_app_backend_version'],
+            "REACT_APP_BACKEND_API":config[service]['react_app_backend_api'],
+            "REACT_APP_BACKEND_GETUSERINFO_API":"https://k9dc.essential-dev.com/fence/login/",
             "REACT_APP_BE_VERSION":config['backend']['image'],
             "REACT_APP_FE_VERSION":config[service]['image'],
-            "REACT_APP_FILE_SERVICE_API":"https://{}-{}.{}/api/files/".format(config['main']['subdomain'], config['main']['tier'], config['main']['domain']),
-            "REACT_APP_INTEROP_SERVICE_URL":"https://{}-{}.{}/api/interoperation/graphql".format(config['main']['subdomain'], config['main']['tier'], config['main']['domain']),
-            "REACT_APP_BACKEND_GETUSERINFO_API":"https://k9dc.essential-dev.com/fence/login/",
-            "REACT_APP_LOGIN_URL":"https://nci-crdc-staging.datacommons.io/user/oauth2/authorize?client_id=$DCF_CLIENT_ID&response_type=code&redirect_uri=https://{}.login&scope=openid%20user%20data".format(config['main']['domain']),
-            #"REACT_APP_USER_SERVICE_API":"/api/users/",
+            "REACT_APP_FILE_SERVICE_API":config[service]['react_app_file_service_api'],
+            "REACT_APP_FILE_SERVICE_VERSION":config[service]['react_app_file_service_version'],
+            "REACT_APP_INTEROP_SERVICE_VERSION":config[service]['react_app_interoperation_service_version'],
+            "REACT_APP_INTEROP_SERVICE_URL":config[service]['react_app_interoperation_service_url'],
+            "REACT_APP_AUTH_SERVICE_VERSION":config[service]['react_app_auth_service_version'],
+            "REACT_APP_AUTH_SERVICE_API":config[service]['react_app_auth_service_api'],
+            "REACT_APP_FILE_CENTRIC_CART_README":config[service]['react_app_readme_data'],
+            "REACT_APP_ABOUT_CONTENT_URL":config[service]['about_content_url'],            
+            "REACT_APP_LOGIN_URL":config[service]['react_app_login_url'],
         }
 
     secrets={
@@ -107,25 +107,29 @@ class frontendService:
         )
     )
 
-    # Sumo Logic Container
-    # sumo_logic_container = taskDefinition.add_container(
-    #     "sumologic-firelens",
-    #     image=ecs.ContainerImage.from_registry("public.ecr.aws/aws-observability/aws-for-fluent-bit:stable"),
-    #     cpu=0,
-    #     essential=True,
-    #     firelens_config=ecs.FirelensConfig(type=ecs.FirelensLogRouterType.FLUENTBIT, options={"enable-ecs-log-metadata": "true"})
-    # )
-    
+    # Sumo Logic FireLens Log Router Container
+    sumo_logic_container = taskDefinition.add_firelens_log_router(
+        "sumologic-firelens",
+        image=ecs.ContainerImage.from_registry("public.ecr.aws/aws-observability/aws-for-fluent-bit:stable"),
+        firelens_config=ecs.FirelensConfig(
+            type=ecs.FirelensLogRouterType.FLUENTBIT,
+            options=ecs.FirelensOptions(
+                enable_ecs_log_metadata=True
+            )
+        ),
+    essential=True
+    )
+
     # New Relic Container
     new_relic_container = taskDefinition.add_container(
         "newrelic-infra",
         image=ecs.ContainerImage.from_registry("newrelic/nri-ecs:1.9.2"),
         cpu=0,
         essential=True,
-        secrets={"NRIA_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "fenr_newrelic", secret_name='monitoring/newrelic'), 'api_key'),},
+        secrets={"NRIA_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "filesnr_newrelic", secret_name='monitoring/newrelic'), 'api_key'),},
         environment={
             "NEW_RELIC_HOST":"gov-collector.newrelic.com",
-            "NEW_RELIC_APP_NAME":"{}-{}-backend".format(config['main']['project'], config['main']['tier']),
+            "NEW_RELIC_APP_NAME":"{}-{}-files".format(config['main']['project'], config['main']['tier']),
             "NRIA_IS_FORWARD_ONLY":"true",
             "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED":"true",
             "NRIA_PASSTHROUGH_ENVIRONMENT":"ECS_CONTAINER_METADATA_URI,ECS_CONTAINER_METADATA_URI_V4,FARGATE",
