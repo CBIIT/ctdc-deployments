@@ -18,38 +18,25 @@ class filesService:
 
     environment={
             "NEW_RELIC_APP_NAME":"crdc-qa-ctdc-files",
-            "NEW_RELIC_HOST":"gov-collector.newrelic.com",
             "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED":"true",
             "NEW_RELIC_LABELS":"Project:{};Environment:{}".format('ctdc', config['main']['tier']),
-            "NRIA_PASSTHROUGH_ENVIRONMENT":"ECS_CONTAINER_METADATA_URI,ECS_CONTAINER_METADATA_URI_V4,FARGATE",
             "AUTH_ENABLED":"false",
-            "NRIA_IS_FORWARD_ONLY":"true",
-            "NRIA_CUSTOM_ATTRIBUTES":"{\"nrDeployMethod\":\"downloadPage\"}",
-            "NRIA_OVERRIDE_HOST_ROOT":"",
-            "AUTH_URL":"/api/auth/authenticated",
-            "AUTHORIZATION_ENABLED":"true",
-            "BACKEND_URL":"/v1/graphql/",
+            "BACKEND_URL":config[service]['backend_url'],
+            "SIGNED_URL_EXPIRY_SECONDS":"86400",
+            "SESSION_TIMEOUT":"1200",
             "DATE":"2024-07-09",
             "MYSQL_PORT":"3306",
-            "MYSQL_SESSION_ENABLED":"true",
-            #"NEO4J_URI":"bolt://{}:7687".format(config['db']['neo4j_ip']),
+            "MYSQL_DATABASE":"ctdc",
             "PROJECT":"CTDC",
-            "URL_SRC":"CLOUD_FRONT",
+            "URL_SRC":"SIGNED_S3",
             "VERSION":config[service]['image'],
         }
 
     secrets={
             "NEW_RELIC_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "files_newrelic", secret_name='monitoring/newrelic'), 'api_key'),
-            #"NEO4J_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_password'),
-            #"NEO4J_USER":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_user'),
-            #"CF_PRIVATE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "files_cf_key", secret_name="ec2-ssh-key/{}/private".format(self.cfKeys.key_pair_name)), ''),
-            #"CF_KEY_PAIR_ID":ecs.Secret.from_secrets_manager(self.secret, 'cf_key_pair_id'),
-            #"CF_URL":ecs.Secret.from_secrets_manager(self.secret, 'cf_url'),
-            #"TOKEN_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'token_secret'),
             "COOKIE_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'cookie_secret'),
             "DCF_FILE_URL":ecs.Secret.from_secrets_manager(self.secret, 'dcf_file_url'),
-
-            "MYSQL_DATABASE":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'dbname'),
+            # "MYSQL_DATABASE":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'dbname'),
             "MYSQL_HOST":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'host'),
             "MYSQL_PASSWORD":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'password'),
             "MYSQL_USER":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'username'),
@@ -108,15 +95,19 @@ class filesService:
         )
     )
 
-    # Sumo Logic Container
-    # sumo_logic_container = taskDefinition.add_container(
-    #     "sumologic-firelens",
-    #     image=ecs.ContainerImage.from_registry("public.ecr.aws/aws-observability/aws-for-fluent-bit:stable"),
-    #     cpu=0,
-    #     essential=True,
-    #     firelens_config=ecs.FirelensConfig(type=ecs.FirelensLogRouterType.FLUENTBIT, options={"enable-ecs-log-metadata": "true"})
-    # )
-    
+    # Sumo Logic FireLens Log Router Container
+    sumo_logic_container = taskDefinition.add_firelens_log_router(
+        "sumologic-firelens",
+        image=ecs.ContainerImage.from_registry("public.ecr.aws/aws-observability/aws-for-fluent-bit:stable"),
+        firelens_config=ecs.FirelensConfig(
+            type=ecs.FirelensLogRouterType.FLUENTBIT,
+            options=ecs.FirelensOptions(
+                enable_ecs_log_metadata=True
+            )
+        ),
+    essential=True
+    )
+
     # New Relic Container
     new_relic_container = taskDefinition.add_container(
         "newrelic-infra",
@@ -126,7 +117,7 @@ class filesService:
         secrets={"NRIA_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "filesnr_newrelic", secret_name='monitoring/newrelic'), 'api_key'),},
         environment={
             "NEW_RELIC_HOST":"gov-collector.newrelic.com",
-            "NEW_RELIC_APP_NAME":"{}-{}-backend".format(config['main']['project'], config['main']['tier']),
+            "NEW_RELIC_APP_NAME":"{}-{}-files".format(config['main']['project'], config['main']['tier']),
             "NRIA_IS_FORWARD_ONLY":"true",
             "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED":"true",
             "NRIA_PASSTHROUGH_ENVIRONMENT":"ECS_CONTAINER_METADATA_URI,ECS_CONTAINER_METADATA_URI_V4,FARGATE",

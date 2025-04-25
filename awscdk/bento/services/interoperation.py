@@ -17,7 +17,8 @@ class interoperationService:
         command = None
 
     environment={
-            "NEW_RELIC_APP_NAME":"crdc-qa-ctdc-interoperation",
+            "PROJECT":"CTCD",
+            "NEW_RELIC_APP_NAME":"{}-{}-files".format(config['main']['project'], config['main']['tier']),
             "NEW_RELIC_LABELS":"Project:{};Environment:{}".format('ctdc', config['main']['tier']),
             "AUTH_ENABLED":"false",
             "REDIS_AUTH_ENABLED":"false",
@@ -25,11 +26,12 @@ class interoperationService:
             "AUTHORIZATION_ENABLED":"true",
             "BACKEND_URL":"/v1/graphql/",
             "DATE":"2024-07-09",
-            "BENTO_BACKEND_GRAPHQL_URI":"https://clinical-qa.datacommons.cancer.gov/v1/graphql/",
+            "BENTO_BACKEND_GRAPHQL_URI":config[service]['backend_graphql_uri'],
             #"MYSQL_PORT":"3306",
             #"MYSQL_SESSION_ENABLED":"true",
             #"NEO4J_URI":"bolt://{}:7687".format(config['db']['neo4j_ip']),
             "PROJECT":"BENTO",
+            "AWS_REGION":"us-east-1",
             "SIGNED_URL_EXPIRY_SECONDS":"86400",
             "SESSION_TIMEOUT":"1200",
             "URL_SRC":"CLOUD_FRONT",
@@ -40,14 +42,14 @@ class interoperationService:
             "NEW_RELIC_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "interoperation_newrelic", secret_name='monitoring/newrelic'), 'api_key'),
             #"NEO4J_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_password'),
             #"NEO4J_USER":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_user'),
-            "CF_PRIVATE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "files_cf_key", secret_name="ec2-ssh-key/{}/private".format(self.cfKeys.key_pair_name)), ''),
-            "CF_KEY_PAIR_ID":ecs.Secret.from_secrets_manager(self.secret, 'cf_key_pair_id'),
-            "CF_URL":ecs.Secret.from_secrets_manager(self.secret, 'cf_url'),
+            "CLOUDFRONT_PRIVATE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "files_cf_key", secret_name="ec2-ssh-key/{}/private".format(self.cfKeys.key_pair_name)), ''),
+            "CLOUDFRONT_KEY_PAIR_ID":ecs.Secret.from_secrets_manager(self.secret, 'cf_key_pair_id'),
+            "CLOUDFRONT_DOMAINL":ecs.Secret.from_secrets_manager(self.secret, 'cf_url'),
             "S3_ACCESS_KEY_ID":ecs.Secret.from_secrets_manager(self.secret, 's3_access_key_id'),
             "S3_SECRET_ACCESS_KEY":ecs.Secret.from_secrets_manager(self.secret, 's3_secret_access_key'),
             "FILE_MANIFEST_BUCKET_NAME":ecs.Secret.from_secrets_manager(self.secret, 'file_manifest_bucket_name'),
             #"TOKEN_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'token_secret'),
-            "COOKIE_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'cookie_secret'),
+            #"COOKIE_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'cookie_secret'),
 
             #"MYSQL_DATABASE":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'dbname'),
             #"MYSQL_HOST":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'host'),
@@ -108,25 +110,29 @@ class interoperationService:
         )
     )
 
-    # Sumo Logic Container
-    # sumo_logic_container = taskDefinition.add_container(
-    #     "sumologic-firelens",
-    #     image=ecs.ContainerImage.from_registry("public.ecr.aws/aws-observability/aws-for-fluent-bit:stable"),
-    #     cpu=0,
-    #     essential=True,
-    #     firelens_config=ecs.FirelensConfig(type=ecs.FirelensLogRouterType.FLUENTBIT, options={"enable-ecs-log-metadata": "true"})
-    # )
-    
+    # Sumo Logic FireLens Log Router Container
+    sumo_logic_container = taskDefinition.add_firelens_log_router(
+        "sumologic-firelens",
+        image=ecs.ContainerImage.from_registry("public.ecr.aws/aws-observability/aws-for-fluent-bit:stable"),
+        firelens_config=ecs.FirelensConfig(
+            type=ecs.FirelensLogRouterType.FLUENTBIT,
+            options=ecs.FirelensOptions(
+                enable_ecs_log_metadata=True
+            )
+        ),
+    essential=True
+    )
+
     # New Relic Container
     new_relic_container = taskDefinition.add_container(
         "newrelic-infra",
         image=ecs.ContainerImage.from_registry("newrelic/nri-ecs:1.9.2"),
         cpu=0,
         essential=True,
-        secrets={"NRIA_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "intnr_newrelic", secret_name='monitoring/newrelic'), 'api_key'),},
+        secrets={"NRIA_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "filesnr_newrelic", secret_name='monitoring/newrelic'), 'api_key'),},
         environment={
             "NEW_RELIC_HOST":"gov-collector.newrelic.com",
-            "NEW_RELIC_APP_NAME":"{}-{}-backend".format(config['main']['project'], config['main']['tier']),
+            "NEW_RELIC_APP_NAME":"{}-{}-files".format(config['main']['project'], config['main']['tier']),
             "NRIA_IS_FORWARD_ONLY":"true",
             "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED":"true",
             "NRIA_PASSTHROUGH_ENVIRONMENT":"ECS_CONTAINER_METADATA_URI,ECS_CONTAINER_METADATA_URI_V4,FARGATE",
@@ -135,6 +141,7 @@ class interoperationService:
             "NRIA_OVERRIDE_HOST_ROOT": ""
             },
     )
+
 
 
     ecsService = ecs.FargateService(self,

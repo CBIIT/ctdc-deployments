@@ -18,30 +18,15 @@ class authnService:
         command = None
 
     environment={
-            "NEW_RELIC_APP_NAME":"crdc-qa-ctdc-authn",
+            "NEW_RELIC_APP_NAME":"{}-{}-backend".format(config['main']['project'], config['main']['tier']),
             "NEW_RELIC_LABELS":"Project:{};Environment:{}".format('ctdc', config['main']['tier']),
-            "AUTHORIZATION_ENABLED":"true",
-            "AUTHORIZATION_URL":"/api/users/graphql",
             "DATE":"2024-05-21",
-            "PROJECT":"bento",
-            "EMAIL_SMTP_HOST":"email-smtp.us-east-1.amazonaws.com",
-            "EMAIL_SMTP_PORT":"465",
-            "EMAILS_ENABLED":"true",
-            "GOOGLE_REDIRECT_URL":self.app_url,
-            "IDP":"google",
             "MYSQL_PORT":"3306",
             "MYSQL_SESSION_ENABLED":"true",
+            "MYSQL_DATABASE":"ctdc",
             "DATABASE_TYPE":"mysql",
             "NEO4J_URI":"bolt://{}:7687".format(config['db']['neo4j_ip']),
-            "NIH_AUTHORIZE_URL":"https://stsstg.nih.gov/auth/oauth/v2/authorize",
-            "NIH_BASE_URL":"https://stsstg.nih.gov",
-            "NIH_LOGOUT_URL":"https://stsstg.nih.gov/connect/session/logout",
-            "NIH_PROMPT":"login",
-            "NIH_REDIRECT_URL":self.app_url,
-            "NIH_SCOPE":"openid email profile",
-            "NIH_TOKEN_URL":"https://stsstg.nih.gov/auth/oauth/v2/token",
-            "NIH_USERINFO_URL":"https://stsstg.nih.gov/openid/connect/v1/userinfo",
-            "SESSION_TIMEOUT":"1800",
+            "IDP":"nih",
             "VERSION":config[service]['image'],
         }
 
@@ -119,25 +104,29 @@ class authnService:
         )
     )
 
-    # Sumo Logic Container
-    # sumo_logic_container = taskDefinition.add_container(
-    #     "sumologic-firelens",
-    #     image=ecs.ContainerImage.from_registry("public.ecr.aws/aws-observability/aws-for-fluent-bit:stable"),
-    #     cpu=0,
-    #     essential=True,
-    #     firelens_config=ecs.FirelensConfig(type=ecs.FirelensLogRouterType.FLUENTBIT, options={"enable-ecs-log-metadata": "true"})
-    # )
-    
+    # Sumo Logic FireLens Log Router Container
+    sumo_logic_container = taskDefinition.add_firelens_log_router(
+        "sumologic-firelens",
+        image=ecs.ContainerImage.from_registry("public.ecr.aws/aws-observability/aws-for-fluent-bit:stable"),
+        firelens_config=ecs.FirelensConfig(
+            type=ecs.FirelensLogRouterType.FLUENTBIT,
+            options=ecs.FirelensOptions(
+                enable_ecs_log_metadata=True
+            )
+        ),
+    essential=True
+    )
+
     # New Relic Container
     new_relic_container = taskDefinition.add_container(
         "newrelic-infra",
         image=ecs.ContainerImage.from_registry("newrelic/nri-ecs:1.9.2"),
         cpu=0,
         essential=True,
-        secrets={"NRIA_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "authnr_newrelic", secret_name='monitoring/newrelic'), 'api_key'),},
+        secrets={"NRIA_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "filesnr_newrelic", secret_name='monitoring/newrelic'), 'api_key'),},
         environment={
             "NEW_RELIC_HOST":"gov-collector.newrelic.com",
-            "NEW_RELIC_APP_NAME":"{}-{}-backend".format(config['main']['project'], config['main']['tier']),
+            "NEW_RELIC_APP_NAME":"{}-{}-files".format(config['main']['project'], config['main']['tier']),
             "NRIA_IS_FORWARD_ONLY":"true",
             "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED":"true",
             "NRIA_PASSTHROUGH_ENVIRONMENT":"ECS_CONTAINER_METADATA_URI,ECS_CONTAINER_METADATA_URI_V4,FARGATE",

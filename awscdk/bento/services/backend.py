@@ -23,6 +23,7 @@ class backendService:
             "AUTH_ENDPOINT":"/api/auth/",
             "BENTO_API_VERSION":config[service]['image'],
             "ES_FILTER_ENABLED":"true",
+            "PROJECT":"ctdc",
             "ES_SCHEMA":"es-schema-ctdc.graphql",
             "MYSQL_SESSION_ENABLED":"true",
             #"NEO4J_URL":"bolt://{}:7687".format(config['db']['neo4j_ip']),
@@ -105,25 +106,29 @@ class backendService:
         )
     )
 
-    # Sumo Logic Container
-    # sumo_logic_container = taskDefinition.add_container(
-    #     "sumologic-firelens",
-    #     image=ecs.ContainerImage.from_registry("public.ecr.aws/aws-observability/aws-for-fluent-bit:stable"),
-    #     cpu=0,
-    #     essential=True,
-    #     firelens_config=ecs.FirelensConfig(type=ecs.FirelensLogRouterType.FLUENTBIT, options={"enable-ecs-log-metadata": "true"})
-    # )
-    
+    # Sumo Logic FireLens Log Router Container
+    sumo_logic_container = taskDefinition.add_firelens_log_router(
+        "sumologic-firelens",
+        image=ecs.ContainerImage.from_registry("public.ecr.aws/aws-observability/aws-for-fluent-bit:stable"),
+        firelens_config=ecs.FirelensConfig(
+            type=ecs.FirelensLogRouterType.FLUENTBIT,
+            options=ecs.FirelensOptions(
+                enable_ecs_log_metadata=True
+            )
+        ),
+    essential=True
+    )
+
     # New Relic Container
     new_relic_container = taskDefinition.add_container(
         "newrelic-infra",
         image=ecs.ContainerImage.from_registry("newrelic/nri-ecs:1.9.2"),
         cpu=0,
         essential=True,
-        secrets={"NRIA_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "benr_newrelic", secret_name='monitoring/newrelic'), 'api_key'),},
+        secrets={"NRIA_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "filesnr_newrelic", secret_name='monitoring/newrelic'), 'api_key'),},
         environment={
             "NEW_RELIC_HOST":"gov-collector.newrelic.com",
-            "NEW_RELIC_APP_NAME":"{}-{}-backend".format(config['main']['project'], config['main']['tier']),
+            "NEW_RELIC_APP_NAME":"{}-{}-files".format(config['main']['project'], config['main']['tier']),
             "NRIA_IS_FORWARD_ONLY":"true",
             "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED":"true",
             "NRIA_PASSTHROUGH_ENVIRONMENT":"ECS_CONTAINER_METADATA_URI,ECS_CONTAINER_METADATA_URI_V4,FARGATE",
@@ -132,6 +137,7 @@ class backendService:
             "NRIA_OVERRIDE_HOST_ROOT": ""
             },
     )
+
 
     ecsService = ecs.FargateService(self,
         "{}-{}-service".format(self.namingPrefix, service),
