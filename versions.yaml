@@ -1,0 +1,13 @@
+Notes: Service Versions
+project: bento
+services:
+  backend:
+    version: 1.1.0.199
+  frontend:
+    version: CTDC-1690.315
+  files:
+    version: 1.1.0.109
+  authn:
+    version: 1.1.0.69
+  interoperation:
+    version: main.2
