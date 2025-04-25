@@ -125,7 +125,7 @@ class backendService:
         image=ecs.ContainerImage.from_registry("newrelic/nri-ecs:1.9.2"),
         cpu=0,
         essential=True,
-        secrets={"NRIA_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "filesnr_newrelic", secret_name='monitoring/newrelic'), 'api_key'),},
+        secrets={"NRIA_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "benr_newrelic", secret_name='monitoring/newrelic'), 'api_key'),},
         environment={
             "NEW_RELIC_HOST":"gov-collector.newrelic.com",
             "NEW_RELIC_APP_NAME":"{}-{}-files".format(config['main']['project'], config['main']['tier']),
