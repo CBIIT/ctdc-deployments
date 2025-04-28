@@ -97,10 +97,10 @@
                     "name": "REACT_APP_GA_TRACKING_ID",
                     "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:google_id::"
                 },
-                {
-                    "name": "REACT_APP_DMN_URL",
-                    "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:react_app_dmn_url::"
-                }
+                // {
+                //     "name": "REACT_APP_DMN_URL",
+                //     "valueFrom": "arn:aws:secretsmanager:us-east-1:$ACCOUNT_ID:secret:bento/$PROJECT/$ENV:react_app_dmn_url::"
+                // }
                
             ],
             "environment": [
