@@ -218,5 +218,5 @@ class Stack(Stack):
         # Files Service
         files.filesService.createService(self, config)
 
-        # # Interoperation Service
-        # interoperation.interoperationService.createService(self, config)
+        # Interoperation Service
+        interoperation.interoperationService.createService(self, config)

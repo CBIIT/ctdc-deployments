@@ -40,21 +40,12 @@ class interoperationService:
 
     secrets={
             "NEW_RELIC_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "interoperation_newrelic", secret_name='monitoring/newrelic'), 'api_key'),
-            #"NEO4J_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_password'),
-            #"NEO4J_USER":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_user'),
             "CLOUDFRONT_PRIVATE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "files_cf_key", secret_name="ec2-ssh-key/{}/private".format(self.cfKeys.key_pair_name)), ''),
             "CLOUDFRONT_KEY_PAIR_ID":ecs.Secret.from_secrets_manager(self.secret, 'cf_key_pair_id'),
-            "CLOUDFRONT_DOMAINL":ecs.Secret.from_secrets_manager(self.secret, 'cf_url'),
+            "CLOUDFRONT_DOMAIN":ecs.Secret.from_secrets_manager(self.secret, 'cf_url'),
             "S3_ACCESS_KEY_ID":ecs.Secret.from_secrets_manager(self.secret, 's3_access_key_id'),
             "S3_SECRET_ACCESS_KEY":ecs.Secret.from_secrets_manager(self.secret, 's3_secret_access_key'),
             "FILE_MANIFEST_BUCKET_NAME":ecs.Secret.from_secrets_manager(self.secret, 'file_manifest_bucket_name'),
-            #"TOKEN_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'token_secret'),
-            #"COOKIE_SECRET":ecs.Secret.from_secrets_manager(self.secret, 'cookie_secret'),
-
-            #"MYSQL_DATABASE":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'dbname'),
-            #"MYSQL_HOST":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'host'),
-            #"MYSQL_PASSWORD":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'password'),
-            #"MYSQL_USER":ecs.Secret.from_secrets_manager(self.auroraCluster.secret, 'username'),
         }
     
     taskDefinition = ecs.FargateTaskDefinition(self,
@@ -110,18 +101,44 @@ class interoperationService:
         )
     )
 
-    # Sumo Logic FireLens Log Router Container
-    sumo_logic_container = taskDefinition.add_firelens_log_router(
-        "sumologic-firelens",
-        image=ecs.ContainerImage.from_registry("public.ecr.aws/aws-observability/aws-for-fluent-bit:stable"),
-        firelens_config=ecs.FirelensConfig(
-            type=ecs.FirelensLogRouterType.FLUENTBIT,
-            options=ecs.FirelensOptions(
-                enable_ecs_log_metadata=True
-            )
-        ),
-    essential=True
-    )
+    # # For Sumo Logs use
+    
+    # interoperation_container = taskDefinition.add_container(
+    #     service,
+    #     image=ecs.ContainerImage.from_ecr_repository(repository=ecr_repo, tag=config[service]['image']),
+    #     cpu=config.getint(service, 'cpu'),
+    #     memory_limit_mib=config.getint(service, 'memory'),
+    #     port_mappings=[ecs.PortMapping(container_port=config.getint(service, 'port'), name=service)],
+    #     command=command,
+    #     environment=environment,
+    #     secrets=secrets,
+    #     logging=ecs.LogDrivers.firelens(
+    #         options={
+    #             "Name": "http",
+    #             "Host": config['sumologic']['collector_endpoint'],
+    #             "URI": "/receiver/v1/http/{}".format(config['sumologic']['collector_token']),
+    #             "Port": "443",
+    #             "tls": "on",
+    #             "tls.verify": "off",
+    #             "Retry_Limit": "2",
+    #             "Format": "json_lines"
+    #         }
+    #     )
+    # )
+
+
+    # # Sumo Logic FireLens Log Router Container
+    # sumo_logic_container = taskDefinition.add_firelens_log_router(
+    #     "sumologic-firelens",
+    #     image=ecs.ContainerImage.from_registry("public.ecr.aws/aws-observability/aws-for-fluent-bit:stable"),
+    #     firelens_config=ecs.FirelensConfig(
+    #         type=ecs.FirelensLogRouterType.FLUENTBIT,
+    #         options=ecs.FirelensOptions(
+    #             enable_ecs_log_metadata=True
+    #         )
+    #     ),
+    # essential=True
+    # )
 
     # New Relic Container
     new_relic_container = taskDefinition.add_container(
