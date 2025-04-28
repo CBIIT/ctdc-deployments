@@ -8,7 +8,7 @@ class interoperationService:
   def createService(self, config):
 
     ### Files Service ###############################################################################################################
-    service = "interoperation"
+    service = "interop"
 
     # Set container configs
     if config.has_option(service, 'command'):
