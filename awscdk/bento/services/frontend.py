@@ -43,6 +43,7 @@ class frontendService:
             "REACT_APP_FILE_CENTRIC_CART_README":config[service]['react_app_readme_data'],
             "REACT_APP_ABOUT_CONTENT_URL":config[service]['about_content_url'],            
             "REACT_APP_LOGIN_URL":config[service]['react_app_login_url'],
+
         }
 
     secrets={
@@ -51,6 +52,7 @@ class frontendService:
             #  "REACT_APP_NIH_AUTH_URL":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "fe_provider_url", secret_name='auth/provider/nih'), 'nih_client_url'),
             #  "REACT_APP_GOOGLE_CLIENT_ID":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "fe_google", secret_name='auth/provider/google'), 'idp_client_id'),
             "REACT_APP_GA_TRACKING_ID":ecs.Secret.from_secrets_manager(self.secret, 'google_id'),
+            "REACT_APP_DMN_URL":ecs.Secret.from_secrets_manager(self.secret, 'react_app_data_model_navigator'),
         
          }
     taskDefinition = ecs.FargateTaskDefinition(self,

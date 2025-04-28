@@ -143,6 +143,7 @@ class Stack(Stack):
                 "google_id": SecretValue.unsafe_plain_text(config['secrets']['google_id']),
                 "s3_access_key_id": SecretValue.unsafe_plain_text(config['secrets']['s3_access_key_id']),
                 "s3_secret_access_key": SecretValue.unsafe_plain_text(config['secrets']['s3_secret_access_key']),
+                "react_app_data_model_navigator": SecretValue.unsafe_plain_text(config['secrets']['react_app_data_model_navigator']),
             }
         )
 
