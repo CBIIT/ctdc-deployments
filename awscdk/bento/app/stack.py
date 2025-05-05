@@ -246,7 +246,7 @@ class Stack(Stack):
         frontend.frontendService.createService(self, config)
 
         # Backend Service
-        backend.backendService.createService(self, config, nlb)
+        #backend.backendService.createService(self, config, nlb)
         backend.backendService.createService(self, config)
 
         # AuthN Service
