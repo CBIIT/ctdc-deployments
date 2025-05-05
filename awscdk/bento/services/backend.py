@@ -6,7 +6,8 @@ from aws_cdk import aws_ecr as ecr
 from aws_cdk import aws_secretsmanager as secretsmanager
 
 class backendService:
-  def createService(self, config, nlb):
+  def createService(self, config):
+  #def createService(self, config, nlb):
 
     ### Backend Service ###############################################################################################################
     service = "backend"
@@ -26,7 +27,7 @@ class backendService:
             "PROJECT":"ctdc",
             "ES_SCHEMA":"es-schema-ctdc.graphql",
             "MYSQL_SESSION_ENABLED":"true",
-            "MEMGRAPH_URL": "bolt://{}:7687".format(nlb.load_balancer_dns_name),
+            #"MEMGRAPH_URL": "bolt://{}:7687".format(nlb.load_balancer_dns_name),
             "REDIS_ENABLE":"false",
             "REDIS_FILTER_ENABLE":"false",
             "REDIS_HOST":"localhost",
