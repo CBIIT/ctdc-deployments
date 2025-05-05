@@ -21,8 +21,8 @@ from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_ssm as ssm
 from aws_cdk import aws_iam as iam
 
-from services import frontend, backend, files, authn, interoperation, memgraph
-#from services import frontend, authn, backend
+#from services import frontend, backend, files, authn, interoperation, memgraph
+from services import frontend, backend, authn, files, interoperation
 
 class Stack(Stack):
     def __init__(self, scope: Construct, **kwargs) -> None:
@@ -240,7 +240,7 @@ class Stack(Stack):
 
         ### Fargate
         # Memgraph Service
-        nlb = memgraph.memgraphService.createService(self, config)
+        #nlb = memgraph.memgraphService.createService(self, config)
 
         # Frontend Service
         frontend.frontendService.createService(self, config)
