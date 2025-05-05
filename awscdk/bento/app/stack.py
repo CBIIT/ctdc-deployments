@@ -1,15 +1,18 @@
 import boto3
 from configparser import ConfigParser
 from constructs import Construct
+from aws_cdk import RemovalPolicy
 from cdk_ec2_key_pair import KeyPair, PublicKeyFormat
-
+from aws_cdk import SecretValue
 from aws_cdk import Stack, RemovalPolicy, SecretValue, Duration
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_opensearchservice as opensearch
 from aws_cdk import aws_kms as kms
+from aws_cdk import aws_efs as efs
 from aws_cdk import aws_secretsmanager as secretsmanager
+from aws_cdk import Stack
 from aws_cdk import aws_certificatemanager as cfm
 from aws_cdk import aws_rds as rds
 from aws_cdk import aws_cloudfront as cloudfront
@@ -18,7 +21,7 @@ from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_ssm as ssm
 from aws_cdk import aws_iam as iam
 
-from services import frontend, backend, files, authn, interoperation
+from services import frontend, backend, files, authn, interoperation, memgraph
 #from services import frontend, authn, backend
 
 class Stack(Stack):
@@ -122,6 +125,8 @@ class Stack(Stack):
         self.secret = secretsmanager.Secret(self, "Secret",
             secret_name="{}/{}/{}".format(config['main']['secret_prefix'], config['main']['tier'], "ctdc"),
             secret_object_value={
+                "db_user": SecretValue.unsafe_plain_text(config['db']['db_user']),
+                "db_pass": SecretValue.unsafe_plain_text(config['db']['db_pass']),
                 "neo4j_user": SecretValue.unsafe_plain_text(config['db']['neo4j_user']),
                 "neo4j_password": SecretValue.unsafe_plain_text(config['db']['neo4j_password']),
                 "file_manifest_bucket_name": SecretValue.unsafe_plain_text(config['s3']['file_manifest_bucket_name']),
@@ -191,6 +196,37 @@ class Stack(Stack):
                 message_body="The requested resource is not available")
         )
 
+        # Add a fixed error message when browsing an invalid URL
+        self.listener.add_action("ECS-Content-Not-Found",
+            action=elbv2.ListenerAction.fixed_response(200,
+                message_body="The requested resource is not available"))
+
+        ### EFS - Memgraph
+        EFSSecurityGroup = ec2.SecurityGroup(self, "EFSSecurityGroup", vpc=self.VPC, allow_all_outbound=True,)
+        EFSSecurityGroup.add_ingress_rule(peer=ec2.Peer.ipv4(self.VPC.vpc_cidr_block),
+            connection=ec2.Port.tcp(2049),
+        )
+        self.fileSystem = efs.FileSystem(self, "EfsFileSystem",
+            vpc=self.VPC,
+            encrypted=True,
+            enable_automatic_backups=True,
+            security_group=EFSSecurityGroup,
+            removal_policy=RemovalPolicy.DESTROY
+        )
+        self.EFSAccessPoint = self.fileSystem.add_access_point("EFSAccessPoint",
+            path="/{}".format(config['main']['tier']),
+            create_acl=efs.Acl(
+                owner_uid="101",
+                owner_gid="101",
+                permissions="755"
+            ),
+            posix_user=efs.PosixUser(
+                uid="101",
+                gid="101"
+            )
+        ) 
+
+
         # ECS Cluster
         self.kmsKey = kms.Key(self, "ECSExecKey")
 
@@ -220,3 +256,6 @@ class Stack(Stack):
 
         # Interoperation Service
         interoperation.interoperationService.createService(self, config)
+
+        # Memgraph Service
+        memgraph.memgraphService.createService(self, config)
