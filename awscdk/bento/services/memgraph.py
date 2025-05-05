@@ -121,3 +121,5 @@ class memgraphService:
     nlbListener = self.NLB.add_listener("Listener", port=config.getint(service, 'port'),)
     nlbListener.add_target_groups("target", nlbTargetGroup)
     nlbTargetGroup.add_target(ecsService)
+
+    return self.NLB

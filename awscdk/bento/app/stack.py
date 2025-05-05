@@ -239,23 +239,20 @@ class Stack(Stack):
         )
 
         ### Fargate
+        # Memgraph Service
+        nlb = memgraph.memgraphService.createService(self, config)
+
         # Frontend Service
         frontend.frontendService.createService(self, config)
 
         # Backend Service
-        backend.backendService.createService(self, config)
+        backend.backendService.createService(self, config, nlb)
 
         # AuthN Service
         authn.authnService.createService(self, config)
-
-        # AuthZ Service
-        #authz.authzService.createService(self, config)
 
         # Files Service
         files.filesService.createService(self, config)
 
         # Interoperation Service
         interoperation.interoperationService.createService(self, config)
-
-        # Memgraph Service
-        memgraph.memgraphService.createService(self, config)
