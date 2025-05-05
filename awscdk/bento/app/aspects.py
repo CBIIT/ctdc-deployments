@@ -7,7 +7,6 @@ from aws_cdk import aws_iam as iam
 @jsii.implements(cdk.IAspect)
 class MyAspect:
     def visit(self, node):
-        # Read config file
         config = ConfigParser()
         config.read('config.ini')
 
