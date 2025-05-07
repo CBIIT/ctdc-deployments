@@ -40,7 +40,11 @@ class Stack(Stack):
         self.VPC = ec2.Vpc.from_lookup(self, "VPC",
             vpc_id=config['main']['vpc_id']
         )
-        
+
+        self.kmsKey = kms.Key(self, "ECSExecKey")
+
+        self.ECSCluster = ecs.Cluster(self, "ecs", vpc=self.VPC, execute_command_configuration=ecs.ExecuteCommandConfiguration(kms_key=self.kmsKey))
+
         #OpenSearch
         # OpenSearch SG
         OpenSearchSG = ec2.SecurityGroup(self, "OpenSearchSG",
@@ -203,15 +207,15 @@ class Stack(Stack):
         )
 
         # ECS Cluster
-        self.kmsKey = kms.Key(self, "ECSExecKey")
+        # self.kmsKey = kms.Key(self, "ECSExecKey")
 
-        self.ECSCluster = ecs.Cluster(self,
-            "ecs",
-            vpc=self.VPC,
-            execute_command_configuration=ecs.ExecuteCommandConfiguration(
-                kms_key=self.kmsKey
-            ),
-        )
+        # self.ECSCluster = ecs.Cluster(self,
+        #     "ecs",
+        #     vpc=self.VPC,
+        #     execute_command_configuration=ecs.ExecuteCommandConfiguration(
+        #         kms_key=self.kmsKey
+        #     ),
+        # )
 
         ### Fargate
         # Frontend Service
