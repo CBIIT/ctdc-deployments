@@ -40,60 +40,49 @@ class Stack(Stack):
         self.VPC = ec2.Vpc.from_lookup(self, "VPC",
             vpc_id=config['main']['vpc_id']
         )
-        
-        #OpenSearch
-        # OpenSearch SG
-        OpenSearchSG = ec2.SecurityGroup(self, "OpenSearchSG",
-            vpc=self.VPC,
-            description="Allow HTTPS access from ECS cluster and whitelisted EC2 IPs",
-            allow_all_outbound=True
-        )
 
-        OpenSearchSG.add_ingress_rule(
-            peer=self.ECSCluster.connections.security_groups[0],
-            connection=ec2.Port.tcp(443),
-            description="Allow HTTPS from ECS Cluster"
-        )
+        # Opensearch Cluster
+        if config['os']['endpoint_type'] == 'vpc':
+            vpc = self.VPC
+            vpc_subnets = [{'subnets': [self.VPC.private_subnets[0]]}]
+        else:
+            vpc = None
+            vpc_subnets = [{}]
 
-        if config.has_option('main', 'ec2_whitelist_ips'):
-            ips = [ip.strip() for ip in config['main']['ec2_whitelist_ips'].split(',')]
-            for ip in ips:
-                OpenSearchSG.add_ingress_rule(
-                    peer=ec2.Peer.ipv4(f"{ip}/32"),
-                    connection=ec2.Port.tcp(443),
-                    description=f"Allow HTTPS from whitelisted IP {ip}"
-                )
-
-        vpc_subnets = [{'subnets': [self.VPC.private_subnets[0]]}] if config['os']['endpoint_type'] == 'vpc' else [{}]
-
-        self.osDomain = opensearch.Domain(self, "opensearch",
+        self.osDomain = opensearch.Domain(self,
+            "opensearch",
             version=opensearch.EngineVersion.open_search(config['os']['version']),
-            vpc=self.VPC,
-            vpc_subnets=vpc_subnets,
-            security_groups=[OpenSearchSG],
+            vpc=vpc,
             zone_awareness=opensearch.ZoneAwarenessConfig(enabled=False),
             capacity=opensearch.CapacityConfig(
                 data_node_instance_type=config['os']['data_node_instance_type'],
                 multi_az_with_standby_enabled=False
             ),
+            vpc_subnets=vpc_subnets,
             removal_policy=RemovalPolicy.DESTROY,
         )
-
+        # Policy to allow access for dataloader instances
         os_policy = iam.PolicyStatement(
             actions=[
-                "es:ESHttpGet", "es:ESHttpPut", "es:ESHttpPost", "es:ESHttpPatch",
-                "es:ESHttpHead", "es:ESHttpDelete"
+                "es:ESHttpGet",
+                "es:ESHttpPut",
+                "es:ESHttpPost",
+                "es:ESHttpPatch",
+                "es:ESHttpHead",
+                "es:ESHttpGet",
+                "es:ESHttpDelete",
             ],
             resources=["{}/*".format(self.osDomain.domain_arn)],
             principals=[iam.AnyPrincipal()],
         )
         self.osDomain.add_access_policies(os_policy)
-
+        self.osDomain.connections.allow_from(ec2.Peer.ipv4("172.16.0.219/32"), ec2.Port.HTTPS)
 
         # Cloudfront
         # self.cfOrigin = s3.Bucket(self, "CFBucket",
         #     removal_policy=RemovalPolicy.DESTROY
         # )
+
         self.cfOrigin = s3.Bucket.from_bucket_name(self, "CFBucket",
             bucket_name=config['s3']['file_manifest_bucket_name']
         )
