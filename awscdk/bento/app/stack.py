@@ -60,26 +60,25 @@ class Stack(Stack):
         )
 
         # Opensearch Cluster
-        # Create OpenSearch SG to allow HTTPS from ECS SG and whitelisted IPs
+        # Create OpenSearch SG to allow HTTPS from ECS services and EC2 whitelist IPs
         OpenSearchSG = ec2.SecurityGroup(self, "OpenSearchSG",
             vpc=self.VPC,
             description="Allow HTTPS access from ECS cluster and whitelisted EC2 IPs",
             allow_all_outbound=True
         )
 
-        OpenSearchSG.add_ingress_rule(
-            peer=self.EcsSG,
-            connection=ec2.Port.tcp(443),
-            description="Allow HTTPS from ECS Cluster"
-        )
+        
 
         if config.has_option('main', 'ec2_whitelist_ips'):
+            ecs_and_ips = [self.EcsSG]
             ips = [ip.strip() for ip in config['main']['ec2_whitelist_ips'].split(',')]
             for ip in ips:
+                ecs_and_ips.append(ec2.Peer.ipv4(f"{ip}/32"))
+            for source in ecs_and_ips:
                 OpenSearchSG.add_ingress_rule(
-                    peer=ec2.Peer.ipv4(f"{ip}/32"),
+                    peer=source,
                     connection=ec2.Port.tcp(443),
-                    description=f"Allow HTTPS from whitelisted IP {ip}"
+                    description="Allow HTTPS from ECS or whitelisted EC2 IP"
                 )
 
         if config['os']['endpoint_type'] == 'vpc':
