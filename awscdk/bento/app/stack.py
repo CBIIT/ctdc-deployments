@@ -1,51 +1,46 @@
 import boto3
 from configparser import ConfigParser
 from constructs import Construct
+from aws_cdk import RemovalPolicy, Stack, SecretValue, Duration
 from cdk_ec2_key_pair import KeyPair, PublicKeyFormat
+from aws_cdk import (
+    aws_elasticloadbalancingv2 as elbv2,
+    aws_ec2 as ec2,
+    aws_ecs as ecs,
+    aws_opensearchservice as opensearch,
+    aws_kms as kms,
+    aws_efs as efs,
+    aws_secretsmanager as secretsmanager,
+    aws_certificatemanager as cfm,
+    aws_rds as rds,
+    aws_cloudfront as cloudfront,
+    aws_cloudfront_origins as origins,
+    aws_s3 as s3,
+    aws_iam as iam
+)
 
-from aws_cdk import Stack, RemovalPolicy, SecretValue, Duration
-from aws_cdk import aws_elasticloadbalancingv2 as elbv2
-from aws_cdk import aws_ec2 as ec2
-from aws_cdk import aws_ecs as ecs
-from aws_cdk import aws_opensearchservice as opensearch
-from aws_cdk import aws_kms as kms
-from aws_cdk import aws_secretsmanager as secretsmanager
-from aws_cdk import aws_certificatemanager as cfm
-from aws_cdk import aws_rds as rds
-from aws_cdk import aws_cloudfront as cloudfront
-from aws_cdk import aws_cloudfront_origins as origins
-from aws_cdk import aws_s3 as s3
-from aws_cdk import aws_ssm as ssm
-from aws_cdk import aws_iam as iam
-
-from services import frontend, backend, files, authn, interoperation
-#from services import frontend, authn, backend
+from services import frontend, backend, authn, files, interoperation
 
 class Stack(Stack):
     def __init__(self, scope: Construct, **kwargs) -> None:
         super().__init__(scope, **kwargs)
 
-        # Read config
         config = ConfigParser()
         config.read('config.ini')
-        
+
         self.namingPrefix = "{}-{}".format(config['main']['resource_prefix'], config['main']['tier'])
 
         if config.has_option('main', 'subdomain'):
             self.app_url = "https://{}.{}".format(config['main']['subdomain'], config['main']['domain'])
         else:
             self.app_url = "https://{}".format(config['main']['domain'])
-        
-        # Import VPC
-        self.VPC = ec2.Vpc.from_lookup(self, "VPC",
-            vpc_id=config['main']['vpc_id']
-        )
+
+        self.VPC = ec2.Vpc.from_lookup(self, "VPC", vpc_id=config['main']['vpc_id'])
 
         self.kmsKey = kms.Key(self, "ECSExecKey")
 
         self.ECSCluster = ecs.Cluster(self, "ecs", vpc=self.VPC, execute_command_configuration=ecs.ExecuteCommandConfiguration(kms_key=self.kmsKey))
 
-        #OpenSearch
         # OpenSearch SG
         OpenSearchSG = ec2.SecurityGroup(self, "OpenSearchSG",
             vpc=self.VPC,
@@ -53,11 +48,13 @@ class Stack(Stack):
             allow_all_outbound=True
         )
 
-        OpenSearchSG.add_ingress_rule(
-            peer=self.ECSCluster.connections.security_groups[0],
-            connection=ec2.Port.tcp(443),
-            description="Allow HTTPS from ECS Cluster"
-        )
+        ecs_sgs = self.ECSCluster.connections.security_groups
+        if ecs_sgs:
+            OpenSearchSG.add_ingress_rule(
+                peer=ecs_sgs[0],
+                connection=ec2.Port.tcp(443),
+                description="Allow HTTPS from ECS Cluster"
+            )
 
         if config.has_option('main', 'ec2_whitelist_ips'):
             ips = [ip.strip() for ip in config['main']['ec2_whitelist_ips'].split(',')]
@@ -93,14 +90,7 @@ class Stack(Stack):
         )
         self.osDomain.add_access_policies(os_policy)
 
-
-        # Cloudfront
-        # self.cfOrigin = s3.Bucket(self, "CFBucket",
-        #     removal_policy=RemovalPolicy.DESTROY
-        # )
-        self.cfOrigin = s3.Bucket.from_bucket_name(self, "CFBucket",
-            bucket_name=config['s3']['file_manifest_bucket_name']
-        )
+        self.cfOrigin = s3.Bucket.from_bucket_name(self, "CFBucket", bucket_name=config['s3']['file_manifest_bucket_name'])
 
         self.cfKeys = KeyPair(self, "CFKeyPair",
             key_pair_name="CF-key-{}-{}".format(config['main']['resource_prefix'], config['main']['tier']),
@@ -111,10 +101,8 @@ class Stack(Stack):
         CFPublicKey = cloudfront.PublicKey(self, "CFPublicKey-{}".format(config['main']['tier']),
             encoded_key=self.cfKeys.public_key_value
         )
-        CFKeyGroup = cloudfront.KeyGroup(self, "CFKeyGroup-{}".format(config['main']['tier']),
-            items=[CFPublicKey]
-        )
-        
+        CFKeyGroup = cloudfront.KeyGroup(self, "CFKeyGroup-{}".format(config['main']['tier']), items=[CFPublicKey])
+
         self.cfDistribution = cloudfront.Distribution(self, "CFDistro",
             default_behavior=cloudfront.BehaviorOptions(
                 origin=origins.S3Origin(self.cfOrigin),
@@ -122,21 +110,20 @@ class Stack(Stack):
                 trusted_key_groups=[CFKeyGroup]
             )
         )
-        
-        # # RDS
+
         self.auroraCluster = rds.DatabaseCluster(self, "Aurora",
             engine=rds.DatabaseClusterEngine.aurora_mysql(version=rds.AuroraMysqlEngineVersion.VER_3_05_2),
-            writer=rds.ClusterInstance.provisioned("writer",
-            ),
-            vpc=vpc,
+            writer=rds.ClusterInstance.provisioned("writer"),
+            vpc=self.VPC,
             storage_encrypted=True,
             default_database_name=config['db']['mysql_database']
         )
 
-        # Secrets
         self.secret = secretsmanager.Secret(self, "Secret",
             secret_name="{}/{}/{}".format(config['main']['secret_prefix'], config['main']['tier'], "ctdc"),
             secret_object_value={
+                "db_user": SecretValue.unsafe_plain_text(config['db']['db_user']),
+                "db_pass": SecretValue.unsafe_plain_text(config['db']['db_pass']),
                 "neo4j_user": SecretValue.unsafe_plain_text(config['db']['neo4j_user']),
                 "neo4j_password": SecretValue.unsafe_plain_text(config['db']['neo4j_password']),
                 "file_manifest_bucket_name": SecretValue.unsafe_plain_text(config['s3']['file_manifest_bucket_name']),
@@ -206,32 +193,9 @@ class Stack(Stack):
                 message_body="The requested resource is not available")
         )
 
-        # ECS Cluster
-        # self.kmsKey = kms.Key(self, "ECSExecKey")
 
-        # self.ECSCluster = ecs.Cluster(self,
-        #     "ecs",
-        #     vpc=self.VPC,
-        #     execute_command_configuration=ecs.ExecuteCommandConfiguration(
-        #         kms_key=self.kmsKey
-        #     ),
-        # )
-
-        ### Fargate
-        # Frontend Service
         frontend.frontendService.createService(self, config)
-
-        # Backend Service
         backend.backendService.createService(self, config)
-
-        # AuthN Service
         authn.authnService.createService(self, config)
-
-        # AuthZ Service
-        #authz.authzService.createService(self, config)
-
-        # Files Service
         files.filesService.createService(self, config)
-
-        # Interoperation Service
         interoperation.interoperationService.createService(self, config)
