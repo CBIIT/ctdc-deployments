@@ -41,12 +41,20 @@ class Stack(Stack):
             vpc_id=config['main']['vpc_id']
         )
 
+        # ECS Security Group
+        self.EcsSG = ec2.SecurityGroup(self, "EcsSecurityGroup",
+            vpc=self.VPC,
+            description="Security group for ECS services",
+            allow_all_outbound=True
+        )
+
         # ECS Cluster
         self.kmsKey = kms.Key(self, "ECSExecKey")
 
         self.ECSCluster = ecs.Cluster(self,
             "ecs",
             vpc=self.VPC,
+            security_groups=[self.EcsSG],
             execute_command_configuration=ecs.ExecuteCommandConfiguration(
                 kms_key=self.kmsKey
             ),
@@ -60,12 +68,11 @@ class Stack(Stack):
             allow_all_outbound=True
         )
 
-        if self.ECSCluster.connections.security_groups:
-            OpenSearchSG.add_ingress_rule(
-                peer=self.ECSCluster.connections.security_groups[0],
-                connection=ec2.Port.tcp(443),
-                description="Allow HTTPS from ECS Cluster"
-            )
+        OpenSearchSG.add_ingress_rule(
+            peer=self.EcsSG,
+            connection=ec2.Port.tcp(443),
+            description="Allow HTTPS from ECS Cluster"
+        )
 
         if config.has_option('main', 'ec2_whitelist_ips'):
             ips = [ip.strip() for ip in config['main']['ec2_whitelist_ips'].split(',')]
