@@ -41,7 +41,41 @@ class Stack(Stack):
             vpc_id=config['main']['vpc_id']
         )
 
+        # ECS Cluster
+        self.kmsKey = kms.Key(self, "ECSExecKey")
+
+        self.ECSCluster = ecs.Cluster(self,
+            "ecs",
+            vpc=self.VPC,
+            execute_command_configuration=ecs.ExecuteCommandConfiguration(
+                kms_key=self.kmsKey
+            ),
+        )
+
         # Opensearch Cluster
+        # Create OpenSearch SG to allow HTTPS from ECS SG and whitelisted IPs
+        OpenSearchSG = ec2.SecurityGroup(self, "OpenSearchSG",
+            vpc=self.VPC,
+            description="Allow HTTPS access from ECS cluster and whitelisted EC2 IPs",
+            allow_all_outbound=True
+        )
+
+        if self.ECSCluster.connections.security_groups:
+            OpenSearchSG.add_ingress_rule(
+                peer=self.ECSCluster.connections.security_groups[0],
+                connection=ec2.Port.tcp(443),
+                description="Allow HTTPS from ECS Cluster"
+            )
+
+        if config.has_option('main', 'ec2_whitelist_ips'):
+            ips = [ip.strip() for ip in config['main']['ec2_whitelist_ips'].split(',')]
+            for ip in ips:
+                OpenSearchSG.add_ingress_rule(
+                    peer=ec2.Peer.ipv4(f"{ip}/32"),
+                    connection=ec2.Port.tcp(443),
+                    description=f"Allow HTTPS from whitelisted IP {ip}"
+                )
+
         if config['os']['endpoint_type'] == 'vpc':
             vpc = self.VPC
             vpc_subnets = [{'subnets': [self.VPC.private_subnets[0]]}]
@@ -59,14 +93,26 @@ class Stack(Stack):
                 multi_az_with_standby_enabled=False
             ),
             vpc_subnets=vpc_subnets,
+            security_groups=[OpenSearchSG],
             removal_policy=RemovalPolicy.DESTROY,
         )
-        
-        # Cloudfront
-        # self.cfOrigin = s3.Bucket(self, "CFBucket",
-        #     removal_policy=RemovalPolicy.DESTROY
-        # )
+        # Policy to allow access for dataloader instances
+        os_policy = iam.PolicyStatement(
+            actions=[
+                "es:ESHttpGet",
+                "es:ESHttpPut",
+                "es:ESHttpPost",
+                "es:ESHttpPatch",
+                "es:ESHttpHead",
+                "es:ESHttpGet",
+                "es:ESHttpDelete",
+            ],
+            resources=["{}/*".format(self.osDomain.domain_arn)],
+            principals=[iam.AnyPrincipal()],
+        )
+        self.osDomain.add_access_policies(os_policy)
 
+        # Cloudfront
         self.cfOrigin = s3.Bucket.from_bucket_name(self, "CFBucket",
             bucket_name=config['s3']['file_manifest_bucket_name']
         )
@@ -173,17 +219,6 @@ class Stack(Stack):
         self.listener.add_action("ECS-Content-Not-Found",
             action=elbv2.ListenerAction.fixed_response(200,
                 message_body="The requested resource is not available")
-        )
-
-        # ECS Cluster
-        self.kmsKey = kms.Key(self, "ECSExecKey")
-
-        self.ECSCluster = ecs.Cluster(self,
-            "ecs",
-            vpc=self.VPC,
-            execute_command_configuration=ecs.ExecuteCommandConfiguration(
-                kms_key=self.kmsKey
-            ),
         )
 
         ### Fargate
