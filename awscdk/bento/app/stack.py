@@ -54,7 +54,6 @@ class Stack(Stack):
         self.ECSCluster = ecs.Cluster(self,
             "ecs",
             vpc=self.VPC,
-            security_groups=[self.EcsSG],
             execute_command_configuration=ecs.ExecuteCommandConfiguration(
                 kms_key=self.kmsKey
             ),
