@@ -20,7 +20,6 @@ from aws_cdk import aws_iam as iam
 
 from services import frontend, files, authn, interoperation
 from services import backend
-#from services import frontend, authn, backend
 
 class Stack(Stack):
     def __init__(self, scope: Construct, **kwargs) -> None:
@@ -53,8 +52,8 @@ class Stack(Stack):
             ),
         )
 
-                        # Backend Service (moved early to fetch SG for OpenSearch)
-        backend_service = backend.backendService().createService(self, config)
+        # Backend Service (moved early to fetch SG for OpenSearch)
+        backend_service = backend.backendService().createService(config)
         backend_service_sg = getattr(getattr(backend_service, 'service', None), 'connections', None)
 
         # Create OpenSearch SG to allow HTTPS from backend service and whitelisted IPs
@@ -70,7 +69,6 @@ class Stack(Stack):
                 connection=ec2.Port.tcp(443),
                 description="Allow HTTPS from Backend Service"
             )
-
 
             ips = [ip.strip() for ip in config['main']['ec2_whitelist_ips'].split(',')]
             for ip in ips:
@@ -100,23 +98,18 @@ class Stack(Stack):
             security_groups=[OpenSearchSG],
             removal_policy=RemovalPolicy.DESTROY,
         )
-        # Policy to allow access for dataloader instances
+
         os_policy = iam.PolicyStatement(
             actions=[
-                "es:ESHttpGet",
-                "es:ESHttpPut",
-                "es:ESHttpPost",
-                "es:ESHttpPatch",
-                "es:ESHttpHead",
-                "es:ESHttpGet",
-                "es:ESHttpDelete",
+                "es:ESHttpGet", "es:ESHttpPut", "es:ESHttpPost", "es:ESHttpPatch",
+                "es:ESHttpHead", "es:ESHttpDelete"
             ],
             resources=["{}/*".format(self.osDomain.domain_arn)],
             principals=[iam.AnyPrincipal()],
         )
         self.osDomain.add_access_policies(os_policy)
 
-        # Cloudfront
+        # CloudFront
         self.cfOrigin = s3.Bucket.from_bucket_name(self, "CFBucket",
             bucket_name=config['s3']['file_manifest_bucket_name']
         )
@@ -141,12 +134,11 @@ class Stack(Stack):
                 trusted_key_groups=[CFKeyGroup]
             )
         )
-        
-        # # RDS
+
+        # RDS
         self.auroraCluster = rds.DatabaseCluster(self, "Aurora",
             engine=rds.DatabaseClusterEngine.aurora_mysql(version=rds.AuroraMysqlEngineVersion.VER_3_05_2),
-            writer=rds.ClusterInstance.provisioned("writer",
-            ),
+            writer=rds.ClusterInstance.provisioned("writer"),
             vpc=vpc,
             storage_encrypted=True,
             default_database_name=config['db']['mysql_database']
@@ -190,7 +182,7 @@ class Stack(Stack):
             subnets = ec2.SubnetSelection(
                 subnets=vpc.select_subnets(one_per_az=True, subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS).subnets
             )
-    
+
         self.ALB = elbv2.ApplicationLoadBalancer(self,
             "alb",
             vpc=self.VPC,
@@ -225,19 +217,8 @@ class Stack(Stack):
                 message_body="The requested resource is not available")
         )
 
-        ### Fargate
-        # Frontend Service
+        ### Fargate services
         frontend.frontendService.createService(self, config)
-
-        
-        # AuthN Service
         authn.authnService.createService(self, config)
-
-        # AuthZ Service
-        #authz.authzService.createService(self, config)
-
-        # Files Service
         files.filesService.createService(self, config)
-
-        # Interoperation Service
         interoperation.interoperationService.createService(self, config)
