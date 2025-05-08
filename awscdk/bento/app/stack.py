@@ -41,13 +41,6 @@ class Stack(Stack):
             vpc_id=config['main']['vpc_id']
         )
 
-        # ECS Security Group
-        self.EcsSG = ec2.SecurityGroup(self, "EcsSecurityGroup",
-            vpc=self.VPC,
-            description="Security group for ECS services",
-            allow_all_outbound=True
-        )
-
         # ECS Cluster
         self.kmsKey = kms.Key(self, "ECSExecKey")
 
@@ -59,26 +52,24 @@ class Stack(Stack):
             ),
         )
 
-        # Opensearch Cluster
-        # Create OpenSearch SG to allow HTTPS from ECS services and EC2 whitelist IPs
+        # Create OpenSearch SG to allow HTTPS from ECS SG and whitelisted IPs
         OpenSearchSG = ec2.SecurityGroup(self, "OpenSearchSG",
             vpc=self.VPC,
-            description="Allow HTTPS access from ECS cluster and whitelisted EC2 IPs",
+            description="Allow HTTPS access from backend service and whitelisted EC2 IPs",
             allow_all_outbound=True
         )
 
-        
+        ,
+                description="Allow HTTPS from ECS Cluster"
+            )
 
         if config.has_option('main', 'ec2_whitelist_ips'):
-            ecs_and_ips = [self.EcsSG]
             ips = [ip.strip() for ip in config['main']['ec2_whitelist_ips'].split(',')]
             for ip in ips:
-                ecs_and_ips.append(ec2.Peer.ipv4(f"{ip}/32"))
-            for source in ecs_and_ips:
                 OpenSearchSG.add_ingress_rule(
-                    peer=source,
+                    peer=ec2.Peer.ipv4(f"{ip}/32"),
                     connection=ec2.Port.tcp(443),
-                    description="Allow HTTPS from ECS or whitelisted EC2 IP"
+                    description=f"Allow HTTPS from whitelisted IP {ip}"
                 )
 
         if config['os']['endpoint_type'] == 'vpc':
@@ -231,7 +222,13 @@ class Stack(Stack):
         frontend.frontendService.createService(self, config)
 
         # Backend Service
-        backend.backendService.createService(self, config)
+        backend_service = backend.backendService.createService(self, config)
+        if hasattr(backend_service, 'service') and backend_service.service.connections.security_groups:
+            OpenSearchSG.add_ingress_rule(
+                peer=backend_service.service.connections.security_groups[0],
+                connection=ec2.Port.tcp(443),
+                description="Allow HTTPS from Backend Service"
+            )
 
         # AuthN Service
         authn.authnService.createService(self, config)
