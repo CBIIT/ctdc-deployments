@@ -136,7 +136,7 @@ class Stack(Stack):
 
         # Services
         frontend.frontendService.createService(self, config)
-        backend_sg = backend.backendService.createService(self, config)
+        backend_sg = backend.backendService.createService(self, config, self.secret)
         authn.authnService.createService(self, config)
         files.filesService.createService(self, config)
         interoperation.interoperationService.createService(self, config)
