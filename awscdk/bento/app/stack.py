@@ -54,7 +54,7 @@ class Stack(Stack):
         )
 
                         # Backend Service (moved early to fetch SG for OpenSearch)
-        backend_service = backend.backendService().createService(self, config)
+        backend_service = backend.backendService(self).createService(config)
         backend_service_sg = getattr(getattr(backend_service, 'service', None), 'connections', None)
 
         # Create OpenSearch SG to allow HTTPS from backend service and whitelisted IPs
