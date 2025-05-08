@@ -98,31 +98,31 @@ class Stack(Stack):
         )
 
         # Secrets
-        self.secret = secretsmanager.CfnSecret(self, "Secret",
-            name=f"{config['main']['secret_prefix']}/{config['main']['tier']}/ctdc",
-            secret_string=f'''{{
-                "neo4j_user": "{config['db']['neo4j_user']}",
-                "neo4j_password": "{config['db']['neo4j_password']}",
-                "file_manifest_bucket_name": "{config['s3']['file_manifest_bucket_name']}",
-                "cf_key_pair_id": "{CFPublicKey.public_key_id}",
-                "cf_url": "https://{self.cfDistribution.distribution_domain_name}",
-                "cookie_secret": "{config['secrets']['cookie_secret']}",
-                "dcf_client_id": "{config['secrets']['dcf_client_id']}",
-                "dcf_client_secret": "{config['secrets']['dcf_client_secret']}",
-                "dcf_base_url": "{config['secrets']['dcf_base_url']}",
-                "dcf_redirect_url": "{config['secrets']['dcf_redirect_url']}",
-                "dcf_userinfo_url": "{config['secrets']['dcf_userinfo_url']}",
-                "dcf_authorize_url": "{config['secrets']['dcf_authorize_url']}",
-                "dcf_token_url": "{config['secrets']['dcf_token_url']}",
-                "dcf_logout_url": "{config['secrets']['dcf_logout_url']}",
-                "dcf_scope": "{config['secrets']['dcf_scope']}",
-                "dcf_prompt": "{config['secrets']['dcf_prompt']}",
-                "dcf_file_url": "{config['secrets']['dcf_file_url']}",
-                "google_id": "{config['secrets']['google_id']}",
-                "s3_access_key_id": "{config['secrets']['s3_access_key_id']}",
-                "s3_secret_access_key": "{config['secrets']['s3_secret_access_key']}",
-                "react_app_data_model_navigator": "{config['secrets']['react_app_data_model_navigator']}"
-            }}'''
+        self.secret = secretsmanager.Secret(self, "Secret",
+            secret_name="{}/{}/{}".format(config['main']['secret_prefix'], config['main']['tier'], "ctdc"),
+            secret_object_value={
+                "neo4j_user": SecretValue.unsafe_plain_text(config['db']['neo4j_user']),
+                "neo4j_password": SecretValue.unsafe_plain_text(config['db']['neo4j_password']),
+                "file_manifest_bucket_name": SecretValue.unsafe_plain_text(config['s3']['file_manifest_bucket_name']),
+                "cf_key_pair_id": SecretValue.unsafe_plain_text(CFPublicKey.public_key_id),
+                "cf_url": SecretValue.unsafe_plain_text("https://{}".format(self.cfDistribution.distribution_domain_name)),
+                "cookie_secret": SecretValue.unsafe_plain_text(config['secrets']['cookie_secret']),
+                "dcf_client_id": SecretValue.unsafe_plain_text(config['secrets']['dcf_client_id']),
+                "dcf_client_secret": SecretValue.unsafe_plain_text(config['secrets']['dcf_client_secret']),
+                "dcf_base_url": SecretValue.unsafe_plain_text(config['secrets']['dcf_base_url']),
+                "dcf_redirect_url": SecretValue.unsafe_plain_text(config['secrets']['dcf_redirect_url']),
+                "dcf_userinfo_url": SecretValue.unsafe_plain_text(config['secrets']['dcf_userinfo_url']),
+                "dcf_authorize_url": SecretValue.unsafe_plain_text(config['secrets']['dcf_authorize_url']),
+                "dcf_token_url": SecretValue.unsafe_plain_text(config['secrets']['dcf_token_url']),
+                "dcf_logout_url": SecretValue.unsafe_plain_text(config['secrets']['dcf_logout_url']),
+                "dcf_scope": SecretValue.unsafe_plain_text(config['secrets']['dcf_scope']),
+                "dcf_prompt": SecretValue.unsafe_plain_text(config['secrets']['dcf_prompt']),
+                "dcf_file_url": SecretValue.unsafe_plain_text(config['secrets']['dcf_file_url']),
+                "google_id": SecretValue.unsafe_plain_text(config['secrets']['google_id']),
+                "s3_access_key_id": SecretValue.unsafe_plain_text(config['secrets']['s3_access_key_id']),
+                "s3_secret_access_key": SecretValue.unsafe_plain_text(config['secrets']['s3_secret_access_key']),
+                "react_app_data_model_navigator": SecretValue.unsafe_plain_text(config['secrets']['react_app_data_model_navigator']),
+            }
         )
 
         # Aurora Cluster
@@ -170,9 +170,9 @@ class Stack(Stack):
         )
 
         # Add es_host to secret now that OpenSearch is created
-        self.secret = secretsmanager.Secret(self, "Secret",
+        secretsmanager.Secret(self, "OpenSearchSecret",
             secret_name=f"{config['main']['secret_prefix']}/{config['main']['tier']}/opensearch",
-            secret_string=f'''{{
-                "es_host": SecretValue.unsafe_plain_text(self.osDomain.domain_endpoint),
-            }}'''
+            secret_object_value={
+                "es_host": SecretValue.unsafe_plain_text(self.osDomain.domain_endpoint)
+            }
         )
