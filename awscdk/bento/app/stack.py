@@ -59,9 +59,6 @@ class Stack(Stack):
             allow_all_outbound=True
         )
 
-        
-            )
-
         if config.has_option('main', 'ec2_whitelist_ips'):
             ips = [ip.strip() for ip in config['main']['ec2_whitelist_ips'].split(',')]
             for ip in ips:
