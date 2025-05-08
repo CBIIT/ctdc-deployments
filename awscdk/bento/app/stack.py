@@ -52,14 +52,25 @@ class Stack(Stack):
             ),
         )
 
-        # Create OpenSearch SG to allow HTTPS from ECS SG and whitelisted IPs
+        # Backend Service (moved early to fetch SG for OpenSearch)
+        backend_service = backend.backendService.createService(self, config)
+        backend_service_sg = getattr(getattr(backend_service, 'service', None), 'connections', None)
+
+        # Create OpenSearch SG to allow HTTPS from backend service and whitelisted IPs
         OpenSearchSG = ec2.SecurityGroup(self, "OpenSearchSG",
             vpc=self.VPC,
             description="Allow HTTPS access from backend service and whitelisted EC2 IPs",
             allow_all_outbound=True
         )
 
-        if config.has_option('main', 'ec2_whitelist_ips'):
+        if backend_service_sg and backend_service_sg.security_groups:
+            OpenSearchSG.add_ingress_rule(
+                peer=backend_service.service.connections.security_groups[0],
+                connection=ec2.Port.tcp(443),
+                description="Allow HTTPS from Backend Service"
+            )
+
+
             ips = [ip.strip() for ip in config['main']['ec2_whitelist_ips'].split(',')]
             for ip in ips:
                 OpenSearchSG.add_ingress_rule(
@@ -217,16 +228,7 @@ class Stack(Stack):
         # Frontend Service
         frontend.frontendService.createService(self, config)
 
-        # Backend Service
-        backend_service = backend.backendService.createService(self, config)
-        backend_service_sg = getattr(getattr(backend_service, 'service', None), 'connections', None)
-        if backend_service_sg and backend_service_sg.security_groups:
-            OpenSearchSG.add_ingress_rule(
-                peer=backend_service.service.connections.security_groups[0],
-                connection=ec2.Port.tcp(443),
-                description="Allow HTTPS from Backend Service"
-            )
-
+        
         # AuthN Service
         authn.authnService.createService(self, config)
 
