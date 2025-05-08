@@ -59,8 +59,7 @@ class Stack(Stack):
             allow_all_outbound=True
         )
 
-        ,
-                description="Allow HTTPS from ECS Cluster"
+        
             )
 
         if config.has_option('main', 'ec2_whitelist_ips'):
