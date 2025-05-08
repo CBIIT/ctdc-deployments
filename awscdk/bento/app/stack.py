@@ -219,7 +219,8 @@ class Stack(Stack):
 
         # Backend Service
         backend_service = backend.backendService.createService(self, config)
-        if hasattr(backend_service, 'service') and backend_service.service.connections.security_groups:
+        backend_service_sg = getattr(getattr(backend_service, 'service', None), 'connections', None)
+        if backend_service_sg and backend_service_sg.security_groups:
             OpenSearchSG.add_ingress_rule(
                 peer=backend_service.service.connections.security_groups[0],
                 connection=ec2.Port.tcp(443),
