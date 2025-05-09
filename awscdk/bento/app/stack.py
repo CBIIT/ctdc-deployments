@@ -221,7 +221,7 @@ class Stack(Stack):
 
         # ECS Services
         frontend.frontendService.createService(self, config)
-        backend.backendService.createService(self, config, self.backendSG)
+        backend.backendService().createService(self, config, self.backendSG)
         authn.authnService.createService(self, config)
         files.filesService.createService(self, config)
         interoperation.interoperationService.createService(self, config)
