@@ -27,12 +27,14 @@ class Stack(Stack):
         config.read('config.ini')
         
         self.namingPrefix = "{}-{}".format(config['main']['resource_prefix'], config['main']['tier'])
+        
+        if config.has_option('main', 'subdomain'):
+            self.app_url = "https://{}.{}".format(config['main']['subdomain'], config['main']['domain'])
+        else:
+            self.app_url = "https://{}".format(config['main']['domain'])
 
-        self.app_url = f"https://{config['main'].get('subdomain') + '.' if config['main'].get('subdomain') else ''}{config['main']['domain']}"
-
-        self.VPC = ec2.Vpc.from_lookup(self, "VPC",
-            vpc_id=config['main']['vpc_id']
-        )
+        # Import VPC
+        self.VPC = ec2.Vpc.from_lookup(self, "VPC", vpc_id=config['main']['vpc_id'])
 
         # Security Groups
         self.albSG = ec2.SecurityGroup(self, "ALBSG",
@@ -73,22 +75,29 @@ class Stack(Stack):
                 description=f"Allow whitelisted IP {ip} to access OpenSearch"
             )
 
-        # OpenSearch
+        # OpenSearch subnet setup (FIXED)
+        if config['os']['endpoint_type'] == 'vpc':
+            vpc = self.VPC
+            vpc_subnets = [{'subnets': [self.VPC.private_subnets[0]]}]
+        else:
+            vpc = None
+            vpc_subnets = [{}]
+
+        # OpenSearch Domain
         self.osDomain = opensearch.Domain(self,
             "opensearch",
             version=opensearch.EngineVersion.open_search(config['os']['version']),
-            vpc=self.VPC,
+            vpc=vpc,
             security_groups=[self.osSG],
             zone_awareness=opensearch.ZoneAwarenessConfig(enabled=False),
             capacity=opensearch.CapacityConfig(
                 data_node_instance_type=config['os']['data_node_instance_type'],
                 multi_az_with_standby_enabled=False
             ),
-            vpc_subnets=[{"subnet_type": ec2.SubnetType.PRIVATE_WITH_EGRESS}],
+            vpc_subnets=vpc_subnets,
             removal_policy=RemovalPolicy.DESTROY,
         )
 
-        # Allow access via policy (optional if SG is enough)
         os_policy = iam.PolicyStatement(
             actions=[
                 "es:ESHttpGet", "es:ESHttpPut", "es:ESHttpPost",
@@ -190,7 +199,6 @@ class Stack(Stack):
 
         client = boto3.client('acm')
         response = client.list_certificates(CertificateStatuses=['ISSUED'])
-
         for cert in response["CertificateSummaryList"]:
             if ('*.{}'.format(config['main']['domain']) in cert.values()):
                 certARN = cert['CertificateArn']
