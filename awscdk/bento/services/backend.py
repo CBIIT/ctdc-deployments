@@ -6,7 +6,7 @@ from aws_cdk import aws_ecr as ecr
 from aws_cdk import aws_secretsmanager as secretsmanager
 
 class backendService:
-  def createService(self, config):
+  def createService(self, scope, config, security_group=None):
   #def createService(self, config, nlb):
 
     ### Backend Service ###############################################################################################################
@@ -42,16 +42,16 @@ class backendService:
         }
 
     secrets={
-            "NEW_RELIC_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "be_newrelic", secret_name='monitoring/newrelic'), 'api_key'),
-            #"NEO4J_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_password'),
-            #"NEO4J_USER":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_user'),
-            "ES_HOST":ecs.Secret.from_secrets_manager(self.secret, 'es_host'),
-            "MEMGRAPH_USER":ecs.Secret.from_secrets_manager(self.secret, 'db_user'),
-            "MEMGRAPH_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'db_pass')
+            "NEW_RELIC_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(scope, "be_newrelic", secret_name='monitoring/newrelic'), 'api_key'),
+            #"NEO4J_PASSWORD":ecs.Secret.from_secrets_manager(scope.secret, 'neo4j_password'),
+            #"NEO4J_USER":ecs.Secret.from_secrets_manager(scope.secret, 'neo4j_user'),
+            "ES_HOST":ecs.Secret.from_secrets_manager(scope.secret, 'es_host'),
+            "MEMGRAPH_USER":ecs.Secret.from_secrets_manager(scope.secret, 'db_user'),
+            "MEMGRAPH_PASSWORD":ecs.Secret.from_secrets_manager(scope.secret, 'db_pass')
         }
     
-    taskDefinition = ecs.FargateTaskDefinition(self,
-        "{}-{}-taskDef".format(self.namingPrefix, service),
+    taskDefinition = ecs.FargateTaskDefinition(scope,
+        "{}-{}-taskDef".format(scope.namingPrefix, service),
         cpu=config.getint(service, 'taskcpu'),
         memory_limit_mib=config.getint(service, 'taskmemory')
     )
@@ -85,7 +85,7 @@ class backendService:
             )
         )
     
-    ecr_repo = ecr.Repository.from_repository_arn(self, "{}_repo".format(service), repository_arn=config[service]['repo'])
+    ecr_repo = ecr.Repository.from_repository_arn(scope, "{}_repo".format(service), repository_arn=config[service]['repo'])
 
     # Backend Container
     backend_container = taskDefinition.add_container(
@@ -104,7 +104,7 @@ class backendService:
         environment=environment,
         secrets=secrets,
         logging=ecs.LogDrivers.aws_logs(
-            stream_prefix="{}-{}".format(self.namingPrefix, service)
+            stream_prefix="{}-{}".format(scope.namingPrefix, service)
         )
     )
 
@@ -147,13 +147,13 @@ class backendService:
     # essential=True
     # )
 
-    # New Relic Container
+    # New Relic Container ###############################################################################################################
     new_relic_container = taskDefinition.add_container(
         "newrelic-infra",
         image=ecs.ContainerImage.from_registry("newrelic/nri-ecs:1.9.2"),
         cpu=0,
         essential=True,
-        secrets={"NRIA_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "benr_newrelic", secret_name='monitoring/newrelic'), 'api_key'),},
+        secrets={"NRIA_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(scope, "benr_newrelic", secret_name='monitoring/newrelic'), 'api_key'),},
         environment={
             "NEW_RELIC_HOST":"gov-collector.newrelic.com",
             "NEW_RELIC_APP_NAME":"{}-{}-files".format(config['main']['project'], config['main']['tier']),
@@ -166,10 +166,10 @@ class backendService:
             },
     )
 
-
-    ecsService = ecs.FargateService(self,
-        "{}-{}-service".format(self.namingPrefix, service),
-        cluster=self.ECSCluster,
+    # ECS Service ###############################################################################################################
+    ecsService = ecs.FargateService(scope,
+        "{}-{}-service".format(scope.namingPrefix, service),
+        cluster=scope.ECSCluster,
         task_definition=taskDefinition,
         enable_execute_command=True,
         min_healthy_percent=50,
@@ -178,9 +178,11 @@ class backendService:
             enable=True,
             rollback=True
         ),
+        security_groups=[security_group] if security_group else None
     )
 
-    ecsTarget = self.listener.add_targets("ECS-{}-Target".format(service),
+    # ALB Target Group + Listener ###############################################################################################################
+    ecsTarget = scope.listener.add_targets("ECS-{}-Target".format(service),
         port=int(config[service]['port']),
         protocol=elbv2.ApplicationProtocol.HTTP,
         health_check = elbv2.HealthCheck(
@@ -189,10 +191,10 @@ class backendService:
             interval=Duration.seconds(config.getint(service, 'health_check_interval')),),
         targets=[ecsService],)
 
-    elbv2.ApplicationListenerRule(self, id="alb-{}-rule".format(service),
+    elbv2.ApplicationListenerRule(scope, id="alb-{}-rule".format(service),
         conditions=[
             elbv2.ListenerCondition.path_patterns(config[service]['path'].split(','))
         ],
         priority=int(config[service]['priority_rule_number']),
-        listener=self.listener,
+        listener=scope.listener,
         target_groups=[ecsTarget])
