@@ -46,8 +46,8 @@ class backendService:
             #"NEO4J_PASSWORD":ecs.Secret.from_secrets_manager(scope.secret, 'neo4j_password'),
             #"NEO4J_USER":ecs.Secret.from_secrets_manager(scope.secret, 'neo4j_user'),
             "ES_HOST":ecs.Secret.from_secrets_manager(scope.secret, 'es_host'),
-            "MEMGRAPH_USER":ecs.Secret.from_secrets_manager(scope.secret, 'db_user'),
-            "MEMGRAPH_PASSWORD":ecs.Secret.from_secrets_manager(scope.secret, 'db_pass')
+            # "MEMGRAPH_USER":ecs.Secret.from_secrets_manager(scope.secret, 'db_user'),
+            # "MEMGRAPH_PASSWORD":ecs.Secret.from_secrets_manager(scope.secret, 'db_pass')
         }
     
     taskDefinition = ecs.FargateTaskDefinition(scope,
