@@ -4,7 +4,7 @@ from aws_cdk import aws_elasticloadbalancingv2 as elbv2
 from aws_cdk import aws_ecs as ecs
 from aws_cdk import aws_ecr as ecr
 from aws_cdk import aws_secretsmanager as secretsmanager
-
+from aws_cdk import aws_ec2 as ec2
 class backendService:
   def createService(self, scope, config, security_group=None):
   #def createService(self, config, nlb):
@@ -198,3 +198,5 @@ class backendService:
         priority=int(config[service]['priority_rule_number']),
         listener=scope.listener,
         target_groups=[ecsTarget])
+    
+    self.osDomain.connections.allow_from(ecsService, ec2.Port.HTTPS)
