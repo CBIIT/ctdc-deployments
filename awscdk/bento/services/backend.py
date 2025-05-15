@@ -6,7 +6,7 @@ from aws_cdk import aws_ecr as ecr
 from aws_cdk import aws_secretsmanager as secretsmanager
 from aws_cdk import aws_ec2 as ec2
 class backendService:
-  def createService(self, scope, config, security_group=None):
+  def createService(self, config):
   #def createService(self, config, nlb):
 
     ### Backend Service ###############################################################################################################
