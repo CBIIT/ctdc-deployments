@@ -178,7 +178,6 @@ class backendService:
             enable=True,
             rollback=True
         ),
-        security_groups=[security_group] if security_group else None
     )
 
     # ALB Target Group + Listener ###############################################################################################################
