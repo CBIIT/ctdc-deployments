@@ -33,7 +33,6 @@ class frontendService:
             "REACT_APP_BACKEND_API":config[service]['react_app_backend_api'],
             "REACT_APP_BACKEND_GETUSERINFO_API":"https://k9dc.essential-dev.com/fence/login/",
             "REACT_APP_BE_VERSION":config['backend']['image'],
-            "REACT_APP_FE_VERSION":config[service]['image'],
             "REACT_APP_FILE_SERVICE_API":config[service]['react_app_file_service_api'],
             "REACT_APP_FILE_SERVICE_VERSION":config[service]['react_app_file_service_version'],
             "REACT_APP_INTEROP_SERVICE_VERSION":config[service]['react_app_interoperation_service_version'],
