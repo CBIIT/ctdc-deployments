@@ -25,8 +25,6 @@ class frontendService:
             "NEW_RELIC_HOST":"gov-collector.newrelic.com",            
             "NODE_LEVEL_ACCESS":"gov-collector.newrelic.com",
             "REACT_APP_AUTH":"true",
-            "REACT_APP_AUTH_SERVICE_API":"https://{}-{}.{}/api/auth/".format(config['main']['subdomain'], config['main']['tier'], config['main']['domain']),
-            "REACT_APP_BACKEND_API":"https://{}-{}.{}/v1/graphql/".format(config['main']['subdomain'], config['main']['tier'], config['main']['domain']),
             "REACT_APP_BE_VERSION":config['backend']['image'],
             "REACT_APP_FRONTEND_VERSION":config[service]['image'],
             "REACT_APP_BACKEND_VERSION":config[service]['react_app_backend_version'],
