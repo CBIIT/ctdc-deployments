@@ -27,7 +27,7 @@ class backendService:
             "PROJECT":"ctdc",
             "ES_SCHEMA":"es-schema-ctdc.graphql",
             "MYSQL_SESSION_ENABLED":"true",
-            "NEO4J_URL": "bolt://{}:7687".format(self.load_balancer_dns_name),
+            "NEO4J_URL": "bolt://{}:7687".format(self.NLB.load_balancer_dns_name),
             "REDIS_ENABLE":"false",
             "REDIS_FILTER_ENABLE":"false",
             "REDIS_HOST":"localhost",
