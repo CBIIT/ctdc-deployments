@@ -27,7 +27,7 @@ class backendService:
             "PROJECT":"ctdc",
             "ES_SCHEMA":"es-schema-ctdc.graphql",
             "MYSQL_SESSION_ENABLED":"true",
-            #"MEMGRAPH_URL": "bolt://{}:7687".format(nlb.load_balancer_dns_name),
+            "NEO4J_URL": "bolt://{}:7687".format(nlb.load_balancer_dns_name),
             "REDIS_ENABLE":"false",
             "REDIS_FILTER_ENABLE":"false",
             "REDIS_HOST":"localhost",
@@ -46,8 +46,8 @@ class backendService:
             #"NEO4J_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_password'),
             #"NEO4J_USER":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_user'),
             "ES_HOST":ecs.Secret.from_secrets_manager(self.secret, 'es_host'),
-            "MEMGRAPH_USER":ecs.Secret.from_secrets_manager(self.secret, 'db_user'),
-            "MEMGRAPH_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'db_pass')
+            "NEO4J_USER":ecs.Secret.from_secrets_manager(self.secret, 'db_user'),
+            "NEO4J_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'db_pass')
         }
     
     taskDefinition = ecs.FargateTaskDefinition(self,
