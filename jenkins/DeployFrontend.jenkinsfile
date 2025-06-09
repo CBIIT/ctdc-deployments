@@ -118,10 +118,16 @@ pipeline {
                         script: "curl -s ${serviceEndpoint('/api/files/version')} | jq -r '.version'"
                     ).trim()
 
+                    // env.INTEROP_VERSION = sh(
+                    //     label: 'Fetch Interop Version',
+                    //     returnStdout: true,
+                    //     script: "curl -s ${serviceEndpoint('/api/interoperation/version')} | jq -r '.version'"
+                    // ).trim()
+
                     env.INTEROP_VERSION = sh(
                         label: 'Fetch Interop Version',
                         returnStdout: true,
-                        script: "curl -s ${serviceEndpoint('/api/interoperation/version')} | jq -r '.version'"
+                        script: "curl -s ${serviceEndpoint('/api/interoperation/version')}"
                     ).trim()
 
                     env.AUTH_SERVICE_VERSION = sh(
