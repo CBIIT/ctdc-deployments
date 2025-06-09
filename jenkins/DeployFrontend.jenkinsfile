@@ -227,17 +227,43 @@ pipeline {
             }
         }
 
+        // stage('Update Task Definition') {
+        //     steps {
+        //         script {
+        //             sh label: 'Task-Definition-Update', script: '''#!/bin/bash
+        //             # create new revision for $PROJECT-$APP Task Definition
+        //             echo "Updating Task Definition to Use: $ECR_REPO:$IMAGE_TAG"
+        //             export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+        //             export IMAGE_ID="$REPO_URL:$IMAGE_TAG"
+                    
+        //             # Update and register task definition
+        //             envsubst < $TEMPLATE_FILE > $TEMPLATE_FILE.updated
+        //             aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE.updated
+        //             '''
+        //         }
+        //     }
+        // }
+
         stage('Update Task Definition') {
             steps {
                 script {
                     sh label: 'Task-Definition-Update', script: '''#!/bin/bash
-                    # create new revision for $PROJECT-$APP Task Definition
                     echo "Updating Task Definition to Use: $ECR_REPO:$IMAGE_TAG"
                     export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
                     export IMAGE_ID="$REPO_URL:$IMAGE_TAG"
-                    
-                    # Update and register task definition
+
                     envsubst < $TEMPLATE_FILE > $TEMPLATE_FILE.updated
+                    echo "----- Task Definition JSON -----"
+                    cat $TEMPLATE_FILE.updated
+                    echo "--------------------------------"
+
+                    # Validate JSON
+                    jq . $TEMPLATE_FILE.updated > /dev/null
+                    if [ $? -ne 0 ]; then
+                        echo "❌ Invalid JSON in $TEMPLATE_FILE.updated"
+                        exit 1
+                    fi
+
                     aws ecs register-task-definition --cli-input-json file://$TEMPLATE_FILE.updated
                     '''
                 }
