@@ -55,7 +55,7 @@ containerDefinitions:
   - name: "VERSION"
     value: "$IMAGE_TAG"
   - name: BENTO_BACKEND_GRAPHQL_URI
-    value: "$DOMAIN_NAME"
+    value: "https://$DOMAIN_NAME/v1/graphql/"
   - name: "BACKEND_URL"
     value: "https://$DOMAIN_NAME/v1/graphql/"
   - name: REDIS_AUTH_ENABLED
