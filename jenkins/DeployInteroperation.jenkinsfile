@@ -101,8 +101,8 @@ pipeline {
 				env.REPO_URL = "${ECR_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
 
 				// set template file name
-				// env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task.yml"
-				env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task_cloudwatch.yml"
+				env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task.yml"
+				// env.TEMPLATE_FILE="ctdc-deployments/aws/${APP}_task_cloudwatch.yml"
 
 			}
 
