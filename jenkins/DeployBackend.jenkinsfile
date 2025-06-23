@@ -124,25 +124,25 @@ pipeline {
             }
         }
 
-        stage('Add Production Tag') {
-            when {
-                expression { ENV == 'prod' }
-            }
-            steps {
-                script {
-                    sh label: 'Docker-Tag', script: '''
-                        #!/bin/bash
-                        echo "Tagging Image as Production: $REPO_URL:$IMAGE_TAG"
-                        docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $REPO_URL
-                        docker pull $REPO_URL:$IMAGE_TAG
-                        docker tag $REPO_URL:$IMAGE_TAG $REPO_URL:prod-$IMAGE_TAG
-                        docker push $REPO_URL:prod-$IMAGE_TAG
-                    '''
-                    IMAGE_TAG = "prod-$IMAGE_TAG"
-                    echo "Updated image tag: $IMAGE_TAG"
-                }
-            }
-        }
+        // stage('Add Production Tag') {
+        //     when {
+        //         expression { ENV == 'prod' }
+        //     }
+        //     steps {
+        //         script {
+        //             sh label: 'Docker-Tag', script: '''
+        //                 #!/bin/bash
+        //                 echo "Tagging Image as Production: $REPO_URL:$IMAGE_TAG"
+        //                 docker login -u AWS -p $(aws ecr get-login-password --region $REGION) $REPO_URL
+        //                 docker pull $REPO_URL:$IMAGE_TAG
+        //                 docker tag $REPO_URL:$IMAGE_TAG $REPO_URL:prod-$IMAGE_TAG
+        //                 docker push $REPO_URL:prod-$IMAGE_TAG
+        //             '''
+        //             IMAGE_TAG = "prod-$IMAGE_TAG"
+        //             echo "Updated image tag: $IMAGE_TAG"
+        //         }
+        //     }
+        // }
 
         stage('Update Task Definition') {
             steps {
