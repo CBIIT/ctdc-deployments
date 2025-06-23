@@ -54,10 +54,8 @@ containerDefinitions:
     value: "$ENV"  
   - name: "VERSION"
     value: "$IMAGE_TAG"
-  - name: "VERSION"
-    value: "{{ lookup('env','INTEROPERATION_VERSION') }}"
   - name: BENTO_BACKEND_GRAPHQL_URI
-    value: "{% if ENV == 'dev' %}https://clinical-dev.datacommons.cancer.gov/v1/graphql/{% elif ENV == 'qa' %}https://clinical-qa.datacommons.cancer.gov/v1/graphql/{% elif ENV == 'stage' %}https://clinical-stage.datacommons.cancer.gov/v1/graphql/{% elif ENV == 'prod' %}https://clinical.datacommons.cancer.gov/v1/graphql/{% endif %}"
+    value: "$DOMAIN_NAME"
   - name: "BACKEND_URL"
     value: "https://$DOMAIN_NAME/v1/graphql/"
   - name: REDIS_AUTH_ENABLED

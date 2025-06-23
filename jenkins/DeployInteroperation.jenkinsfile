@@ -83,8 +83,8 @@ pipeline {
 
                     env.DOMAIN_NAME = "clinical.datacommons.cancer.gov"
 
-                } else if(env.ENV == 'stage'){
-                     env.DOMAIN_NAME = "clinical-${env.ENV}.datacommons.cancer.gov"
+                // } else if(env.ENV == 'stage'){
+                //      env.DOMAIN_NAME = "clinical-${env.ENV}.datacommons.cancer.gov"
 				}  else {
 
                     env.DOMAIN_NAME = "clinical-${env.ENV}.datacommons.cancer.gov"
