@@ -8,13 +8,13 @@ requiresCompatibilities:
 - FARGATE
 containerDefinitions:
 
-- name: sumologic-firelens
-  image: public.ecr.aws/aws-observability/aws-for-fluent-bit:stable
-  essential: true
-  firelensConfiguration:
-    type: fluentbit
-    options:
-      enable-ecs-log-metadata: "true"
+# - name: sumologic-firelens
+#   image: public.ecr.aws/aws-observability/aws-for-fluent-bit:stable
+#   essential: true
+#   firelensConfiguration:
+#     type: fluentbit
+#     options:
+#       enable-ecs-log-metadata: "true"
 
 - name: newrelic-infra
   image: newrelic/nri-ecs:1.9.2
