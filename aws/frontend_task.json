@@ -178,8 +178,7 @@
                 },
                 {
                     "name": "REACT_APP_INTEROP_SERVICE_URL",
-                    "value": "https://$DOMAIN_NAME/api/interoperation/"
-                    //"value": "https://clinical.datacommons.cancer.gov/api/interoperation/"
+                    "value": "https://clinical.datacommons.cancer.gov/api/interoperation/"
                 },
                 {
                     "name": "NODE_LEVEL_ACCESS",
