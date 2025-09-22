@@ -25,7 +25,6 @@ class authnService:
             "MYSQL_SESSION_ENABLED":"true",
             "MYSQL_DATABASE":"ctdc",
             "DATABASE_TYPE":"mysql",
-            "NEO4J_URI":"bolt://{}:7687".format(config['db']['neo4j_ip']),
             "IDP":"nih",
             "VERSION":config[service]['image'],
         }

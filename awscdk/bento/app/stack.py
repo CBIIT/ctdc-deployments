@@ -31,36 +31,54 @@ class Stack(Stack):
         
         self.namingPrefix = "{}-{}".format(config['main']['resource_prefix'], config['main']['tier'])
 
+        # if config.has_option('main', 'subdomain'):
+        #     self.app_url = "https://{}.{}".format(config['main']['subdomain'], config['main']['domain'])
+        # else:
+        #     self.app_url = "https://{}".format(config['main']['domain'])
+
         if config.has_option('main', 'subdomain'):
-            self.app_url = "https://{}.{}".format(config['main']['subdomain'], config['main']['domain'])
+            subdomain = config['main']['subdomain']
+            tier = config['main']['tier']
+            if tier.lower() != "prod":
+                subdomain = f"{subdomain}-{tier}"
+            self.app_url = f"https://{subdomain}.{config['main']['domain']}"
         else:
-            self.app_url = "https://{}".format(config['main']['domain'])
+            self.app_url = f"https://{config['main']['domain']}"
         
         # Import VPC
         self.VPC = ec2.Vpc.from_lookup(self, "VPC",
             vpc_id=config['main']['vpc_id']
         )
 
-        # Opensearch Cluster
+        # Determine VPC and subnet usage for OpenSearch
         if config['os']['endpoint_type'] == 'vpc':
             vpc = self.VPC
-            vpc_subnets = [{'subnets': [self.VPC.private_subnets[0]]}]
+            vpc_subnets = [ec2.SubnetSelection(subnets=[self.VPC.isolated_subnets[0]])]
         else:
             vpc = None
             vpc_subnets = [{}]
 
-        self.osDomain = opensearch.Domain(self,
+
+        # OpenSearch Domain
+        self.osDomain = opensearch.Domain(
+            self,
             "opensearch",
             version=opensearch.EngineVersion.open_search(config['os']['version']),
-            vpc=vpc,
+            removal_policy=RemovalPolicy.DESTROY,
             zone_awareness=opensearch.ZoneAwarenessConfig(enabled=False),
             capacity=opensearch.CapacityConfig(
                 data_node_instance_type=config['os']['data_node_instance_type'],
                 multi_az_with_standby_enabled=False
             ),
-            vpc_subnets=vpc_subnets,
-            removal_policy=RemovalPolicy.DESTROY,
+            vpc=vpc,
+            vpc_subnets=[ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_ISOLATED,
+                availability_zones=[vpc.availability_zones[0]]
+            )],
+            enforce_https=True,
+            node_to_node_encryption=True,
         )
+
         # Policy to allow access for dataloader instances
         os_policy = iam.PolicyStatement(
             actions=[
@@ -72,21 +90,16 @@ class Stack(Stack):
                 "es:ESHttpGet",
                 "es:ESHttpDelete",
             ],
-            resources=["{}/*".format(self.osDomain.domain_arn)],
+            resources=[f"{self.osDomain.domain_arn}/*"],
             principals=[iam.AnyPrincipal()],
         )
         self.osDomain.add_access_policies(os_policy)
-        #self.osDomain.connections.allow_from(ec2.Peer.ipv4("172.16.0.219/32"), ec2.Port.HTTPS)
-    
-        # Allow access from SGs defined in config
-        if config.has_option('main', 'opensearch_allowed_sg_ids'):
-            sg_ids = [sg.strip() for sg in config['main']['opensearch_allowed_sg_ids'].split(',')]
-            for sg_id in sg_ids:
-                source_sg = ec2.SecurityGroup.from_security_group_id(
-                    self, f"SourceSG-{sg_id}", security_group_id=sg_id
-                )
-                self.osDomain.connections.allow_from(source_sg, ec2.Port.tcp(443))
 
+        if config.has_option('os', 'opensearch_allowed_ips'):
+            ip_cidrs = [ip.strip() for ip in config['os']['opensearch_allowed_ips'].split(',')]
+            for ip in ip_cidrs:
+                self.osDomain.connections.allow_from(ec2.Peer.ipv4(ip), ec2.Port.HTTPS)
+        
         # Cloudfront
         # self.cfOrigin = s3.Bucket(self, "CFBucket",
         #     removal_policy=RemovalPolicy.DESTROY
@@ -131,8 +144,6 @@ class Stack(Stack):
         self.secret = secretsmanager.Secret(self, "Secret",
             secret_name="{}/{}/{}".format(config['main']['secret_prefix'], config['main']['tier'], "ctdc"),
             secret_object_value={
-                "neo4j_user": SecretValue.unsafe_plain_text(config['db']['neo4j_user']),
-                "neo4j_password": SecretValue.unsafe_plain_text(config['db']['neo4j_password']),
                 "file_manifest_bucket_name": SecretValue.unsafe_plain_text(config['s3']['file_manifest_bucket_name']),
                 "es_host": SecretValue.unsafe_plain_text(self.osDomain.domain_endpoint),
                 "cf_key_pair_id": SecretValue.unsafe_plain_text(CFPublicKey.public_key_id),
@@ -157,20 +168,21 @@ class Stack(Stack):
         )
 
         # ALB
-        if config.getboolean('alb', 'internet_facing'):
-            subnets = ec2.SubnetSelection(
-                subnets=vpc.select_subnets(one_per_az=True, subnet_type=ec2.SubnetType.PUBLIC).subnets
-            )
-        else:
-            subnets = ec2.SubnetSelection(
-                subnets=vpc.select_subnets(one_per_az=True, subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS).subnets
-            )
-    
         self.ALB = elbv2.ApplicationLoadBalancer(self,
             "alb",
             vpc=self.VPC,
             internet_facing=config.getboolean('alb', 'internet_facing'),
-            vpc_subnets=subnets
+            vpc_subnets=ec2.SubnetSelection(
+                subnets=self.VPC.select_subnets(one_per_az=True, subnet_type=ec2.SubnetType.PUBLIC).subnets
+            )
+        )
+
+        self.ALB.log_access_logs(
+            prefix=f"{config['main']['program']}/{config['main']['tier']}/{config['main']['project']}/alb-access-logs",
+            bucket=s3.Bucket.from_bucket_arn(self,
+                f"{self.namingPrefix}-ALB-CentralLogBucket",
+                bucket_arn=config['alb']['log_bucket_arn']
+            )
         )
 
         self.ALB.add_redirect(
@@ -180,25 +192,16 @@ class Stack(Stack):
             target_port=443
         )
 
-        client = boto3.client('acm')
-        response = client.list_certificates(CertificateStatuses=['ISSUED'])
-
-        for cert in response["CertificateSummaryList"]:
-            if ('*.{}'.format(config['main']['domain']) in cert.values()):
-                certARN = cert['CertificateArn']
-
         alb_cert = cfm.Certificate.from_certificate_arn(self, "alb-cert",
-            certificate_arn=certARN)
+            certificate_arn=config['alb']['certificate_arn']
+        )
         
         self.listener = self.ALB.add_listener("PublicListener",
             certificates=[alb_cert],
             port=443
         )
 
-        self.listener.add_action("ECS-Content-Not-Found",
-            action=elbv2.ListenerAction.fixed_response(200,
-                message_body="The requested resource is not available")
-        )
+        self.app_url = f"https://{self.ALB.load_balancer_dns_name}"
 
         # ECS Cluster
         self.kmsKey = kms.Key(self, "ECSExecKey")
@@ -229,3 +232,8 @@ class Stack(Stack):
 
         # Interoperation Service
         interoperation.interoperationService.createService(self, config)
+
+        self.listener.add_action("ECS-Content-Not-Found",
+            action=elbv2.ListenerAction.fixed_response(200,
+                message_body="The requested resource is not available")
+        )

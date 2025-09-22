@@ -21,7 +21,7 @@ class filesService:
             "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED":"true",
             "NEW_RELIC_LABELS":"Project:{};Environment:{}".format('ctdc', config['main']['tier']),
             "AUTH_ENABLED":"false",
-            "BACKEND_URL":config[service]['backend_url'],
+            "BACKEND_URL":"/v1/graphql/",
             "SIGNED_URL_EXPIRY_SECONDS":"86400",
             "SESSION_TIMEOUT":"1200",
             "DATE":"2024-07-09",

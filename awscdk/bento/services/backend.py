@@ -43,8 +43,6 @@ class backendService:
 
     secrets={
             "NEW_RELIC_LICENSE_KEY":ecs.Secret.from_secrets_manager(secretsmanager.Secret.from_secret_name_v2(self, "be_newrelic", secret_name='monitoring/newrelic'), 'api_key'),
-            #"NEO4J_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_password'),
-            #"NEO4J_USER":ecs.Secret.from_secrets_manager(self.secret, 'neo4j_user'),
             "ES_HOST":ecs.Secret.from_secrets_manager(self.secret, 'es_host'),
             # "MEMGRAPH_USER":ecs.Secret.from_secrets_manager(self.secret, 'db_user'),
             # "MEMGRAPH_PASSWORD":ecs.Secret.from_secrets_manager(self.secret, 'db_pass')
@@ -55,6 +53,21 @@ class backendService:
         cpu=config.getint(service, 'taskcpu'),
         memory_limit_mib=config.getint(service, 'taskmemory')
     )
+
+    # Allow ECS backend task role to access OpenSearch
+    taskDefinition.task_role.add_to_policy(
+            iam.PolicyStatement(
+                actions=[
+                    "es:ESHttpPost",
+                    "es:ESHttpGet",
+                    "es:ESHttpPut",
+                    "es:ESHttpDelete"
+                ],
+                resources=[
+                    f"arn:aws:es:us-east-1:{self.account}:domain/{self.osDomain.domain_name}/*"
+                ]
+            )
+        )
 
     # Grant ECR access
     taskDefinition.add_to_execution_role_policy(
@@ -198,4 +211,3 @@ class backendService:
         listener=self.listener,
         target_groups=[ecsTarget])
     
-    self.osDomain.connections.allow_from(ecsService, ec2.Port.HTTPS)
