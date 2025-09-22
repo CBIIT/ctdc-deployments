@@ -51,21 +51,21 @@ if __name__=="__main__":
   #       lookup_role_arn="arn:${AWS::Partition}:iam::${AWS::AccountId}:role/" + config['iam']['role_prefix'] + "-cdk-${Qualifier}-lookup-role-${AWS::Region}",
   #     )
   # else:
-  #   synthesizer = cdk.DefaultStackSynthesizer()
+  synthesizer = cdk.DefaultStackSynthesizer()
   
-  # app = cdk.App()
+  app = cdk.App()
 
-  # stack = Stack(
-  #   app,
-  #   stack_name="{}-{}".format(config['main']['resource_prefix'], config['main']['tier']),
-  #   synthesizer=synthesizer,
-  #   env=cdk.Environment(
-  #     # account=os.environ["AWS_DEFAULT_ACCOUNT"],
-  #     # region=os.environ["AWS_DEFAULT_REGION"],
-  #     account=config['main']['account_id'],
-  #     region=config['main']['region']
-  #   ),
-  # )
+  stack = Stack(
+     app,
+     stack_name="{}-{}".format(config['main']['resource_prefix'], config['main']['tier']),
+     synthesizer=synthesizer,
+     env=cdk.Environment(
+       # account=os.environ["AWS_DEFAULT_ACCOUNT"],
+       # region=os.environ["AWS_DEFAULT_REGION"],
+       account=config['main']['account_id'],
+       region=config['main']['region']
+     ),
+   )
 
   # # Rename all roles to add role prefix
   # cdk.Aspects.of(stack).add(MyAspect())
