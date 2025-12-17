@@ -53,6 +53,14 @@
           stage: "https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/stage/aboutPagesContent.yaml"
           prod: "https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/production/aboutPagesContent.yaml"
         #about_content_url: "{% if tier == 'prod' %}https://raw.githubusercontent.com/CBIIT/bento-ctdc-frontend/{{ frontend_version | split('-') | first }}/src/content/prod/aboutPagesContent.yaml{% else %}https://raw.githubusercontent.com/CBIIT/bento-ctdc-frontend/{{ frontend_version | split('-') | first }}/src/content/{{ tier }}/aboutPagesContent.yaml{% endif %}"
+        ## static content
+        react_app_static_content_url:
+          dev: "https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/refs/heads/develop/"
+          dev2: "https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/refs/heads/develop/"
+          qa: "https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/refs/heads/qa/"
+          qa2: "https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/refs/heads/qa/"
+          stage: "https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/refs/heads/stage/"
+          prod: "https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/refs/heads/production/"
         ## ecs
         container_port: 80
         container_memory: "512"
