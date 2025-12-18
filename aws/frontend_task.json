@@ -141,6 +141,10 @@
                     "value": "$REACT_APP_ABOUT_CONTENT_URL"
                 },          
                 {
+                    "name": "REACT_APP_STATIC_CONTENT_URL",
+                    "value": "$REACT_APP_STATIC_CONTENT_URL"
+                }, 
+                {
                     "name": "REACT_APP_BACKEND_API",
                     "value": "https://$DOMAIN_NAME/v1/graphql/"
                 },

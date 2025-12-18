@@ -88,6 +88,17 @@ pipeline {
                         env.REACT_APP_ABOUT_CONTENT_URL = "https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/production/aboutPagesContent.yaml"
                     }
 
+                    // Set REACT_APP_STATIC_CONTENT_URL based on environment
+                    if (env.ENV == 'dev' || env.ENV == 'dev2') {
+                        env.REACT_APP_STATIC_CONTENT_URL = "https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/refs/heads/develop/"
+                    } else if (env.ENV == 'qa' || env.ENV == 'qa2') {
+                        env.REACT_APP_STATIC_CONTENT_URL = "https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/refs/heads/qa/"
+                    } else if (env.ENV == 'stage') {
+                        env.REACT_APP_STATIC_CONTENT_URL = "https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/refs/heads/stage/"
+                    } else if (env.ENV == 'prod') {
+                        env.REACT_APP_STATIC_CONTENT_URL = "https://raw.githubusercontent.com/CBIIT/bento-ctdc-static-content/refs/heads/production/"
+                    }
+
                     // Set domain name and redirect URL based on environment
                     if (env.ENV == 'prod') {
                         env.DOMAIN_NAME = "clinical.datacommons.cancer.gov"
