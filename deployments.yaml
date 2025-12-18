@@ -17,3 +17,7 @@ services:
     version: 1.1.0.69
     image: 1.1.0.69
     buildNumber: '69'
+  interoperation:
+    version: 1.0.0.23
+    image: 1.0.0.23
+    buildNumber: '23'
