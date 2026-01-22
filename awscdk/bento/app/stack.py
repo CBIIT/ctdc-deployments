@@ -18,7 +18,8 @@ from aws_cdk import aws_s3 as s3
 from aws_cdk import aws_ssm as ssm
 from aws_cdk import aws_iam as iam
 
-from services import frontend, backend, files, authn, interoperation
+from services import frontend, backend, files, interoperation
+#from services import frontend, backend, files, authn, interoperation
 #from services import frontend, authn, backend
 
 class Stack(Stack):
@@ -118,14 +119,14 @@ class Stack(Stack):
         )
         
         # # RDS
-        self.auroraCluster = rds.DatabaseCluster(self, "Aurora",
-            engine=rds.DatabaseClusterEngine.aurora_mysql(version=rds.AuroraMysqlEngineVersion.VER_3_05_2),
-            writer=rds.ClusterInstance.provisioned("writer",
-            ),
-            vpc=vpc,
-            storage_encrypted=True,
-            default_database_name=config['db']['mysql_database']
-        )
+        # self.auroraCluster = rds.DatabaseCluster(self, "Aurora",
+        #     engine=rds.DatabaseClusterEngine.aurora_mysql(version=rds.AuroraMysqlEngineVersion.VER_3_05_2),
+        #     writer=rds.ClusterInstance.provisioned("writer",
+        #     ),
+        #     vpc=vpc,
+        #     storage_encrypted=True,
+        #     default_database_name=config['db']['mysql_database']
+        # )
 
         # Secrets
         self.secret = secretsmanager.Secret(self, "Secret",
@@ -219,10 +220,7 @@ class Stack(Stack):
         backend.backendService.createService(self, config)
 
         # AuthN Service
-        authn.authnService.createService(self, config)
-
-        # AuthZ Service
-        #authz.authzService.createService(self, config)
+        #authn.authnService.createService(self, config)
 
         # Files Service
         files.filesService.createService(self, config)
