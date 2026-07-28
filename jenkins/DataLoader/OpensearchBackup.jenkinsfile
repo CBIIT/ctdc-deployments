@@ -62,7 +62,6 @@ pipeline {
 
         stage('checkout') {
             steps {
-
                 checkout(
                     poll: false,
                     changelog: false,
@@ -84,27 +83,20 @@ pipeline {
                         ]
                     ]
                 )
-
             }
         }
 
         stage('Set Environment Variables') {
-
             steps {
-
                 script {
-
-                    // set account number
+                    // Set account number
                     env.AWS_ACCOUNT = sh(
                         label: 'Get account number',
                         returnStdout: true,
-                        script: "aws sts get-caller-identity --query \"Account\" --output text"
+                        script: 'aws sts get-caller-identity --query "Account" --output text'
                     ).trim()
-
                 }
-
             }
-
         }
 
         stage('opensearch_backup') {
@@ -122,14 +114,13 @@ pipeline {
             }
 
             steps {
-
-                wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
+                wrap([$class: 'AnsiColorBuildWrapper', colorMapName: 'xterm']) {
 
                     ansiblePlaybook(
                         playbook: '${WORKSPACE}/ctdc-deployments/ansible/playbooks/dataloader/opensearchbackup.yml',
                         inventory: '${WORKSPACE}/ctdc-deployments/ansible/playbooks/hosts',
                         extraVars: [
-                            role_arn: "arn:aws:iam::${AWS_ACCOUNT}:role/power-user-crdc-dev-ctdc-opensearch-snapshot"
+                            role_arn: "arn:aws:iam::${AWS_ACCOUNT}:role/power-user-crdc-dev-ctdc-opensearch-snapshot",
                             ansible_python_interpreter: '/usr/bin/python3'
                         ],
                         hostKeyChecking: false,
@@ -137,21 +128,13 @@ pipeline {
                     )
 
                 }
-
             }
-
         }
-
     }
 
     post {
-
         cleanup {
-
             cleanWs()
-
         }
-
     }
-
 }
