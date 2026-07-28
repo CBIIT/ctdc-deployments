@@ -88,6 +88,18 @@ pipeline {
   	}
 
   	stage('opensearch restore'){
+        environment {
+                TIER = "${params.Environment}"
+            }
+
+            agent {
+                docker {
+                    image 'cbiitssrepo/cicd-ansible_4.0'
+                    args '--net=host -u root -v /var/run/docker.sock:/var/run/docker.sock'
+                    reuseNode true
+                }
+            }
+
  		  steps{
         wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]){
              ansiblePlaybook( 
@@ -95,6 +107,7 @@ pipeline {
                 inventory: '${WORKSPACE}/ctdc-deployments/ansible/playbooks/hosts',
                 extraVars: [
                     role_arn: "arn:aws:iam::${AWS_ACCOUNT}:role/power-user-crdc-dev-ctdc-opensearch-snapshot"
+                    ansible_python_interpreter: '/usr/bin/python3'
                     ],
                   hostKeyChecking: false,
                   colorized: true,
